@@ -2172,6 +2172,16 @@ config PANIC_ON_DATA_CORRUPTION
 	 If we do not panic immediately after corruptions have been detected,
 	 the problem context is lost in the ensuing system mayhem.
 
+config CC_WERROR
+	bool "Treat all compile warnings as errors"
+	default n
+	help
+	 Select this option to set compiler warnings as errors,
+	 to prevent easily-fixable problems from creeping into
+	 the codebase.
+
+	 If unsure, say N.
+
 source "samples/Kconfig"
 
 source "lib/Kconfig.kgdb"
