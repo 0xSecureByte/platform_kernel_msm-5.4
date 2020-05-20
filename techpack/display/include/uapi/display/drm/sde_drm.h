@@ -495,6 +495,11 @@ struct sde_drm_roi_v1 {
 #define SDE_RECOVERY_CAPTURE		1
 #define SDE_RECOVERY_HARD_RESET		2
 
+/**
+ * sde fod dim layer
+ */
+#define FOD_PRESSED_LAYER_ZORDER 0x20000000u
+
 /*
  * Colorimetry Data Block values
  * These bit nums are defined as per the CTA spec
