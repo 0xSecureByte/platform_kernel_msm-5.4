@@ -26,17 +26,11 @@
 #include "wlan_ipa_ucfg_api.h"
 #include "qdf_platform.h"
 
-static bool g_ipa_is_ready;
 static qdf_mutex_t g_init_deinit_lock;
-bool ipa_is_ready(void)
-{
-	return g_ipa_is_ready;
-}
 
 void ipa_disable_register_cb(void)
 {
 	ipa_debug("Don't register ready cb with IPA driver");
-	g_ipa_is_ready = false;
 }
 
 void ipa_init_deinit_lock(void)
@@ -172,7 +166,6 @@ static void ipa_register_ready_cb(void *user_data)
 		goto out;
 	}
 
-	g_ipa_is_ready = true;
 	ipa_info("IPA ready callback invoked: ipa_register_ready_cb");
 	status = ipa_obj_setup(ipa_obj);
 	if (QDF_IS_STATUS_ERROR(status)) {
