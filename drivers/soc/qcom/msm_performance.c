@@ -913,9 +913,14 @@ void  msm_perf_events_update(enum evt_update_t update_typ,
 static int set_game_start_pid(const char *buf, const struct kernel_param *kp)
 {
 	long usr_val = 0;
-	int ret = strlen(buf);
+	int ret;
 
-	kstrtol(buf, 0, &usr_val);
+	ret = kstrtol(buf, 0, &usr_val);
+	if (ret) {
+		pr_err("msm_perf: kstrtol failed, ret=%d\n", ret);
+		return ret;
+	}
+	ret = strlen(buf);
 	atomic_set(&game_status_pid, usr_val);
 	return ret;
 }
