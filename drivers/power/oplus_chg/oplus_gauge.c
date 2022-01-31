@@ -51,6 +51,16 @@ int oplus_gauge_get_batt_mvolts(void)
 	}
 }
 
+int oplus_gauge_get_batt_ttf(void)
+{
+	if (!g_gauge_chip || !g_gauge_chip->gauge_ops
+		|| !g_gauge_chip->gauge_ops->get_battery_ttf) {
+		return 0;
+	} else {
+		return g_gauge_chip->gauge_ops->get_battery_ttf();
+	}
+}
+
 int oplus_gauge_get_batt_fc(void)
 {
 	if (!g_gauge_chip || !g_gauge_chip->gauge_ops

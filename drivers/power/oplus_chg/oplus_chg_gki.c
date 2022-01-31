@@ -507,7 +507,7 @@ static int battery_psy_get_prop(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_TIME_TO_FULL_NOW:
 		rc = oplus_chg_mod_get_property(ogdev->batt_ocm,
-			OPLUS_CHG_PROP_TIME_TO_FULL_AVG,
+			OPLUS_CHG_PROP_TIME_TO_FULL_NOW,
 			(union oplus_chg_mod_propval *)pval);
 		break;
 	case POWER_SUPPLY_PROP_TIME_TO_EMPTY_AVG:
