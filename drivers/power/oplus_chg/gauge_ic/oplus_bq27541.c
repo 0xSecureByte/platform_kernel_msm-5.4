@@ -480,6 +480,48 @@ static int bq27541_get_battery_mvolts(void)
 	}
 }
 
+/*
+ * Return remaining time in seconds until the battery is fully charged
+ * Or < 0 if something fails.
+ */
+
+static int bq27541_get_battery_ttf(void)
+{
+	int ret = 0;
+	int val = 0;
+
+	if (!gauge_ic) {
+		return -1;
+	}
+#ifdef OPLUS_CHG_OP_DEF
+	if (!gauge_ic->bq_present)
+		return -1;
+#endif
+	if(gauge_ic->device_type != DEVICE_BQ27541 && gauge_ic->device_type != DEVICE_ZY0602){
+		return -1;
+	}
+
+	if (atomic_read(&gauge_ic->suspended) != 1) {
+		ret = bq27541_read_i2c(gauge_ic->cmd_addr.reg_ttf, &val);
+		if (ret) {
+			dev_err(gauge_ic->dev, "error reading time to full, ret:%d\n", ret);
+			return -1;
+		} else {
+			// Multiply to handle mins -> secs
+			gauge_ic->ttf_pre = val * 60;
+			// Datasheet states a return of 65535 indicates the battery is
+			// not being charged. Lower-bounds check in case of I2C glitches
+			if (val < 65535 && val >= 0) {
+				return gauge_ic->ttf_pre;
+			} else {
+				return -1;
+			}
+		}
+	} else {
+		return -1;
+	}
+}
+
 static int bq27541_get_battery_fc(void)
 {
 	int ret = 0;
@@ -1564,6 +1606,7 @@ out:
 static int gauge_reg_dump(void);
 static struct oplus_gauge_operations bq27541_gauge_ops = {
 	.get_battery_mvolts = bq27541_get_battery_mvolts,
+	.get_battery_ttf = bq27541_get_battery_ttf,
 	.get_battery_fc = bq27541_get_battery_fc,
 	.get_battery_qm = bq27541_get_battery_qm,
 	.get_battery_pd = bq27541_get_battery_pd,
@@ -3453,6 +3496,7 @@ rerun :
 	if(fg_ic->batt_bq28z610) {
 		fg_ic->batt_vol_pre = 3800;
 		fg_ic->fc_pre = 0;
+		fg_ic->ttf_pre = 5000; // ~1hr 24 mins, based on default previous return value
 		fg_ic->qm_pre = 0;
 		fg_ic->pd_pre = 0;
 		fg_ic->rcu_pre = 0;
@@ -3468,6 +3512,7 @@ rerun :
 	} else {
 		fg_ic->batt_vol_pre = 3800;
 		fg_ic->fc_pre = 0;
+		fg_ic->ttf_pre = 5000; // ~1hr 24 mins, based on default previous return value
 		fg_ic->qm_pre = 0;
 		fg_ic->pd_pre = 0;
 		fg_ic->rcu_pre = 0;

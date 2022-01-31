@@ -1619,7 +1619,11 @@ static int oplus_chg_intf_batt_get_prop(struct oplus_chg_mod *ocm,
 		pval->intval = 0;
 		break;
 	case OPLUS_CHG_PROP_TIME_TO_FULL_NOW:
-		pval->intval = 0;
+		rc = oplus_gauge_get_batt_ttf();
+		if (rc < 0)
+			pval->intval = -1;
+		else
+			pval->intval = rc;
 		break;
 	case OPLUS_CHG_PROP_TIME_TO_EMPTY_AVG:
 		pval->intval = 5000;
