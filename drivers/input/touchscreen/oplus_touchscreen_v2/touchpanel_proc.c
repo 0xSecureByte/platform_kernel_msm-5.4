@@ -226,10 +226,8 @@ DECLARE_PROC_OPS(proc_debug_level_ops, simple_open, proc_debug_level_read, proc_
 
 /*double_tap_enable - For black screen gesture
  * Input:
- * gesture_enable = 0 : disable gesture
- * gesture_enable = 1 : enable gesture when ps is far away
- * gesture_enable = 2 : disable gesture when ps is near
- * gesture_enable = 3 : enable single tap gesture when ps is far away
+ * gesture_enable = 0 : disable dt2w
+ * gesture_enable = 1 : enable dt2w
  */
 static ssize_t proc_gesture_control_write(struct file *file,
 		const char __user *buffer, size_t count, loff_t *ppos)
@@ -249,36 +247,19 @@ static ssize_t proc_gesture_control_write(struct file *file,
 		return count;
 	}
 
-	if (value > 3 || (ts->gesture_test_support && ts->gesture_test.flag)) {
+	if ((ts->gesture_test_support && ts->gesture_test.flag)) {
 		return count;
 	}
 
 	mutex_lock(&ts->mutex);
 
-	if (ts->gesture_enable != value) {
-		ts->gesture_enable = value;
-		TP_INFO(ts->tp_index, "%s: gesture_enable = %d, is_suspended = %d\n", __func__,
-			ts->gesture_enable, ts->is_suspended);
+	if (value)
+		ts->gesture_enable_indep |= (1 << DOU_TAP);
+	else
+		ts->gesture_enable_indep &= ~(1 << DOU_TAP);
 
-		if (ts->is_incell_panel && (ts->suspend_state == TP_RESUME_EARLY_EVENT
-					    || ts->disable_gesture_ctrl) && (ts->tp_resume_order == LCD_TP_RESUME)) {
-			TP_INFO(ts->tp_index,
-				"tp will resume, no need mode_switch in incell panel\n"); /*avoid i2c error or tp rst pulled down in lcd resume*/
-
-		} else if (ts->is_suspended) {
-			if (ts->fingerprint_underscreen_support && ts->fp_enable
-					&& ts->ts_ops->enable_gesture_mask) {
-				ts->ts_ops->enable_gesture_mask(ts->chip_data,
-								(ts->gesture_enable & 0x01) == 1);
-
-			} else {
-				operate_mode_switch(ts);
-			}
-		}
-
-	} else {
-		TP_INFO(ts->tp_index, "%s: do not do same operator :%d\n", __func__, value);
-	}
+	if (ts->ts_ops->set_gesture_state)
+		ts->ts_ops->set_gesture_state(ts->chip_data, ts->gesture_enable_indep);
 
 	mutex_unlock(&ts->mutex);
 
@@ -287,14 +268,14 @@ static ssize_t proc_gesture_control_write(struct file *file,
 
 /*double_tap_enable - For black screen gesture
  * Output:
- * gesture_enable = 0 : disable gesture
- * gesture_enable = 1 : enable gesture when ps is far away
- * gesture_enable = 2 : disable gesture when ps is near
+ * gesture_enable = 0 : disable dt2w
+ * gesture_enable = 1 : enable dt2w
  */
 static ssize_t proc_gesture_control_read(struct file *file, char __user *buffer,
 		size_t count, loff_t *ppos)
 {
 	int ret = 0;
+	int value = 0;
 	char page[PAGESIZE] = {0};
 	struct touchpanel_data *ts = PDE_DATA(file_inode(file));
 
@@ -302,8 +283,10 @@ static ssize_t proc_gesture_control_read(struct file *file, char __user *buffer,
 		return 0;
 	}
 
-	TP_DEBUG(ts->tp_index, "double tap enable is: %d\n", ts->gesture_enable);
-	ret = snprintf(page, PAGESIZE - 1, "%d\n", ts->gesture_enable);
+	value = !!(ts->gesture_enable_indep & (1 << DOU_TAP));
+
+	TP_DEBUG(ts->tp_index, "double tap enable is: %d\n", value);
+	ret = snprintf(page, PAGESIZE - 1, "%d\n", value);
 	ret = simple_read_from_buffer(buffer, count, ppos, page, strlen(page));
 
 	return ret;

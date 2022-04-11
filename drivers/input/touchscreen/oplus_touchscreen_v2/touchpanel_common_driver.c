@@ -504,16 +504,26 @@ static void tp_gesture_handle(struct touchpanel_data *ts)
 
 #endif /* end of CONFIG_OPLUS_TP_APK*/
 
-	if (gesture_info_temp.gesture_type != UNKOWN_GESTURE
+	if (gesture_info_temp.gesture_type == DOU_TAP
+			&& CHK_BIT(ts->gesture_enable_indep, (1 << gesture_info_temp.gesture_type))) {
+		tp_memcpy(&ts->gesture, sizeof(ts->gesture), \
+			  &gesture_info_temp, sizeof(struct gesture_info), \
+			  sizeof(struct gesture_info));
+		input_report_key(ts->input_dev, KEY_WAKEUP, 1);
+		input_sync(ts->input_dev);
+		input_report_key(ts->input_dev, KEY_WAKEUP, 0);
+		input_sync(ts->input_dev);
+
+	} else if (gesture_info_temp.gesture_type != UNKOWN_GESTURE
 		&& gesture_info_temp.gesture_type != FINGER_PRINTDOWN
 		&& gesture_info_temp.gesture_type != FRINGER_PRINTUP
 		&& CHK_BIT(ts->gesture_enable_indep, (1 << gesture_info_temp.gesture_type))) {
 		tp_memcpy(&ts->gesture, sizeof(ts->gesture), \
 			  &gesture_info_temp, sizeof(struct gesture_info), \
 			  sizeof(struct gesture_info));
-		input_report_key(ts->input_dev, KEY_F4, 1);
+		input_report_key(ts->input_dev, KEY_GESTURE_START + gesture_info_temp.gesture_type, 1);
 		input_sync(ts->input_dev);
-		input_report_key(ts->input_dev, KEY_F4, 0);
+		input_report_key(ts->input_dev, KEY_GESTURE_START + gesture_info_temp.gesture_type, 0);
 		input_sync(ts->input_dev);
 
 	} else if (gesture_info_temp.gesture_type == FINGER_PRINTDOWN) {
@@ -1279,7 +1289,7 @@ static struct attribute_group properties_attr_group = {
  */
 static int init_input_device(struct touchpanel_data *ts)
 {
-	int ret = 0;
+	int ret = 0, i = 0;
 	struct kobject *vk_properties_kobj;
 	static  bool board_properties = false;
 
@@ -1335,6 +1345,10 @@ static int init_input_device(struct touchpanel_data *ts)
 
 	if (ts->black_gesture_support) {
 		set_bit(KEY_F4, ts->input_dev->keybit);
+		set_bit(KEY_WAKEUP, ts->input_dev->keybit);
+		for (i = UP_VEE; i <= S_GESTURE; i++) {
+			set_bit(KEY_GESTURE_START + i, ts->input_dev->keybit);
+		}
 #ifdef CONFIG_OPLUS_TP_APK
 		set_bit(KEY_POWER, ts->input_dev->keybit);
 #endif /*end of CONFIG_OPLUS_TP_APK*/
@@ -3051,7 +3065,7 @@ int register_common_touch_device(struct touchpanel_data *pdata)
 	ts->loading_fw = false;
 	ts->is_suspended = 0;
 	ts->suspend_state = TP_SPEEDUP_RESUME_COMPLETE;
-	ts->gesture_enable = 0;
+	ts->gesture_enable = 1;
 	ts->fd_enable = 0;
 	ts->fp_enable = 0;
 	ts->fp_info.touch_state = 0;
