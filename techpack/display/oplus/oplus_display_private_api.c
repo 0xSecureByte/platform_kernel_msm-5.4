@@ -26,6 +26,7 @@
 #include <linux/msm_drm_notify.h>
 /*#include "oplus_mm_kevent_fb.h"*/
 #include <soc/oplus/device_info.h>
+#include <soc/oplus/touchpanel_event_notify.h>
 #if defined(OPLUS_FEATURE_PXLW_IRIS5)
 #include <video/mipi_display.h>
 #include "iris/dsi_iris5_api.h"
@@ -95,6 +96,9 @@ int shutdown_flag = 0;
 int oplus_dsi_log_type = OPLUS_DEBUG_LOG_DISABLED;
 int dsi_cmd_panel_debug = 0;
 /*#endif*/
+
+
+struct touchpanel_event fp_state = {0};
 
 uint64_t serial_number_fir = 0x0;
 uint64_t serial_number_sec = 0x0;
@@ -3375,6 +3379,12 @@ static ssize_t oplus_set_shutdownflag(struct kobject *obj,
 }
 #endif /*OPLUS_FEATURE_TP_BASIC*/
 
+static ssize_t oplus_display_get_fp_state(struct kobject *obj,
+	struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d,%d,%d\n", fp_state.x, fp_state.y, fp_state.touch_state);
+}
+
 static struct kobject *oplus_display_kobj;
 
 static OPLUS_ATTR(hbm, S_IRUGO | S_IWUSR, oplus_display_get_hbm,
@@ -3444,6 +3454,7 @@ static OPLUS_ATTR(panel_pwr, S_IRUGO | S_IWUSR, oplus_display_get_panel_pwr,
 static OPLUS_ATTR(dsi_log_switch, S_IRUGO | S_IWUSR, oplus_display_get_dsi_log_switch,
                         oplus_display_set_dsi_log_switch);
 /*#endif*/
+static OPLUS_ATTR(fp_state, S_IRUGO, oplus_display_get_fp_state, NULL);
 
 #ifdef OPLUS_FEATURE_TP_BASIC
 static OPLUS_ATTR(shutdownflag, S_IRUGO | S_IWUSR, oplus_get_shutdownflag,
@@ -3511,6 +3522,7 @@ static struct attribute *oplus_display_attrs[] = {
 	&oplus_attr_dither.attr,
 	/* fp type config */
 	&oplus_attr_fp_type.attr,
+	&oplus_attr_fp_state.attr,
 	NULL,	/* need to NULL terminate the list of attributes */
 };
 
@@ -3533,6 +3545,23 @@ int oplus_display_get_resolution(unsigned int *xres, unsigned int *yres)
 	return 0;
 }
 EXPORT_SYMBOL(oplus_display_get_resolution);
+
+static int oplus_input_event_notify(struct notifier_block *self, unsigned long action, void *data) {
+	struct touchpanel_event *event = (struct touchpanel_event*)data;
+
+	if (event && action == EVENT_ACTION_FOR_FINGPRINT) {
+		fp_state.x = event->x;
+		fp_state.y = event->y;
+		fp_state.touch_state = event->touch_state;
+		sysfs_notify(kernel_kobj, "oplus_display", oplus_attr_fp_state.attr.name);
+	}
+
+	return NOTIFY_DONE;
+}
+
+struct notifier_block oplus_input_event_notifier = {
+	.notifier_call = oplus_input_event_notify,
+};
 
 extern int oplus_display_panel_init(void);
 int oplus_display_private_api_init(void)
@@ -3572,6 +3601,12 @@ int oplus_display_private_api_init(void)
 		pr_err("fail to init oplus_display_panel_init\n");
 	/*mm_kevent_init();*/
 
+	retval = touchpanel_event_register_notifier(&oplus_input_event_notifier);
+
+	if (retval) {
+		goto error_remove_sysfs_group;
+	}
+
 	return 0;
 
 error_remove_sysfs_group:
@@ -3588,6 +3623,7 @@ void  oplus_display_private_api_exit(void)
 {
 	/*mm_kevent_deinit();*/
 	oplus_ffl_thread_exit();
+	touchpanel_event_unregister_notifier(&oplus_input_event_notifier);
 	sysfs_remove_link(oplus_display_kobj, "panel");
 	sysfs_remove_group(oplus_display_kobj, &oplus_display_attr_group);
 	kobject_put(oplus_display_kobj);
