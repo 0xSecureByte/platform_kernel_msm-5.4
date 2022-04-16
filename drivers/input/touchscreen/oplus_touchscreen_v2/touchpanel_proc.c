@@ -341,8 +341,9 @@ static ssize_t proc_gesture_control_indep_write(struct file *file, const char __
 
 	mutex_lock(&ts->mutex);
 
+	ts->gesture_enable_indep = value;
+
 	if (ts->ts_ops->set_gesture_state) {
-		ts->gesture_enable_indep = value;
 		ts->ts_ops->set_gesture_state(ts->chip_data, value);
 	}
 	mutex_unlock(&ts->mutex);
