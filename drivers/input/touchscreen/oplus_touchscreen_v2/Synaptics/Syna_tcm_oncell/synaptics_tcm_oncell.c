@@ -6029,8 +6029,8 @@ static void syna_set_gesture_state(void *chip_data, int state)
 	SET_GESTURE_BIT(state, DOU_TAP, state_inchip, 0);
 	SET_GESTURE_BIT(state, UP_VEE, state_inchip, 2);
 	SET_GESTURE_BIT(state, DOWN_VEE, state_inchip, 1);
-	SET_GESTURE_BIT(state, LEFT_VEE, state_inchip, 3);
-	SET_GESTURE_BIT(state, RIGHT_VEE, state_inchip, 4);
+	SET_GESTURE_BIT(state, RIGHT_VEE, state_inchip, 3);
+	SET_GESTURE_BIT(state, LEFT_VEE, state_inchip, 4);
 	SET_GESTURE_BIT(state, CIRCLE_GESTURE, state_inchip, 5);
 	SET_GESTURE_BIT(state, DOU_SWIP, state_inchip, 6);
 	SET_GESTURE_BIT(state, LEFT2RIGHT_SWIP, state_inchip, 7);
