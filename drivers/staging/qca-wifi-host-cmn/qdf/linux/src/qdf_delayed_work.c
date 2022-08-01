@@ -112,7 +112,7 @@ qdf_export_symbol(__qdf_delayed_work_destroy);
 
 bool __qdf_delayed_work_start(struct qdf_delayed_work *dwork, uint32_t msec)
 {
-	return schedule_delayed_work(&dwork->dwork, msecs_to_jiffies(msec));
+	return queue_delayed_work(system_power_efficient_wq, &dwork->dwork, msecs_to_jiffies(msec));
 }
 
 qdf_export_symbol(__qdf_delayed_work_start);
