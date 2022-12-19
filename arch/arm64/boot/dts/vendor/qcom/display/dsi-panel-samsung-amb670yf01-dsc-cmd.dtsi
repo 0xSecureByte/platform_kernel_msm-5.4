@@ -5143,5 +5143,14 @@
 			qcom,display-topology = <1 1 1>,<2 2 1>;
 			qcom,default-topology-index = <1>;
 		};
+		/delete-node/ timing@fhd_oplus_60;
+		/delete-node/ timing@fhd_oplus_72;
+		/delete-node/ timing@fhd_oplus_90;
+		/delete-node/ timing@fhd_oplus_120;
+		/delete-node/ timing@wqhd_oplus_60;
+		/delete-node/ timing@wqhd_oplus_72;
+		/delete-node/ timing@wqhd_oplus_90;
+		/delete-node/ timing@wqhd_oplus_120;
+		/delete-node/ timing@wqhd_memc_60;
 	};
 };
