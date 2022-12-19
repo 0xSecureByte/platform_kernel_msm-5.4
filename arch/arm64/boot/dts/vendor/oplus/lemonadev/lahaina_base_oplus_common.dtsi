@@ -4,6 +4,7 @@
 	aliases {
 		/* #ifdef OPLUS_ARCH_EXTENDS */
 		i2c4 = &qupv3_se19_i2c;
+		i2c6 = &qupv3_se17_i2c;
 		/* #endif OPLUS_ARCH_EXTENDS  */
 	};
     chosen {
