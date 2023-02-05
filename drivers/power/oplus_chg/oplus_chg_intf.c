@@ -1471,11 +1471,7 @@ static int oplus_chg_intf_batt_get_prop(struct oplus_chg_mod *ocm,
 			pval->intval = oplus_chg_comm_get_batt_status(oplus_dev->comm_ocm);
 		} else {
 			if (!usb_online && !wls_online) {
-#ifdef 	CONFIG_OPLUS_CHG_OOS
 				pval->intval = POWER_SUPPLY_STATUS_DISCHARGING;
-#else
-				pval->intval = POWER_SUPPLY_STATUS_NOT_CHARGING;
-#endif
 			} else if ((oplus_chg_show_warp_logo_ornot() == 1) ||
 				   oplus_warp_ignore_event() ||
 				   oplus_dev->icon_debounce) {
