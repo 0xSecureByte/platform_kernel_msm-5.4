@@ -2114,7 +2114,7 @@ static const char * const rx_hph_mode_mux_text[] = {
 	"CLS_H_ULP", "CLS_AB_HIFI",
 };
 
-static const char * const tx_master_ch_text[] = {
+static const char * const wcd937x_tx_master_ch_text[] = {
 	"ZERO", "SWRM_TX1_CH1", "SWRM_TX1_CH2", "SWRM_TX1_CH3", "SWRM_TX1_CH4",
 	"SWRM_TX2_CH1", "SWRM_TX2_CH2", "SWRM_TX2_CH3", "SWRM_TX2_CH4",
 	"SWRM_TX3_CH1", "SWRM_TX3_CH2", "SWRM_TX3_CH3", "SWRM_TX3_CH4",
@@ -2122,9 +2122,9 @@ static const char * const tx_master_ch_text[] = {
 	"DMIC4", "DMIC5", "DMIC6", "DMIC7",
 };
 
-static const struct soc_enum tx_master_ch_enum =
-	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(tx_master_ch_text),
-					tx_master_ch_text);
+static const struct soc_enum wcd937x_tx_master_ch_enum =
+	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(wcd937x_tx_master_ch_text),
+					wcd937x_tx_master_ch_text);
 
 static void wcd937x_tx_get_slave_ch_type_idx(const char *wname, int *ch_idx)
 {
@@ -2262,25 +2262,25 @@ static const struct snd_kcontrol_new wcd937x_snd_controls[] = {
 			analog_gain),
 	SOC_SINGLE_TLV("ADC3 Volume", WCD937X_ANA_TX_CH3, 0, 20, 0,
 			analog_gain),
-	SOC_ENUM_EXT("ADC1 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("ADC1 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("ADC2 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("ADC2 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("ADC3 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("ADC3 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("DMIC0 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("DMIC0 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("DMIC1 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("DMIC1 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("MBHC ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("MBHC ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("DMIC2 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("DMIC2 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("DMIC3 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("DMIC3 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("DMIC4 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("DMIC4 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
-	SOC_ENUM_EXT("DMIC5 ChMap", tx_master_ch_enum,
+	SOC_ENUM_EXT("DMIC5 ChMap", wcd937x_tx_master_ch_enum,
 			wcd937x_tx_master_ch_get, wcd937x_tx_master_ch_put),
 	SOC_ENUM_EXT("TX CH1 PWR", wcd937x_tx_ch_pwr_level_enum,
 		wcd937x_tx_ch_pwr_level_get, wcd937x_tx_ch_pwr_level_put),
@@ -2289,17 +2289,17 @@ static const struct snd_kcontrol_new wcd937x_snd_controls[] = {
 };
 
 #ifdef OPLUS_ARCH_EXTENDS
-const char * const die_crk_det_en_text[] = {"0x80", "0xC0"};
-const u8 det_en[] = {0x80, 0xC0};
+const char * const wcd937x_die_crk_det_en_text[] = {"0x80", "0xC0"};
+const u8 wcd937x_det_en[] = {0x80, 0xC0};
 
-const char * const die_crk_det_int1_text[] = {"0xC2", "0x82", "0x42", "0x02"};
-const u8 det_int1[] = {0xC2, 0x82, 0x42, 0x02};
+const char * const wcd937x_die_crk_det_int1_text[] = {"0xC2", "0x82", "0x42", "0x02"};
+const u8 wcd937x_det_int1[] = {0xC2, 0x82, 0x42, 0x02};
 
-const char * const die_crk_det_out_text[] = {"0x00"};
+const char * const wcd937x_die_crk_det_out_text[] = {"0x00"};
 
-static SOC_ENUM_SINGLE_EXT_DECL(die_crk_det_en_enum, die_crk_det_en_text);
-static SOC_ENUM_SINGLE_EXT_DECL(die_crk_det_int1_enum, die_crk_det_int1_text);
-static SOC_ENUM_SINGLE_EXT_DECL(die_crk_det_out_enum, die_crk_det_out_text);
+static SOC_ENUM_SINGLE_EXT_DECL(die_crk_det_en_enum, wcd937x_die_crk_det_en_text);
+static SOC_ENUM_SINGLE_EXT_DECL(die_crk_det_int1_enum, wcd937x_die_crk_det_int1_text);
+static SOC_ENUM_SINGLE_EXT_DECL(die_crk_det_out_enum, wcd937x_die_crk_det_out_text);
 
 static int get_enum_index_from_reg(const u8 reg_array[], u8 array_num, u8 reg)
 {
@@ -2329,8 +2329,8 @@ static int wcd93xx_die_crk_det_en_put(struct snd_kcontrol *kcontrol,
 	if (!component)
 		return -EINVAL;
 
-	if (ucontrol->value.enumerated.item[0] < ARRAY_SIZE(det_en)) {
-		ctl_value = det_en[ucontrol->value.enumerated.item[0]];
+	if (ucontrol->value.enumerated.item[0] < ARRAY_SIZE(wcd937x_det_en)) {
+		ctl_value = wcd937x_det_en[ucontrol->value.enumerated.item[0]];
 		ret = snd_soc_component_update_bits(component,
 			WCD937X_DIE_CRACK_DIE_CRK_DET_EN, 0xFF, ctl_value);
 #if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
@@ -2375,7 +2375,7 @@ static int wcd93xx_die_crk_det_en_get(struct snd_kcontrol *kcontrol,
 	dev_err(component->dev, "%04x:%04x\n", WCD937X_DIE_CRACK_DIE_CRK_DET_EN, reg);
 #endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 
-	ucontrol->value.enumerated.item[0] = get_enum_index_from_reg(det_en, ARRAY_SIZE(det_en), reg);
+	ucontrol->value.enumerated.item[0] = get_enum_index_from_reg(wcd937x_det_en, ARRAY_SIZE(wcd937x_det_en), reg);
 
 	return 0;
 }
@@ -2394,8 +2394,8 @@ static int wcd93xx_die_crk_det_int1_put(struct snd_kcontrol *kcontrol,
 	if (!component)
 		return -EINVAL;
 
-	if (ucontrol->value.enumerated.item[0] < ARRAY_SIZE(det_int1)) {
-		ctl_value = det_int1[ucontrol->value.enumerated.item[0]];
+	if (ucontrol->value.enumerated.item[0] < ARRAY_SIZE(wcd937x_det_int1)) {
+		ctl_value = wcd937x_det_int1[ucontrol->value.enumerated.item[0]];
 		ret = snd_soc_component_update_bits(component,
 			WCD937X_DIE_CRACK_INT_DIE_CRK_DET_INT1, 0xFF, ctl_value);
 #if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
@@ -2440,7 +2440,7 @@ static int wcd93xx_die_crk_det_int1_get(struct snd_kcontrol *kcontrol,
 	dev_err(component->dev, "%04x:%04x\n", WCD937X_DIE_CRACK_INT_DIE_CRK_DET_INT1, reg);
 #endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 
-	ucontrol->value.enumerated.item[0] = get_enum_index_from_reg(det_int1, ARRAY_SIZE(det_int1), reg);
+	ucontrol->value.enumerated.item[0] = get_enum_index_from_reg(wcd937x_det_int1, ARRAY_SIZE(wcd937x_det_int1), reg);
 
 	return 0;
 }
