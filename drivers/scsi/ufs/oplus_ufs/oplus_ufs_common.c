@@ -61,6 +61,7 @@ static inline bool oplus_ufs_bio_has_data(struct bio *bio)
 
 void ufs_latency_hist_handle(void *data, struct ufs_hba *hba , struct ufshcd_lrb *lrbp)
 {
+#if defined(CONFIG_TRACING) && defined(DEBUG)
 	if(lrbp->cmd->request){
 		u_int64_t delta_us = ktime_us_delta(lrbp->compl_time_stamp, lrbp->issue_time_stamp);
 
@@ -71,7 +72,7 @@ void ufs_latency_hist_handle(void *data, struct ufs_hba *hba , struct ufshcd_lrb
 					lrbp->cmd->sdb.length);
 		}
 	}
-		
+#endif
 	return;
 }
 
