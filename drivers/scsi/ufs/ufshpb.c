@@ -2580,10 +2580,12 @@ static void ufshpb_rsp_req_region_update(struct ufshpb_lu *hpb,
 		atomic64_inc(&hpb->rb_inactive_cnt);
 	}
 
+#if defined(CONFIG_HPB_DEBUG)
 	TMSG(hpb->ufsf, hpb->lun, "Noti: #ACT %u, #INACT %u",
 	     rsp_field->active_rgn_cnt, rsp_field->inactive_rgn_cnt);
 	trace_printk("[rspnoti]\t noti ACT %d INACT %d\n",
 		     rsp_field->active_rgn_cnt, rsp_field->inactive_rgn_cnt);
+#endif
 	schedule_work(&hpb->task_work);
 }
 
