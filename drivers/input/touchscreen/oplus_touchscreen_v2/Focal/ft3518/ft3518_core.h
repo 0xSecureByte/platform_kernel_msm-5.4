@@ -229,6 +229,7 @@ struct chip_data_ft3518 {
 	bool black_gesture_indep;
 	bool high_resolution_support;
 	bool high_resolution_support_x8;
+	bool leave_gesture_buffer;
 	bool read_buffer_support;
 };
 
