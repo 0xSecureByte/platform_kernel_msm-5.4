@@ -1195,7 +1195,7 @@ static int fts_enable_black_gesture(struct chip_data_ft3518 *ts_data,
 {
 	int i = 0;
 	int ret = 0;
-	int config1 = 0xff;
+	int config1 = 0x50;
 	int config2 = 0xff;
 	int config4 = 0xff;
 
@@ -1561,6 +1561,10 @@ static u32 fts_u32_trigger_reason(void *chip_data, int gesture_enable,
 		ret = touch_i2c_read_byte(ts_data->client, FTS_REG_GESTURE_EN);
 
 		if (ret == 0x01) {
+			if(ts_data->leave_gesture_buffer) {
+				ret = touch_i2c_read_block(ts_data->client, cmd, FTS_POINTS_ONE, &buf[0]);
+				TPD_INFO("touch_i2c_read_block FTS_POINTS_ONE add once");
+			}
 			ret = touch_i2c_read_byte(ts_data->client, FTS_REG_POINTS_LB);
 			return IRQ_GESTURE;
 		}
@@ -2133,6 +2137,8 @@ static int ft3518_parse_dts(struct chip_data_ft3518 *ts_data, struct i2c_client 
 	ts_data->high_resolution_support = of_property_read_bool(np, "high_resolution_support");
 	ts_data->high_resolution_support_x8 = of_property_read_bool(np, "high_resolution_support_x8");
 	TPD_INFO("%s:high_resolution_support is:%d %d\n", __func__, ts_data->high_resolution_support, ts_data->high_resolution_support_x8);
+	ts_data->leave_gesture_buffer = of_property_read_bool(np, "leave_gesture_buffer");
+	TPD_INFO("%s:leave_gesture_buffer\n", __func__);
 	ts_data->read_buffer_support = of_property_read_bool(np, "read_buffer_support");
 	TPD_INFO("%s:read_buffer_support is:%d\n", __func__, ts_data->read_buffer_support);
 	return 0;
