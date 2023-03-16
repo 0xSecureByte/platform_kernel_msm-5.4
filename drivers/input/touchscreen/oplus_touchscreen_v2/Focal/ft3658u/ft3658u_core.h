@@ -50,6 +50,7 @@
 #define FTS_REG_FW_VER                          0xA6
 #define FTS_REG_VENDOR_ID                       0xA8
 #define FTS_REG_GESTURE_EN                      0xD0
+#define FTS_REG_GESTURE_CONFIG1                 0xD1
 #define FTS_REG_GESTURE_OUTPUT_ADDRESS          0xD3
 #define FTS_REG_MODULE_ID                       0xE3
 #define FTS_REG_LIC_VER                         0xE4
