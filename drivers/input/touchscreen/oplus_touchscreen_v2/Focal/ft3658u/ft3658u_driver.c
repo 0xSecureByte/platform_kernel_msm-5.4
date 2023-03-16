@@ -1483,8 +1483,26 @@ static void fts3658u_main_register_read(struct seq_file *s, void *chip_data)
 static int fts_enable_black_gesture(struct chip_data_ft3658u *ts_data,
                                     bool enable)
 {
+	int i = 0;
+	int ret = 0;
+	int config1 = 0x50;
+
 	TPD_INFO("MODE_GESTURE, write 0xD0=%d", enable);
-	return touch_i2c_write_byte(ts_data->client, FTS_REG_GESTURE_EN, enable);
+
+	if (enable) {
+		for (i = 0; i < 5 ; i++) {
+			ret = touch_i2c_write_byte(ts_data->client, FTS_REG_GESTURE_CONFIG1, config1);
+			ret = touch_i2c_write_byte(ts_data->client, FTS_REG_GESTURE_EN, enable);
+			msleep(1);
+			ret = touch_i2c_read_byte(ts_data->client, FTS_REG_GESTURE_EN);
+			if (1 == ret)
+				break;
+		}
+	} else {
+		ret = touch_i2c_write_byte(ts_data->client, FTS_REG_GESTURE_EN, enable);
+	}
+
+	return ret;
 }
 
 static int fts_enable_edge_limit(struct chip_data_ft3658u *ts_data, int enable)
