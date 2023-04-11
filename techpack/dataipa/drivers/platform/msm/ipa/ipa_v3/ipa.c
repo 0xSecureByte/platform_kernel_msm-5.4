@@ -468,7 +468,7 @@ EXPORT_SYMBOL(ipa_smmu_free_sgt);
 
 static int ipa_pm_notify(struct notifier_block *b, unsigned long event, void *p)
 {
-	IPAERR("Entry\n");
+	IPADBG("Entry\n");
 	switch (event) {
 		case PM_POST_SUSPEND:
 #ifdef CONFIG_DEEPSLEEP
@@ -480,7 +480,7 @@ static int ipa_pm_notify(struct notifier_block *b, unsigned long event, void *p)
 #endif
 			break;
 	}
-	IPAERR("Exit\n");
+	IPADBG("Exit\n");
 	return NOTIFY_DONE;
 }
 
