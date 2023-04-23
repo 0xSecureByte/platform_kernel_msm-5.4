@@ -838,7 +838,7 @@ static void hal_reg_write_enqueue(struct hal_soc *hal_soc,
 static QDF_STATUS hal_delayed_reg_write_init(struct hal_soc *hal)
 {
 	hal->reg_write_wq =
-		qdf_alloc_high_prior_ordered_workqueue("hal_register_write_wq");
+		qdf_alloc_power_efficient_ordered_workqueue("hal_register_write_wq");
 	qdf_create_work(0, &hal->reg_write_work, hal_reg_write_work, hal);
 	hal->reg_write_queue = qdf_mem_malloc(HAL_REG_WRITE_QUEUE_LEN *
 					      sizeof(*hal->reg_write_queue));
