@@ -149,6 +149,18 @@ static inline qdf_workqueue_t *qdf_alloc_unbound_workqueue(char *name)
 	return  __qdf_alloc_unbound_workqueue(name);
 }
 
+
+/**
+ * qdf_alloc_unbound_workqueue - allocate a power efficient ordered workqueue
+ * @name: string
+ *
+ * Return: pointer of type qdf_workqueue_t
+ */
+static inline qdf_workqueue_t *qdf_alloc_power_efficient_ordered_workqueue(char *name)
+{
+        return  __qdf_alloc_power_efficient_ordered_workqueue(name);
+}
+
 /**
  * qdf_queue_work - Queue the work/task
  * @hdl: OS handle

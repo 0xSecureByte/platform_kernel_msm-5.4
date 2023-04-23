@@ -160,6 +160,17 @@ static inline __qdf_workqueue_t *__qdf_alloc_unbound_workqueue(char *name)
 }
 
 /**
+ * __qdf_alloc_unbound_workqueue - alloc an ordered power efficient workqueue
+ * @name: string
+ *
+ * Return: pointer of type qdf_workqueue_t
+ */
+static inline __qdf_workqueue_t *__qdf_alloc_power_efficient_ordered_workqueue(char *name)
+{
+        return alloc_ordered_workqueue(name, WQ_POWER_EFFICIENT);
+}
+
+/**
  * __qdf_flush_workqueue - flush the workqueue
  * @wqueue: pointer to workqueue
  * Return: none
