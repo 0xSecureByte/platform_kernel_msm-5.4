@@ -513,14 +513,15 @@
 &pm8350b_haptics {
 	status = "ok";
 //#ifdef OPLUS_FEATURE_CHG_BASIC
-	qcom,vmax-mv = <2100>;
-	qcom,cl-vmax-mv = <2550>;
-	qcom,lra-period-us = <4255>;
-	qcom,fifo-vmax-mv = <8900>;
-	qcom,old-steady-vmax-mv = <9700>;
+	qcom,vmax-mv = <1280>;
+	qcom,cl-vmax-mv = <1280>;
+	qcom,lra-period-us = <5882>;
+	qcom,fifo-vmax-mv = <9100>;
+	qcom,old-steady-vmax-mv = <9100>;
 	qcom,cal-data-restore;
 //#endif
 };
+
 //#ifdef OPLUS_FEATURE_FINGERPRINT
 &sdhc_2 {
 	status = "disabled";
