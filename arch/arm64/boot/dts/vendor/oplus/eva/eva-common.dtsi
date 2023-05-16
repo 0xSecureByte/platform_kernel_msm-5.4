@@ -2117,7 +2117,7 @@
 	status = "ok";
 //#ifdef OPLUS_FEATURE_CHG_BASIC
 	qcom,vmax-mv = <1280>;
-	qcom,cl-vmax-mv = <1400>;
+	qcom,cl-vmax-mv = <1280>;
 	qcom,lra-period-us = <5882>;
 	qcom,fifo-vmax-mv = <9100>;
 	qcom,old-steady-vmax-mv = <9100>;
