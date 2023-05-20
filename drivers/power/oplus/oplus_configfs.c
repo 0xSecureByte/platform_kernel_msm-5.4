@@ -164,39 +164,7 @@ static ssize_t otg_switch_show(struct device *dev, struct device_attribute *attr
 	return sprintf(buf, "%d\n", chip->otg_switch);
 }
 
-void __attribute__((weak)) oplus_set_otg_switch_status(bool value)
-{
-	return;
-}
-
-static ssize_t otg_switch_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	int val = 0;
-	struct oplus_chg_chip *chip = NULL;
-
-	chip = (struct oplus_chg_chip *)dev_get_drvdata(oplus_usb_dir);
-	if (!chip) {
-		chg_err("chip is NULL\n");
-		return -EINVAL;
-	}
-
-	if (kstrtos32(buf, 0, &val)) {
-		chg_err("buf error\n");
-		return -EINVAL;
-	}
-
-	if (val == 1) {
-		chip->otg_switch = true;
-		oplus_set_otg_switch_status(true);
-	} else {
-		chip->otg_switch = false;
-		chip->otg_online = false;
-		oplus_set_otg_switch_status(false);
-	}
-
-	return count;
-}
-static DEVICE_ATTR_RW(otg_switch);
+static DEVICE_ATTR_RO(otg_switch);
 
 int __attribute__((weak)) oplus_get_usb_status(void)
 {
