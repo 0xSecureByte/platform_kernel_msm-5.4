@@ -2093,7 +2093,7 @@ static const char * const rx_hph_mode_mux_text[] = {
 	"CLS_H_ULP", "CLS_AB_HIFI",
 };
 
-const char * const tx_master_ch_text[] = {
+static const char * const tx_master_ch_text[] = {
 	"ZERO", "SWRM_TX1_CH1", "SWRM_TX1_CH2", "SWRM_TX1_CH3", "SWRM_TX1_CH4",
 	"SWRM_TX2_CH1", "SWRM_TX2_CH2", "SWRM_TX2_CH3", "SWRM_TX2_CH4",
 	"SWRM_TX3_CH1", "SWRM_TX3_CH2", "SWRM_TX3_CH3", "SWRM_TX3_CH4",
@@ -2101,7 +2101,7 @@ const char * const tx_master_ch_text[] = {
 	"DMIC4", "DMIC5", "DMIC6", "DMIC7",
 };
 
-const struct soc_enum tx_master_ch_enum =
+static const struct soc_enum tx_master_ch_enum =
 	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(tx_master_ch_text),
 					tx_master_ch_text);
 
