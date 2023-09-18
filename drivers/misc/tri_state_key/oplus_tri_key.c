@@ -1065,12 +1065,12 @@ static ssize_t proc_hall_data_read(struct file *file, char __user *user_buf,
 
 	if (!g_the_chip) {
 		TRI_KEY_ERR("g_the_chip null\n");
-		snprintf(page, PAGE_SIZE, "%d\n", -1);
+		snprintf(page, sizeof(page), "%d\n", -1);
 	} else {
 		oplus_hall_get_data(DHALL_0);
 		oplus_hall_get_data(DHALL_1);
 
-		snprintf(page, PAGE_SIZE, "%d, %d\n",
+		snprintf(page, sizeof(page), "%d, %d\n",
 			g_the_chip->dhall_data0, g_the_chip->dhall_data1);
 	}
 	ret = simple_read_from_buffer(user_buf, count, ppos, page, strlen(page));
@@ -1091,11 +1091,11 @@ static ssize_t proc_tri_state_read(struct file *file, char __user *user_buf,
 
 	if (!g_the_chip) {
 		TRI_KEY_ERR("g_the_chip null\n");
-		snprintf(page, PAGE_SIZE, "%d\n", -1);
+		snprintf(page, sizeof(page), "%d\n", -1);
 	} else {
 		oplus_hall_get_data(DHALL_0);
 		oplus_hall_get_data(DHALL_1);
-		snprintf(page, PAGE_SIZE, "%d\n", g_the_chip->state);
+		snprintf(page, sizeof(page), "%d\n", g_the_chip->state);
 	}
 	ret = simple_read_from_buffer(user_buf, count, ppos, page, strlen(page));
 	return ret;
@@ -1115,9 +1115,9 @@ static ssize_t proc_hall_data_calib_read(struct file *file, char __user *user_bu
 
 	if (!g_the_chip) {
 		TRI_KEY_ERR("g_the_chip null\n");
-		snprintf(page, PAGE_SIZE, "%d\n", -1);
+		snprintf(page, sizeof(page), "%d\n", -1);
 	} else {
-		snprintf(page, PAGE_SIZE, "%d,%d,%d,%d,%d,%d,%d,%d\n",
+		snprintf(page, sizeof(page), "%d,%d,%d,%d,%d,%d,%d,%d\n",
 		g_the_chip->dnHall_UpV, g_the_chip->upHall_UpV,
 		g_the_chip->dnHall_MdV, g_the_chip->upHall_MdV,
 		g_the_chip->dnHall_DnV, g_the_chip->upHall_DnV,
@@ -1196,9 +1196,9 @@ static ssize_t proc_hall_debug_info_read(struct file *file, char __user *user_bu
 
 	if (!g_the_chip) {
 		TRI_KEY_ERR("g_the_chip null\n");
-		snprintf(page, PAGE_SIZE, "%d\n", -1);
+		snprintf(page, sizeof(page), "%d\n", -1);
 	} else
-		snprintf(page, PAGE_SIZE, "%d\n", tri_key_debug);
+		snprintf(page, sizeof(page), "%d\n", tri_key_debug);
 
 	ret = simple_read_from_buffer(user_buf, count, ppos, page, strlen(page));
 	return ret;
