@@ -201,6 +201,12 @@ static inline int dp_connector_atomic_check(struct drm_connector *connector,
 	return 0;
 }
 
+static inline int dp_connector_set_backlight(struct drm_connector *connector,
+		void *display, u32 bl_lvl)
+{
+	return 0;
+}
+
 static inline int dp_connector_set_colorspace(struct drm_connector *connector,
 		void *display)
 {
