@@ -7132,7 +7132,7 @@ int oplus_get_charger_cycle(void)
 	return cycle_count;
 }
 
-int oplus_adsp_voocphy_get_enable()
+int oplus_adsp_voocphy_get_enable(void)
 {
 	int rc = 0;
 	struct battery_chg_dev *bcdev = NULL;

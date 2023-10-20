@@ -142,7 +142,7 @@ EXPORT_SYMBOL_GPL(oem_gpio_control);
 #endif /* CONFIG_OPLUS_OPTIGA_LOW_DELAY */
 
 
-static try_count = 0;
+static int try_count = 0;
 void set_optiga_pin(uint8_t level){
 	int en = level;
 
