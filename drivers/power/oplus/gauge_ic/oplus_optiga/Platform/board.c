@@ -52,7 +52,7 @@ void Set_SWILowSpeed(void) {
 }
 
 
-uint8_t get_pin()
+uint8_t get_pin(void)
 {
 	return get_optiga_pin();
 }

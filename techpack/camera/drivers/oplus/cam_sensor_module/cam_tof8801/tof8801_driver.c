@@ -2652,7 +2652,7 @@ static int tof_input_dev_open(struct input_dev *dev)
   AMS_MUTEX_UNLOCK(&chip->lock);
   return error;
 }
-int start_poll_thread()
+int start_poll_thread(void)
 {
 	struct tof_sensor_chip *chip = g_tof_sensor_chip;
 	int error = 0;
@@ -2717,7 +2717,7 @@ int tof_start_thread(void *tof_chip)
 
 }
 
-int tof_oem_start()
+int tof_oem_start(void)
 {
     struct tof_sensor_chip *chip = g_tof_sensor_chip;
     /*** Use Polled I/O instead of interrupt ***/
@@ -2784,7 +2784,7 @@ int tof_oem_start()
 }
 
 
-int  tof_stop()
+int  tof_stop(void)
 {
 	struct tof_sensor_chip *chip = g_tof_sensor_chip;
 
@@ -2808,7 +2808,7 @@ int  tof_stop()
 	return 0;
 }
 
-int wait_for_tof_ready()
+int wait_for_tof_ready(void)
 {
 
 	struct i2c_client *client = tof_pdata.client;
