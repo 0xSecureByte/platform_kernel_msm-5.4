@@ -954,7 +954,7 @@ void icnss_dms_deinit(struct icnss_priv *priv)
 }
 #ifdef OPLUS_FEATURE_WIFI_BDF
 //Modify for: multi projects using different bdf
-static bool is_secondory_BDF() {
+static bool is_secondory_BDF(void) {
 	int pcbVersion =  get_PCB_Version();
 	icnss_pr_dbg("pcbVersion: %d", pcbVersion);
 	if (pcbVersion != 16 &&
