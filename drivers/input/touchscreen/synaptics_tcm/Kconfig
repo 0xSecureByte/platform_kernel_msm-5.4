@@ -9,6 +9,8 @@ menuconfig TOUCHSCREEN_SYNAPTICS_TCM
 
 	  If unsure, say N.
 
+if TOUCHSCREEN_SYNAPTICS_TCM
+
 choice
 	default TOUCHSCREEN_SYNAPTICS_TCM_I2C
 	prompt "Synaptics TCM bus module"
@@ -123,3 +125,4 @@ config TOUCHSCREEN_SYNAPTICS_TCM_DIAGNOSTICS
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called synaptics_tcm_diagnostics.
+endif
