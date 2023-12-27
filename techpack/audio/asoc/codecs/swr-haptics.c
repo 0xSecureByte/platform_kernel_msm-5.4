@@ -4,8 +4,11 @@
  * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
+#include <linux/atomic.h>
 #include <linux/device.h>
+#include <linux/hrtimer.h>
 #include <linux/init.h>
+#include <linux/input/qcom-hv-haptics.h>
 #include <linux/module.h>
 #include <linux/of_device.h>
 #include <linux/platform_device.h>
@@ -88,6 +91,9 @@ struct swr_haptics_dev {
 	struct swr_port			port;
 	struct regulator		*slave_vdd;
 	struct regulator		*hpwr_vreg;
+	struct notifier_block		hbst_off_nb;
+	struct hrtimer			hbst_off_timer;
+	atomic_t			hbst_off;
 	u32				hpwr_voltage_mv;
 	bool				slave_enabled;
 	bool				hpwr_vreg_enabled;
@@ -187,12 +193,19 @@ static int swr_haptics_slave_enable(struct swr_haptics_dev *swr_hap)
 	if (swr_hap->slave_enabled)
 		return 0;
 
-	rc = regulator_enable(swr_hap->slave_vdd);
-	if (rc < 0) {
-		dev_err(swr_hap->dev, "%s: enable swr-slave-vdd failed, rc=%d\n",
-				__func__, rc);
-		return rc;
+#ifdef OPLUS_ARCH_EXTENDS
+	if (!IS_ERR(swr_hap->slave_vdd)) {
+#endif /* OPLUS_ARCH_EXTENDS */
+		rc = regulator_enable(swr_hap->slave_vdd);
+		if (rc < 0) {
+			dev_err(swr_hap->dev, "%s: enable swr-slave-vdd failed, rc=%d\n",
+					__func__, rc);
+			return rc;
+		}
+#ifdef OPLUS_ARCH_EXTENDS
 	}
+#endif /* OPLUS_ARCH_EXTENDS */
+
 
 	dev_dbg(swr_hap->dev, "%s: enable swr-slave-vdd success\n", __func__);
 	swr_hap->slave_enabled = true;
@@ -206,12 +219,19 @@ static int swr_haptics_slave_disable(struct swr_haptics_dev *swr_hap)
 	if (!swr_hap->slave_enabled)
 		return 0;
 
-	rc = regulator_disable(swr_hap->slave_vdd);
-	if (rc < 0) {
-		dev_err(swr_hap->dev, "%s: disable swr-slave-vdd failed, rc=%d\n",
-				__func__, rc);
-		return rc;
+#ifdef OPLUS_ARCH_EXTENDS
+	if (!IS_ERR(swr_hap->slave_vdd)) {
+#endif /* OPLUS_ARCH_EXTENDS */
+		rc = regulator_disable(swr_hap->slave_vdd);
+		if (rc < 0) {
+			dev_err(swr_hap->dev, "%s: disable swr-slave-vdd failed, rc=%d\n",
+					__func__, rc);
+			return rc;
+		}
+#ifdef OPLUS_ARCH_EXTENDS
 	}
+#endif /* OPLUS_ARCH_EXTENDS */
+
 
 	dev_dbg(swr_hap->dev, "%s: disable swr-slave-vdd success\n", __func__);
 	swr_hap->slave_enabled = false;
@@ -300,6 +320,10 @@ static int hap_enable_swr_dac_port(struct snd_soc_dapm_widget *w,
 
 		swr_slvdev_datapath_control(swr_hap->swr_slave,
 				swr_hap->swr_slave->dev_num, true);
+
+		if (atomic_read(&swr_hap->hbst_off))
+			usleep_range(5000,5001);
+
 		/* trigger SWR play */
 		val = SWR_PLAY_BIT | SWR_PLAY_SRC_VAL_SWR;
 		rc = regmap_write(swr_hap->regmap, SWR_PLAY_REG, val);
@@ -366,14 +390,24 @@ static int haptics_vmax_put(struct snd_kcontrol *kcontrol,
 			snd_soc_component_get_drvdata(component);
 
 	swr_hap->vmax = ucontrol->value.integer.value[0];
+#ifdef OPLUS_ARCH_EXTENDS
+	if (swr_hap->vmax > 200) {
+		swr_hap->vmax = 200;
+	}
+#endif /* OPLUS_ARCH_EXTENDS */
 	pr_debug("%s: vmax %u\n", __func__, swr_hap->vmax);
 
 	return 0;
 }
 
 static const struct snd_kcontrol_new haptics_snd_controls[] = {
+#ifndef OPLUS_ARCH_EXTENDS
 	SOC_SINGLE_EXT("Haptics Amplitude Step", SND_SOC_NOPM, 0, 100, 0,
 		haptics_vmax_get, haptics_vmax_put),
+#else /* OPLUS_ARCH_EXTENDS */
+	SOC_SINGLE_EXT("Haptics Amplitude Step", SND_SOC_NOPM, 0, 200, 0,
+		haptics_vmax_get, haptics_vmax_put),
+#endif /* OPLUS_ARCH_EXTENDS */
 };
 
 static const struct snd_soc_dapm_widget haptics_comp_dapm_widgets[] = {
@@ -478,6 +512,37 @@ static int swr_haptics_parse_port_mapping(struct swr_device *sdev)
 	return 0;
 }
 
+static enum hrtimer_restart disable_hbst_off_timer(struct hrtimer *timer)
+{
+	struct swr_haptics_dev *swr_hap = container_of(timer,
+			struct swr_haptics_dev, hbst_off_timer);
+
+	pr_err("%s: in \n", __func__);
+
+	atomic_set(&swr_hap->hbst_off, 0);
+	return HRTIMER_NORESTART;
+}
+
+#define HBST_OFF_DELAY_NS 5000000
+static int hbst_off_notifier(struct notifier_block *nb, unsigned long event, void *val)
+{
+	struct swr_haptics_dev *swr_hap = container_of(nb, struct swr_haptics_dev, hbst_off_nb);
+
+	pr_err("%s: in \n", __func__);
+
+	if ((hrtimer_get_remaining(&swr_hap->hbst_off_timer) > 0) ||
+			hrtimer_active(&swr_hap->hbst_off_timer))
+		hrtimer_cancel(&swr_hap->hbst_off_timer);
+
+	hrtimer_start(&swr_hap->hbst_off_timer,
+			ktime_set(0,HBST_OFF_DELAY_NS),
+			HRTIMER_MODE_REL);
+
+	atomic_set(&swr_hap->hbst_off, *(int *)val);
+
+	return 0;
+}
+
 static int swr_haptics_probe(struct swr_device *sdev)
 {
 	struct swr_haptics_dev *swr_hap;
@@ -512,10 +577,19 @@ static int swr_haptics_probe(struct swr_device *sdev)
 	swr_hap->slave_vdd = devm_regulator_get(swr_hap->dev, "swr-slave");
 	if (IS_ERR(swr_hap->slave_vdd)) {
 		rc = PTR_ERR(swr_hap->slave_vdd);
+#ifdef OPLUS_ARCH_EXTENDS
+		dev_err(swr_hap->dev, "%s: get swr-slave-supply failed, rc=%d\n",
+				__func__, rc);
+		if (rc != -EPROBE_DEFER)
+			goto clean;
+		else
+			rc = 0;
+#else /* OPLUS_ARCH_EXTENDS */
 		if (rc != -EPROBE_DEFER)
 			dev_err(swr_hap->dev, "%s: get swr-slave-supply failed, rc=%d\n",
 					__func__, rc);
 		goto clean;
+#endif /* OPLUS_ARCH_EXTENDS */
 	}
 
 	if (of_find_property(node, "qcom,hpwr-supply", NULL)) {
@@ -574,6 +648,14 @@ static int swr_haptics_probe(struct swr_device *sdev)
 		goto dev_err;
 	}
 
+	atomic_set(&swr_hap->hbst_off, 0);
+	hrtimer_init(&swr_hap->hbst_off_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
+	swr_hap->hbst_off_timer.function = disable_hbst_off_timer;
+
+	swr_hap->hbst_off_nb.notifier_call = hbst_off_notifier;
+	rc = register_hbst_off_notifier(&swr_hap->hbst_off_nb);
+	dev_err(swr_hap->dev, "%s: register_hbst_off_notifier, rc=%d\n",__func__, rc);
+
 	return 0;
 dev_err:
 	swr_haptics_slave_disable(swr_hap);
@@ -594,6 +676,8 @@ static int swr_haptics_remove(struct swr_device *sdev)
 		rc = -ENODEV;
 		goto clean;
 	}
+
+	unregister_hbst_off_notifier(&swr_hap->hbst_off_nb);
 
 	rc = swr_haptics_slave_disable(swr_hap);
 	if (rc < 0) {
