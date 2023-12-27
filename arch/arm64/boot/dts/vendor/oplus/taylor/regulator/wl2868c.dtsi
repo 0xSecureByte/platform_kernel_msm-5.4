@@ -1,0 +1,36 @@
+&soc {
+};
+
+&pm8350c_gpios {
+	wl2868c_pins_enp1: wl2868c_pins_enp1 {
+			pins = "gpio3";
+			function = "normal";
+			bias-pull-up;
+			output-low;
+			drive-strength = <2>;
+	};
+
+	wl2868c_pins_enp0: wl2868c_pins_enp0 {
+			pins = "gpio3";
+			function = "normal";
+			bias-pull-up;
+			output-high;
+			drive-strength = <2>;
+	};
+
+	wl2868c_pins_default: wl2868c_pins_default {
+	};
+};
+
+&qupv3_se1_i2c {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	i2c_wl2868c@2F{
+		compatible = "qualcomm,i2c_wl2868c";
+		reg = <0x2F>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pm8008i_active>;
+		status = "okay";
+	};
+};

@@ -1,0 +1,80 @@
+&battery_charger {
+	qcom,vooc_project = <7>;//80W
+};
+
+&soc {
+	oplus,track-charge {
+		compatible = "oplus,track-charge";
+		track,fast_chg_break_t_thd = <1000>;
+		track,general_chg_break_t_thd = <200>;
+		track,voocphy_type = <4>;
+		track,wired_max_power = <80000>;
+		track,wired_fast_chg_scheme = <1>;
+	};
+};
+
+&rk826_fastcg {
+	qcom,vooc_strategy_normal_current = <0x0f>;
+	qcom,vooc_strategy1_low_current0 = <0x0f>;
+	qcom,vooc_current_lvl = <1000
+				1500
+				2000
+				2500
+				3000
+				3500
+				4000
+				4500
+				5000
+				5500
+				6000
+				6300
+				6500
+				7000
+				7500>;
+	qcom,vooc-max-input-current-support = <7300>;
+	svooc_charge_curve {
+		strategy_soc_0_to_50 {
+			strategy_temp_normal_low =	<4304 73 55 0
+							 4484 60 35 0
+							 4514 40 13 0
+							 4520 13 13 1>;
+			strategy_temp_normal_high =	<4304 73 55 0
+							 4484 60 35 0
+							 4514 40 15 0
+							 4520 15 15 1>;
+		};
+	};
+};
+
+&rt5125_fastcg {
+	qcom,vooc_strategy_normal_current = <0x0f>;
+	qcom,vooc_strategy1_low_current0 = <0x0f>;
+	qcom,vooc_current_lvl = <1000
+				1500
+				2000
+				2500
+				3000
+				3500
+				4000
+				4500
+				5000
+				5500
+				6000
+				6300
+				6500
+				7000
+				7500>;
+	qcom,vooc-max-input-current-support = <7300>;
+	svooc_charge_curve {
+		strategy_soc_0_to_50 {
+			strategy_temp_normal_low =	<4304 73 55 0
+							 4484 60 35 0
+							 4514 40 13 0
+							 4520 13 13 1>;
+			strategy_temp_normal_high =	<4304 73 55 0
+							 4484 60 35 0
+							 4514 40 15 0
+							 4520 15 15 1>;
+		};
+	};
+};

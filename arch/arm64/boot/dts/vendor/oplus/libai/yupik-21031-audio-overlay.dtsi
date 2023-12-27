@@ -1,0 +1,141 @@
+&q6core {
+	wsa_swr_clk_data_pinctrl {
+		status = "disabled";
+	};
+	cdc_quin_mi2s_gpios: msm_cdc_pinctrl_quin {
+		compatible = "qcom,msm-cdc-pinctrl";
+		pinctrl-names = "aud_active", "aud_sleep";
+		pinctrl-0 = <&lpi_i2s1_sck_active &lpi_i2s1_ws_active
+		&lpi_i2s1_sd0_active &lpi_i2s1_sd1_active>;
+		pinctrl-1 = <&lpi_i2s1_sck_sleep &lpi_i2s1_ws_sleep
+		&lpi_i2s1_sd0_sleep &lpi_i2s1_sd1_sleep>;
+		qcom,lpi-gpios;
+		#gpio-cells = <0>;
+	};
+	cdc_dmic01_pinctrl{
+		status = "disabled";
+	};
+	cdc_dmic23_pinctrl{
+		status = "disabled";
+	};
+};
+
+&yupik_snd {
+	qcom,audio-routing =
+		"AMIC1", "Analog Mic1",
+		"Analog Mic1", "MIC BIAS1",
+		"AMIC2", "Analog Mic2",
+		"Analog Mic2", "MIC BIAS2",
+		"AMIC3", "Analog Mic3",
+		"Analog Mic3", "MIC BIAS3",
+		//"AMIC4", "Analog Mic4",
+		//"Analog Mic4", "MIC BIAS3",
+		"TX DMIC0", "Digital Mic0",
+		"TX DMIC0", "MIC BIAS3",
+		"TX DMIC1", "Digital Mic1",
+		"TX DMIC1", "MIC BIAS3",
+		"TX DMIC2", "Digital Mic2",
+		"TX DMIC2", "MIC BIAS1",
+		"TX DMIC3", "Digital Mic3",
+		"TX DMIC3", "MIC BIAS1",
+		"TX DMIC4", "Digital Mic4",
+		"TX DMIC4", "MIC BIAS1",
+		"TX DMIC5", "Digital Mic5",
+		"TX DMIC5", "MIC BIAS1",
+		"IN1_HPHL", "HPHL_OUT",
+		"IN2_HPHR", "HPHR_OUT",
+		"IN3_AUX", "AUX_OUT",
+		//"WSA SRC0_INP", "SRC0",
+		//"WSA_TX DEC0_INP", "TX DEC0 MUX",
+		//"WSA_TX DEC1_INP", "TX DEC1 MUX",
+		"RX_TX DEC0_INP", "TX DEC0 MUX",
+		"RX_TX DEC1_INP", "TX DEC1 MUX",
+		"RX_TX DEC2_INP", "TX DEC2 MUX",
+		"RX_TX DEC3_INP", "TX DEC3 MUX",
+		//"SpkrLeft IN", "WSA_SPK1 OUT",
+		//"SpkrRight IN", "WSA_SPK2 OUT",
+		"TX SWR_INPUT", "WCD_TX_OUTPUT",
+		"VA SWR_INPUT", "VA_SWR_CLK",
+		"VA SWR_INPUT", "WCD_TX_OUTPUT",
+		"VA_AIF1 CAP", "VA_SWR_CLK",
+		"VA_AIF2 CAP", "VA_SWR_CLK",
+		"VA_AIF3 CAP", "VA_SWR_CLK",
+		"VA DMIC0", "Digital Mic0",
+		"VA DMIC1", "Digital Mic1",
+		"VA DMIC2", "Digital Mic2",
+		"VA DMIC3", "Digital Mic3",
+		"VA DMIC4", "Digital Mic4",
+		"VA DMIC5", "Digital Mic5",
+		"VA DMIC0", "VA MIC BIAS3",
+		"VA DMIC1", "VA MIC BIAS3",
+		"VA DMIC2", "VA MIC BIAS1",
+		"VA DMIC3", "VA MIC BIAS1",
+		"VA DMIC4", "VA MIC BIAS1",
+		"VA DMIC5", "VA MIC BIAS1";
+	qcom,msm-mbhc-hphl-swh = <1>;
+	qcom,msm-mbhc-gnd-swh = <1>;
+	qcom,msm-mbhc-moist-cfg = <1>, <3>, <0>;
+	qcom,wsa-max-devs = <0>;
+	/delete-property/ qcom,cdc-dmic01-gpios;
+	/delete-property/ qcom,cdc-dmic23-gpios;
+	qcom,quin-mi2s-gpios = <&cdc_quin_mi2s_gpios>;
+	qcom,msm-mbhc-hs-mic-max-threshold-mv = <2600>;
+	qcom,msm-mbhc-hs-mic-min-threshold-mv = <75>;
+	qcom,codec-max-aux-devs = <1>;
+	qcom,codec-aux-devs = <&wcd937x_codec>;
+	oplus,speaker-pa = "nxp";
+	oplus,mi2s-id = <4>;
+	qcom,msm-mbhc-usbc-audio-supported = <1>;
+	oplus,mbhc-check-cross-conn = <1>;
+	oplus,mbhc-headset-micbias-alwayon = <1>;
+	oplus,mbhc-check-irq-en = <1>;
+	oplus,mbhc-headset-detect-mode = <1>;
+};
+
+&qupv3_se1_i2c {
+	status = "ok";
+	qcom,clk-freq-out = <400000>;
+	tfa98xx@34 {
+		compatible = "nxp,tfa98xx";
+		reg = <0x34>;
+		tfa9874_vdd-supply = <&L18B>;
+		reset-gpio = <&tlmm 3 0x00>;
+		tfa_min_range = <5000>;
+		tfa_max_range = <8000>;
+		tfa_channel = <0>;
+		tfa_mi2s_id = <4>;
+		status = "ok";
+	};
+};
+
+&bolero {
+	qcom,num-macros = <3>;
+	wsa-macro@3240000 {
+		status = "disabled";
+	};
+	wcd937x-codec {
+		qcom,cdc-micbias1-mv = <2700>;
+		qcom,cdc-micbias2-mv = <2700>;
+		qcom,cdc-micbias3-mv = <2700>;
+		oplus,mbhc_enable_hp_impedance_detect = <0>;
+	};
+};
+
+&soc {
+	wsa_spkr_en1_pinctrl {
+		status = "disabled";
+	};
+	wsa_spkr_en2_pinctrl {
+		status = "disabled";
+	};
+};
+
+&fsa4480 {
+	fsa4480,hs-det-gpio = <&tlmm 97 0x00>;
+};
+
+&adsp_mem {
+	compatible = "removed-dma-pool";
+	no-map;
+	/delete-property/ reusable;
+};

@@ -1,0 +1,40 @@
+&soc {
+	devinfo {
+		compatible = "oplus-devinfo";
+
+		//pinctrl-names = "active", "sleep";
+		//pinctrl-0 = <&hw_id_active>;
+		//pinctrl-1 = <&hw_id_sleep>;
+
+		io-channels= <&pmk8350_vadc PM8350_ADC7_GPIO1>;
+		io-channel-names= "vph_pwr_voltage_sub";
+
+		main-sub {
+			compatible = "hw-match, main-sub";
+			use_pmic_adc;
+			adc_ranges = <0 80
+					81 180
+					181 300
+					301 420
+					421 550
+					551 650
+					651 760
+					761 850
+					851 950
+					951 1050
+					1051 1150
+					1151 1300>;
+			aboard-patterns = <1 1 1 1 1 1 1 1 1>;
+
+			/*main board*/
+			match-projects = <21051 21051 21051 21051 21051 21051 21051 21051 21051>;
+
+			/*rf type*/
+			rf_match_support;
+			rf-patterns = <0 1 2 3 4 5 6 7 8>;
+		};
+	};
+	midas_pdev {
+                compatible = "oplus,midas-pdev";
+        };
+};

@@ -1,0 +1,164 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (C) 2018-2020 Oplus. All rights reserved.
+ */
+
+&soc {
+        //#ifdef OPLUS_FEATURE_SENSOR_DRIVER
+        sensor_fb: sensor_fb {
+            compatible = "oplus,sensor-feedback";
+        };
+        consumer_ir_core: consumer_ir_core {
+            compatible = "oplus,kookong_ir_core";
+            status = "okay";
+
+            vdd-type = <0>; /*0: internal LDO , 1: external LOD*/
+            vdd-supply = <&pm8008i_l5>;
+            vdd-min-vol = <3064000>;
+            vdd-max-vol = <3064000>;
+            vdd-change-enable = <1>; // when value = 1, set different vdd begain power on
+        };
+        /*enum sensor_id { OPLUS_ACCEL,OPLUS_GYRO,OPLUS_MAG,OPLUS_LIGHT,OPLUS_PROXIMITY,OPLUS_SAR,OPLUS_CT,OPLUS_BAROMETER,SENSORS_NUM};*/
+        oplus_sensor: oplus_sensor {
+                compatible = "oplus,sensor-devinfo";
+                als-row-coe = <110>;
+                /*enum {LSM6DSM = 0x01, BMI160 = 0x02, LSM6DS3 = 0x04, BMI260 = 0x08};*/
+                gsensor@0 {
+                        sensor-name = <0x08>;//BMI260
+                        sensor-direction = <7>;
+                        sensor-index = <0>;//source num
+                        sensor-type = <0>;//OPLUS_ACCEL
+                };
+                /* enum {AKM0991X = 0x01, MMC5603 = 0x02};*/
+                msensor@0 {
+                        sensor-name = <0x01>;//AKM09918
+                        sensor-direction = <1>;
+                        sensor-index = <0>;
+                        sensor-type = <2>;//OPLUS_MAG
+                        parameter-number= <18>;
+                        soft-mag-parameter = <9654 0 671 0 47 0 631 0 9143 0 31 1 140 0 173 1 10166 0>;//e00 sign e01 sign...
+                };
+                /*enum {STK3A5X=0x01,TCS3701=0x02,TCS3408=0x04,STK326X};*/
+                /*enum {NORMAL=0x01,UNDER_LCD=0x02,VIRTUAL_UNDER_LCD=0x03}*/
+                lsensor@0 {
+                        sensor-name = <0x2>;//TCS3701
+                        sensor-index = <0>;
+                        sensor-type = <3>;//LIGHT
+                        bus-number = <2>;
+                        irq-number = <142>;
+                        als-type = <2>;//<1-normal;2-under screen;3-normal needed compensation>
+                        is-unit-device = <1>;//<1-alsps unit device;0-separate device>
+                        is-als-dri = <0>;//<0-polling 1-irq>
+                        als-factor = <150>;
+                        is_als_initialed = <0>;
+                        als_buffer_length = <10>;
+                        use_lb_algo = <1>;
+                        lcd_type = <0>;
+                        linear_comp_scope = <0>;
+                        linear_comp_intercept = <10000>;
+                        temp_lux = <30>;
+                        coef = <1000>;
+                        bal_coef = <100>;
+                        ir_coef_stage_0 = <100>;
+                        ir_coef_stage_1 = <160>;
+                        ir_coef_stage_2 = <200>;
+                        ir_coef_stage_3 = <300>;
+                        ir_coef_val_0 = <1000>;
+                        ir_coef_val_1 = <570>;
+                        ir_coef_val_2 = <390>;
+                        ir_coef_val_3 = <270>;
+                        ir_coef_val_4 = <1200>;
+                        normalization_value = <549>;
+                };
+                psensor@0 {
+                        sensor-name = <0x2>;//TCS3701
+                        sensor-index = <0>;
+                        sensor-type = <4>;//PROXIMITY
+                        bus-number = <2>;
+                        irq-number = <142>;
+                        ps-type = <1>;
+                        low_step = <300>;
+                        high_step = <400>;
+                        low_limit = <400>;
+                        high_limit = <600>;
+                        dirty_low_step = <100>;
+                        dirty_high_step = <150>;
+                        ps_dirty_limit = <1020>;
+                        ps_ir_limit = <500>;
+                        ps_adjust_min = <0>;
+                        ps_adjust_max = <600>;
+                        sampling_count = <5>;
+                        step_max = <400>;
+                        step_min = <100>;
+                        step_div = <1500>;
+                        anti_shake_delta = <80>;
+                        dynamic_cali_max = <1024>;
+                        raw2offset_radio = <31200>;
+                        offset_max = <250>;
+                        offset_range_min = <0xFFFFFF01>;// -255
+                        offset_range_max = <255>;
+                        force_cali_limit = <2000>;
+                        cali_jitter_limit = <20>;
+                        cal_offset_margin = <80>;
+                        /*sensor-reg start*/
+                        parameter-number = <4>;
+                        sensor-reg = <0xB9 0x21
+                                      0xBC 0xFB>; // 70mA
+                        /*sensor-reg end*/
+                };
+                ssensor@0 {
+                    sensor-name = <0x2>;//SX9331
+                    sensor-index = <0>;
+                    sensor-type = <5>;//OPLUS_SAR
+                    irq-number = <141>;
+                    channel-num = <3>;
+                    is-dc-offset = <1>;
+                    dc-offset = <4172 3560 5268 4 5 6259 5340 7903 30004 30005>;
+                };
+                /*virtual sensor
+                enum sensor_algo_id {
+                        OPLUS_PICKUP_DETECT,
+                        OPLUS_LUX_AOD,
+                        OPLUS_TP_GESTURE,
+                        OPLUS_FP_DISPLAY,
+                        OPLUS_FREE_FALL,
+                        OPLUS_CAMERA_PROTECT,
+                        SENSOR_ALGO_NUM
+                }*/
+                pickup_detect {
+                        sensor-type = <0>; //OPLUS_PICKUP_DETECT
+                        is-virtual-sensor;
+                        is-need-prox = <1>;
+                        prox-type = <0>; // 0 - proximity; 1 - proximity_fake
+                };
+                lux_aod {
+                        sensor-type = <1>; //OPLUS_LUX_AOD
+                        is-virtual-sensor;
+                        thrd-low = <30>;
+                        thrd-high = <300>;
+                        als-type = <1>; // 0 - wise_light; 1 - ambient_light
+                };
+                fp_display {
+                        sensor-type = <3>; //OPLUS_FP_DISPLAY
+                        is-virtual-sensor;
+                        prox-type = <0>; // 0 - proximity; 1 - proximity_fake
+                };
+                free_fall {
+                        sensor-type = <4>; //OPLUS_FREE_FALL
+                        is-virtual-sensor;
+                };
+        };
+        //#endif /*OPLUS_FEATURE_SENSOR_DRIVER*/
+};
+
+&qupv3_se4_spi{
+    status = "ok";
+    consumerIr@0 {
+        compatible = "oplus,kookong_ir_spi";
+        reg = <0>;
+        status = "ok";
+
+        spi-max-frequency = <5000000>;    /*4800000,9600000,15000000,19200000*/
+        ir-spi-mode = <0>;
+    };
+};

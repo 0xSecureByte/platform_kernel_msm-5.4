@@ -1,0 +1,130 @@
+/* *****************
+the up part file change like:
+delete note  and status = "disabled" to "ok"  add here also, other will meet can't boot issue or compile error issue
+**************************/
+#include "../../qcom/yupik-idp.dtsi"
+&soc {
+	gpio_keys {
+		compatible = "gpio-keys";
+		label = "gpio-keys";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&key_vol_down_default>;
+
+		vol_up {
+			label = "volume_down";
+			gpios = <&pm7325_gpios 6 GPIO_ACTIVE_LOW>;
+			linux,input-type = <1>;
+			linux,code = <KEY_VOLUMEDOWN>;
+			gpio-key,wakeup;
+			debounce-interval = <15>;
+			linux,can-disable;
+		};
+	};
+
+        shell_front {
+                compatible = "oplus,shell-temp";
+        };
+
+        shell_frame {
+                compatible = "oplus,shell-temp";
+        };
+
+        shell_back {
+                compatible = "oplus,shell-temp";
+        };
+};
+
+//yupik_pmic_overlay.dtsi
+&pm7325_gpios {
+	key_vol_down {
+		key_vol_down_default: key_vol_down_default {
+			pins = "gpio6";
+			function = "normal";
+			input-enable;
+			bias-pull-up;
+			power-source = <1>;
+		};
+	};
+};
+
+
+&firmware {
+		android {
+			vbmeta {
+				parts = "vbmeta,boot,system,vendor,dtbo,vendor_boot";
+				//#else
+				//parts = "vbmeta,boot,system,vendor,dtbo,recovery";
+			};
+
+			fstab {
+				vendor {
+					fsmgr_flags = "wait,slotselect,avb";
+//#else
+					//fsmgr_flags = "wait,avb";
+				};
+			};
+		};
+};
+
+//pmk8350.dtsi for pmk7325.dtsi
+&pmk8350 {
+
+	pon_hlos@1300 {
+			qcom,pon_2 {
+				reg = <0x1300>, <0x800>;
+				reg-names = "pon_hlos", "pon_pbs";
+				qcom,kpdpwr-sw-debounce;
+				qcom,pon-type = <PON_POWER_ON_TYPE_RESIN>;
+				linux,code = <KEY_VOLUMEUP>;
+			};
+	};
+};
+
+
+
+// #ifdef OPLUS_SYSTEM_UBOOT_LOG
+// xbl_uefi_mem address get from boot_images Core.dsc.inc file: PcdEmbeddedFdBaseAddress + SERIAL_BUFFER_OFFSET,0x9FE00000+0x1F7000=0x9FFF7000 (same with 8350)
+// kernel boot log: 0x9FE00000~ 0x9FFF7000
+&reserved_memory {
+		kboot_uboot_logmem: kboot_uboot_logmem@0x9FE00000 {
+			reg = <0x0 0x9FE00000 0x0 0x200000>;
+			compatible = "oplus,xbl_uefi_kbootlog";
+			xbluefi-offset = <0x1F7000>;
+			no-map;
+		};
+//#if IS_ENABLED(CONFIG_OPLUS_FEATURE_DUMP_DEVICE_INFO)
+//0xE9700000 is PSTORE_RAM_BASE,defined in boot_target.h
+    qcom: ramoops {
+        compatible = "ramoops";
+        /delete-property/ reg;
+        reg = <0 0xE9700000 0 0x05B8000>; //5M + 736k;
+        record-size =  <0x40000>; //256k
+        console-size = <0x40000>; //256k
+        ftrace-size =  <0x200000>; //2M
+        pmsg-size=     <0x200000>; //2M
+        devinfo-size=  <0x08000>;  //32k
+        dumpinfo-size=  <0x08000>; //32k
+        rsv01info-size=  <0x08000>; //32k
+        rsv02info-size=  <0x08000>; //32k
+        rsv03info-size=  <0x08000>; //32k
+        rsv04info-size=  <0x08000>; //32k
+        rsv05info-size=  <0x08000>; //32k
+        ecc-size=      <0x0>;
+    };
+//#endif
+};
+// #endif
+
+//#ifdef OPLUS_BUG_STABILITY
+&icnss2 {
+	use-nv-mac;
+};
+//#endif /* OPLUS_BUG_STABILITY */
+
+&removed_mem {
+	no-map;
+	//reg = <0x0 0xc0000000 0x0 0x5100000>;
+	reg = <0x0 0xc0000000 0x0 0x8E00000>;
+};
+//#endif /*OPLUS_FEATURE_FINGERPRINT*/

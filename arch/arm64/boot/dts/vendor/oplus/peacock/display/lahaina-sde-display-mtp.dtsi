@@ -1,0 +1,8 @@
+&sde_dsi {
+	/delete-property/ qcom,dsi-default-panel;
+	qcom,dsi-default-panel = <&dsi_oplus_20085_s6e3_samsung_1792_1920_dsc_cmd>;
+};
+&sde_dsi1 {
+	/delete-property/ qcom,dsi-default-panel;
+	qcom,dsi-default-panel = <&dsi_oplus_20085_boe_nt37701_988_1972_cmd>;
+};

@@ -1,0 +1,12 @@
+/dts-v1/;
+/plugin/;
+
+#include "yupik-overlay.dtsi"
+#include "yupik-walle-overlay.dtsi"
+//#include "yupik-21603-audio-overlay.dtsi"
+/ {
+	model = "Qualcomm Technologies, Inc. Yupik IDP";
+	compatible = "qcom,yupik-idp", "qcom,yupik", "qcom,idp";
+	qcom,board-id = <34 0>;
+	oplus,dtsi_no = <21071>;
+};

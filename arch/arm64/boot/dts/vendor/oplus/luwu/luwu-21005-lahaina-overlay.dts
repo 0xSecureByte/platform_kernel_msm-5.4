@@ -1,0 +1,181 @@
+#include "../../qcom/lahaina-mtp-overlay.dts"
+//#include "lahaina_overlay_oplus_common.dtsi"
+//#include "lahaina_overlay_oplus_common_pinctrl.dtsi"
+#include "lahaina-camera-sensor-21005.dtsi"
+#include "luwu-common.dtsi"
+#include "luwu-21005.dtsi"
+#include "nfc/luwu-nfc-sn100t.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. Lahaina MTP";
+	compatible = "qcom,lahaina-mtp", "qcom,lahaina", "qcom,mtp";
+	qcom,board-id = <0x10008 0>;
+	oplus,dtsi_no = <21005>;
+};
+
+&tlmm {
+	cd_pin_pulldown: cd_pin_pulldown {
+		mux {
+			pins = "gpio35";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio35";
+			drive-strength = <2>;
+			bias-pull-down;
+			input-enable;
+		};
+	};
+
+	explorer_int0: explorer_int0 {
+		mux {
+			pins = "gpio98";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio98";
+			bias-pull-down;
+			drive-strength = <2>;
+			input-enable;
+		};
+	};
+
+	explorer_int1: explorer_int1 {
+		mux {
+			pins = "gpio79";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio79";
+			bias-pull-down;
+			drive-strength = <2>;
+			input-enable;
+		};
+	};
+
+	explorer_int2: explorer_int2 {
+		mux {
+			pins = "gpio90";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio90";
+			bias-pull-down;
+			drive-strength = <2>;
+			input-enable;
+		};
+	};
+
+	pmic_pon_1: pmic_pon_1 {
+		mux {
+			pins = "gpio72";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio72";
+			bias-pull-down;
+			drive-strength = <2>;
+			output-low;
+		};
+	};
+
+	gpio_sleep: gpio_sleep {
+		mux {
+			pins = "gpio75";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio75";
+			bias-pull-down;
+			drive-strength = <2>;
+			input-enable;
+		};
+	};
+
+	pmic_resin_n: pmic_resin_n {
+		mux {
+			pins = "gpio78";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio78";
+			bias-pull-down;
+			drive-strength = <2>;
+			output-low;
+		};
+	};
+
+	sdc2_on: sdc2_on {
+		clk {
+			pins = "sdc2_clk";
+			bias-disable;
+			drive-strength = <10>;
+		};
+
+		cmd {
+			pins = "sdc2_cmd";
+			bias-pull-up;
+			drive-strength = <8>;
+		};
+
+		data {
+			pins = "sdc2_data";
+			bias-pull-up;
+			drive-strength = <8>;
+		};
+	};
+
+	sdc2_off: sdc2_off {
+		clk {
+			pins = "sdc2_clk";
+			bias-disable;
+			drive-strength = <2>;
+		};
+
+		cmd {
+			pins = "sdc2_cmd";
+			bias-pull-up;
+			drive-strength = <2>;
+		};
+
+		data {
+			pins = "sdc2_data";
+			bias-pull-up;
+			drive-strength = <2>;
+		};
+	};
+};
+
+&sdhc_2 {
+	cd-debounce-delay-ms = <1>;
+	cd-gpios = <&tlmm 35 GPIO_ACTIVE_HIGH>;
+	pinctrl-names = "default", "sleep";
+	pinctrl-0 = <&sdc2_on &cd_pin_pulldown>;
+	pinctrl-1 = <&sdc2_off>;
+	filter-enable;
+	no-sd;
+	no-mmc;
+	qcom,vdd-io-voltage-level = <1808000 1808000>;
+	status = "ok";
+};
+
+&soc {
+	preisp: zeku,explorer@0 {
+		compatible = "zeku,explorer";
+		interrupt-parent = <&tlmm>;
+		bsp_irq_gpio = <&tlmm 98 0>;
+		bsp_int1_gpio = <&tlmm 79 0>;
+		bsp_int2_gpio = <&tlmm 90 0>;
+		explorer_sleep_gpio = <&tlmm 75 0>;
+		pmic_pon_gpio = <&tlmm 72 0>;
+		pmic_reset_gpio = <&tlmm 78 0>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&explorer_int0 &explorer_int1 &explorer_int2 &pmic_pon_1 &gpio_sleep &pmic_resin_n>;
+		clock-names = "clk_ref";
+		clocks = <&clock_rpmh RPMH_RF_CLK5>;
+		vcc_sdio-supply = <&L6C>;
+		explorer,clk-drive-strength = <6>;
+		explorer,cmd-drive-strength = <6>;
+		explorer,data-drive-strength = <6>;
+	};
+};

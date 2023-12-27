@@ -1,0 +1,14 @@
+#include "../../qcom/lahaina-mtp-overlay.dts"
+//#include "lahaina_overlay_oplus_common.dtsi"
+//#include "lahaina_overlay_oplus_common_pinctrl.dtsi"
+#include "lahaina-camera-sensor-21147.dtsi"
+#include "eva-common.dtsi"
+#include "eva-21147.dtsi"
+#include "nfc/eva-nfc-sn100t.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. Lahaina MTP";
+	compatible = "qcom,lahaina-mtp", "qcom,lahaina", "qcom,mtp";
+	qcom,board-id = <0x10008 0>;
+	oplus,dtsi_no = <21147>;
+};

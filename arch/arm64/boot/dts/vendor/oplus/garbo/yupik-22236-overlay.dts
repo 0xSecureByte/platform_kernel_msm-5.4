@@ -1,0 +1,20 @@
+/dts-v1/;
+/plugin/;
+
+#include "yupik-overlay.dtsi"
+#include "yupik-22236-overlay.dtsi"
+//#include "yupik-camera-sensor-22236.dtsi"
+#include "yupik-22236-audio-overlay.dtsi"
+// #include "regulator/wl2868c.dtsi"
+#include "yupik-camera-sensor-22236.dtsi"
+//#ifdef OPLUS_FEATURE_NFC_BRINGUP
+#include "nfc/garbo-nfc-sn100t.dtsi"
+#include "garbo-common.dtsi"
+//#endif OPLUS_FEATURE_NFC_BRINGUP
+/ {
+	model = "Qualcomm Technologies, Inc. Yupik IDP";
+	compatible = "qcom,yupik-idp", "qcom,yupik", "qcom,idp";
+	qcom,board-id = <34 0>;
+	oplus,dtsi_no = <22236>;
+	oplus,pcb_range = <0 1450>;
+};

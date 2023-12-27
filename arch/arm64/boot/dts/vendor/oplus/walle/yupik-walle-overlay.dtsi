@@ -1,0 +1,566 @@
+//#ifdef OPLUS_BUG_STABILITY
+#include "dsi-panel-oplus21612boe-ili7807s-1080-2400-120fps.dtsi"
+#include "dsi-panel-oplus21075-ds-ili7807s-1080-2412-120fps.dtsi"
+#include "charge/option_charge.dtsi"
+//VDDIO
+&L12C {
+	regulator-max-microvolt = <1800000>;
+	qcom,init-voltage = <1800000>;
+	qcom,proxy-consumer-enable;
+	qcom,proxy-consumer-current = <250000>;
+};
+
+&soc {
+	dsi_panel_pwr_supply_labibb {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		qcom,panel-supply-entry@0 {
+			reg = <0>;
+			qcom,supply-name = "vddio";
+			qcom,supply-min-voltage = <1800000>;
+			qcom,supply-max-voltage = <1800000>;
+			qcom,supply-enable-load = <62000>;
+			qcom,supply-disable-load = <80>;
+			qcom,supply-post-on-sleep = <20>;
+		};
+
+		qcom,panel-supply-entry@1 {
+			reg = <1>;
+			qcom,supply-name = "lab";
+			qcom,supply-min-voltage = <5500000>;
+			qcom,supply-max-voltage = <5500000>;
+			qcom,supply-enable-load = <20>;
+			qcom,supply-disable-load = <0>;
+		};
+
+		qcom,panel-supply-entry@2 {
+			reg = <2>;
+			qcom,supply-name = "ibb";
+			qcom,supply-min-voltage = <5500000>;
+			qcom,supply-max-voltage = <5500000>;
+			qcom,supply-enable-load = <40>;
+			qcom,supply-disable-load = <0>;
+			qcom,supply-post-on-sleep = <20>;
+		};
+	};
+
+    //#ifdef OPLUS_FEATURE_TP_BASIC
+	oplus_sim_detect {
+		compatible = "oplus, sim_detect";
+		Hw,sim_det = <&tlmm 116 0>;
+	};
+    //#endif /* OPLUS_FEATURE_TP_BASIC */
+
+};
+
+&sde_dsi {
+	vddio-supply = <&L12C>;//PM7350C LDO12
+	lab-supply = <&lcdb_ldo_vreg>;
+	ibb-supply = <&lcdb_ncp_vreg>;
+	qcom,dsi-default-panel = <&dsi_oplus21612boe_ili7807s_1080_2400_120fps_vid
+		&dsi_oplus21075_ds_ili7807s_1080_2412_120fps_vid>;
+};
+
+&soc {
+	sde_dp: qcom,dp_display@ae90000 {
+		status = "disabled";
+	};
+};
+&mdss_mdp {
+	connectors = <&smmu_sde_unsec &smmu_sde_sec &sde_wb &sde_dsi &sde_rscc>;
+};
+
+&mdss_dsi_phy0 {
+	qcom,panel-allow-phy-poweroff;
+};
+
+&pm7325b_lcdb {
+	status = "ok";
+	qcom,pwrdn-delay-ms = <4>;
+};
+
+&pm7325b_wled {
+	status = "ok";
+	qcom,fs-current-limit = <25000>;
+	qcom,string-cfg = <3>;
+	qcom,cabc-sel = <1>;
+	qcom,boost-current-limit = <1225>;
+	qcom,ovp = <29500>;
+};
+//#endif /* OPLUS_BUG_STABILITY */
+
+&tlmm {
+
+	rf_cable0_active: rf_cable0_active {
+		mux {
+			pins = "gpio129";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio129";
+			drive-strength = <2>;
+			input-enable;
+			bias-pull-up;
+		};
+	};
+
+};
+
+
+
+&pm7325_gpios {
+	pm7325_gpio2 {
+		pm7325_gpio2_default: pm7325_gpio2_default {
+			pins = "gpio2";
+			bias-high-impedance;
+		};
+	};
+};
+
+&pmk8350 {
+        pon_pbs@800 {
+                status = "ok";
+        };
+};
+
+&pmk8350_vadc {
+	pinctrl-names = "default";
+
+	pinctrl-0 = <&pm7325_gpio2_default>;
+
+	pm8350_board_id {
+		reg = <PM7325_ADC7_GPIO1>;
+		label = "pm8350_board_id";
+		//qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
+	};
+};
+
+
+
+&soc {
+	devinfo {
+		compatible = "oplus-devinfo";
+
+		//pinctrl-names = "active", "sleep";
+		//pinctrl-0 = <&hw_id_active>;
+		//pinctrl-1 = <&hw_id_sleep>;
+
+		io-channels= <&pmk8350_vadc PM7325_ADC7_GPIO1>;
+		io-channel-names= "vph_pwr_voltage_sub";
+
+		main-sub {
+			devinfo-match-ignore-list = <21075 22831>; /*to jump over match*/
+			compatible = "hw-match, main-sub";
+			use_pmic_adc;
+			adc_ranges = <0 80
+					81 180
+					181 300
+					301 420
+					421 550
+					551 650
+					651 760
+					761 850
+					851 950
+					951 1050
+					1051 1150
+					1151 1300>;
+			aboard-patterns = <0 0 0 0>;
+
+			/*main board*/
+			match-projects = <21071 21072 21075 22831>;
+
+			/*rf type*/
+			//rf_match_support;
+			//rf-patterns = <0 0>;
+		};
+	};
+	
+	oplus_rf_cable {
+		compatible = "oplus,rf_cable";
+		interrupt-parent = <&tlmm>;
+		rf_cable_support_num = <1>;
+		rf,cable0-gpio = <&tlmm 129 0>;
+		rf,cable-support-timer = <0>;
+		pinctrl-names = "rf_cable_active";
+		pinctrl-0 = <&rf_cable0_active>;
+	};
+	feedback_fb: feedback_fb {
+		compatible = "oplus,haptic-feedback";
+	};
+};
+
+//baihang.Wang 2021/06/01 add for supporting tp-ic-78807s
+#include "Walle-21071-tp.dtsi"
+&qupv3_se13_spi {
+       status = "ok";
+       ilitek@1 {
+                compatible = "ilitek,ili7807s";
+                reg = <1>;
+                chip-num = <1>;
+                chip-name = "NF_ILI7807S";
+                status = "ok";
+
+                spi-max-frequency = <10000000>;    //4800000,9600000,15000000,19200000
+                reset-gpio = <&tlmm 105 0x00>;
+                interrupt-parent = <&tlmm>;
+                interrupts = <81 0x0>;
+                irq-gpio = <&tlmm 81 0x2002>;
+                cs-gpio = <&tlmm 55 0x00>;
+
+                panel_type = <9 3>;
+                project_id = <21612>;
+                touchpanel,max-num-support = <10>;
+                touchpanel,tx-rx-num = <16 36>;
+                touchpanel,panel-coords = <4320 9648>;
+                touchpanel,display-coords = <1080 2412>;
+                touchpanel,touchmajor-limit = <0 216>;
+                touchpanel,button-type = <4>;
+                touchpanel.button-TRx = <0 0>;
+                tp_type = <9>;
+                platform_support_project = <21075 21072 21071 22831>;
+                platform_support_project_dir = <21075 21075 21075 21075>;
+                firmware_name = "0xAA276DI";
+                platform_support_project_commandline = "mdss_dsi_oplus21075_ds_ili7807s_1080_2412_120fps_vid","mdss_dsi_oplus21612boe_ili7807s_1080_2400_120fps_vid","default_commandline","mdss_dsi_oplus21075_ds_ili7807s_1080_2412_120fps_vid";
+                panel = <&dsi_oplus21075_ds_ili7807s_1080_2412_120fps_vid>;
+                pinctrl-names = "default", "pin_set_low", "pin_set_high";
+                pinctrl-0 = <&ts_int_active>;
+                /*pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;*/
+                pinctrl-1 = <&ctp_ts_reset_poweroff>;
+                pinctrl-2 = <&ctp_ts_reset_poweron>;
+
+                touchpanel,smooth-level = <255 5 4 3 2 1>;
+                //touchpanel,smooth-level-charging = <255 10 9 8 7 6>;
+                touchpanel,sensitive-level = <255 1 2 3 3 4>;
+                touchpanel,single-optimized-time = <8>;
+
+                incell_screen;
+                fw_edge_limit_support;
+                black_gesture_support;
+                charger_pump_support;
+                headset_pump_support;
+                esd_handle_support;
+                //spurious_fingerprint_support;
+                //lcd_trigger_fp_check;
+                black_gesture_test_support;
+                noflash_support;
+                smart_gesture_support;
+                fw_update_app_support;
+                game_switch_support;
+                pressure_report_support;
+                new_set_irq_wake_support;
+                lcd_trigger_load_tp_fw_support;
+                //fw_update_in_probe_with_headfile;
+                health_monitor_support;
+		exception_upload_support;
+                //high_resolution_support;
+        };
+};
+
+&tlmm {
+	gpio_wakeup: gpio_wakeup {
+		compatible = "gpio_wakeup";
+		gpio_table = <11 15 18 19 60 68 79 93 101 102 104 117 119 130 136 141 150 151 153 155 157 158 23 82>;
+	};
+};
+
+
+&qupv3_se13_i2c {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	status = "disable";
+
+	Focaltech20603@38 {
+		compatible = "focaltech,fts";
+		reg = <0x38>;
+		chip-name = "FT3518";
+
+		/* Interrupt && Irq-gpio */
+		interrupt-parent = <&tlmm>;
+		interrupts = <81 0x2002>;
+
+		/* Power Config */
+		vdd_2v8-supply = <&L3C>;
+		vcc_1v8-supply = <&L12C>;
+		vdd_2v8_volt = <3008000>;
+
+		/* Interrupt && Irq-gpio */
+                /* Other HW Resource */
+		irq-gpio = <&tlmm 81 0x2002>;
+		reset-gpio = <&tlmm 105 0x1>;
+		/*pinctrl-names = "default";*/
+		/*pinctrl-0 = <&ts_int_active &ts_reset_active>;*/
+
+		pinctrl-names = "pmx_ts_active","pmx_ts_suspend",
+					"pmx_ts_release";
+
+		pinctrl-0 = <&ts_active>;
+		pinctrl-1 = <&ts_int_suspend &ts_reset_suspend>;
+		pinctrl-2 = <&ts_release>;
+
+		touchpanel,max-num-support = <10>;
+		touchpanel,tx-rx-num = <16 34>;
+		touchpanel,panel-coords = <1080 2400>;
+		touchpanel,display-coords = <1080 2400>;
+		touchpanel,touchmajor-limit = <0 54>;
+		touchpanel,smooth-level = <255 2 15 25 45 60>;
+		touchpanel,sensitive-level = <255 20 14 10 6 0>;
+		project_id = <21603>;
+		panel_type = <8>;
+		tp_type = <8>;
+		firmware_name = "focalt_";
+		platform_support_project = <21603 21604 21675 21676>;
+		platform_support_project_dir = <21603 21603 21603 21603>;
+		platform_support_project_commandline = "default_commandline","default_commandline","default_commandline","default_commandline"; 
+		/* SW Support Feature Control */
+		black_gesture_support;
+		fw_edge_limit_support;
+		pressure_report_support;
+		charger_pump_support;
+		game_switch_support;
+		smart_gesture_support;
+		fw_update_app_support;
+		fingerprint_underscreen_support;
+		headset_pump_support;
+		//esd_handle_support;
+		new_set_irq_wake_support;
+		irq_need_dev_resume_ok;
+		/*
+		*Virtual Key Config:
+		*1:touchpanel,button-type: <virtualkey_type  supportted_button-map>
+		*virtualkey_type:
+		*Type 1: using board_properties
+		*Type 2: using same IC (button zone&& touch zone are seprate)
+		*Type 3: using diffrent IC (button zone&& touch zone are seprate)
+		*Type 4: No need of virtual key process
+		*supportted_button-map:select|menu|home|back
+		*
+		*2:touchpanel,button-map
+		*type (X1,Y1)(X2,Y2)(X3,Y3)(Width_X,Hight_Y)--Only when button-type is 0
+		*/
+		touchpanel,button-type = <4>;
+		touchpanel.button-TRx = <0 0>;
+	};
+};
+
+&sdhc_2 {
+	cd-gpios = <&tlmm 91 GPIO_ACTIVE_HIGH>;
+	status = "ok";
+ };
+
+&pm7250b_vib {
+	status = "disabled";
+};
+
+&tlmm {
+	aw_haptics: aw_haptics {
+		aw_irq_gpio_default: aw_irq_gpio_default {
+			mux {
+				pins = "gpio7";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio7";
+				drive-strength = <2>;
+				input-enable;
+				bias-pull-up; /*PULL UP*/
+				//bias-disable;
+			};
+		};
+	};
+	
+	//add for tp pinctrl
+	/* add pingrp for touchscreen */
+	pmx_ts_int_active_oplus {
+		ts_int_active: ts_int_active {
+			mux {
+				pins = "gpio81";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio81";
+				drive-strength = <8>;
+				bias-disable;
+				input-enable;
+			};
+		};
+	};
+
+	pmx_ts_int_suspend_oplus {
+		ts_int_suspend1: ts_int_suspend1 {
+			mux {
+				pins = "gpio81";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio81";
+				drive-strength = <8>;
+				//bias-pull-down;
+				bias-pull-up;
+				input-enable;
+			};
+		};
+	};
+
+	pmx_ts_reset_active_oplus {
+		ctp_ts_reset_poweron: ts_reset_active {
+			mux {
+				pins = "gpio105";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio105";
+				drive-strength = <8>;
+				output-low;
+				bias-disable;
+			};
+		};
+	};
+
+	pmx_ts_reset_suspend_oplus {
+		ctp_ts_reset_poweroff: ts_reset_suspend1 {
+			mux {
+				pins = "gpio105";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio105";
+				drive-strength = <2>;
+				bias-pull-down;
+			};
+		};
+	};
+	//#endif
+};
+
+&qupv3_se2_i2c  {
+	status = "ok";
+	/* AWINIC AW8697 Haptic */
+	aw8697_haptic@5A {
+		compatible = "awinic,aw8697_haptic";
+		reg = <0x5A>;
+		reset-gpio = <&tlmm 3 0>;
+		irq-gpio = <&tlmm 7 0>;
+		status = "ok";
+		qcom,device_id = <815>;//19066
+		qcom,aw8697_boost_voltage = /bits/ 8 <0x12>;//21075
+		pinctrl-names = "default";
+		pinctrl-0 = <&aw_irq_gpio_default>;
+	};
+	/* AWINIC AW8697 Haptic End */
+};
+//#endif
+
+//#ifdef OPLUS_FEATURE_FINGERPRINT
+//&sdhc_2 {
+//	status = "disabled";
+//};
+
+&tlmm {
+		silead_fp{
+			gpio_silead_irq_default: gpio_silead_irq_default {
+				mux {
+					pins = "gpio34";
+					function = "gpio";
+				};
+				config {
+					pins = "gpio34";
+					drive-strength = <2>;
+					bias-disable;
+					input-enable;
+				};
+			};
+		};
+		//#endif /*OPLUS_FEATURE_FINGERPRINT*/
+};
+
+&pm8350c_gpios {
+	gpio_id0_default: gpio_id0_default {
+		pins = "gpio4";
+		function = "normal";
+		qcom,drive-strength = <2>;
+		input-enable;
+		bias-pull-down;
+		power-source = <0>;
+	};
+};
+
+/* delete low battery policy for performance */
+&thermal_soc_cooling_maps {
+	socd_cpu4 {
+		trip = <&socd_trip>;
+		cooling-device = <&cpu4_isolate 0 0>;
+	};
+
+	socd_cpu5 {
+		trip = <&socd_trip>;
+		cooling-device = <&cpu5_isolate 0 0>;
+	};
+
+	socd_cpu6 {
+		trip = <&socd_trip>;
+		cooling-device = <&cpu6_isolate 0 0>;
+	};
+
+	socd_cpu7 {
+		trip = <&socd_trip>;
+		cooling-device = <&cpu7_isolate 0 0>;
+	};
+};
+
+&soc {
+	oplus_fp_common {
+		compatible = "oplus,fp_common";
+		oplus,fp_gpio_num = <1>;
+        oplus,fp_gpio_0 = <&pm8350c_gpios 4 0x00>;
+		pinctrl-names = "gpio_id0_default";
+		pinctrl-0 = <&gpio_id0_default>;
+		oplus,one_gpio_for_three_ic = <1>;
+		silead_6159 {
+			oplus,fp-id = <0>; /* fp id mapping table */
+			vendor-chip = <19>; /* please refer to the struct fp_vendor_t in oplus_fp_commmon.n */
+			eng-menu = "-1,-1"; /* represents SNR, inclination test item in engineer menu, and 0/1 means off/on */
+			chip-name = "S_gsl6159";  /* /proc/fp_id, will be displayed in engineer menu  */
+		};
+	};
+
+    silead_fp {
+        status = "ok";
+        compatible = "sil,silead_fp";
+        qcom,qup-id = <15>;
+        interrupt-parent = <&tlmm>;
+        interrupts = <34 0>;
+		avdd-supply = <&L13C>;
+		ldo-supply = <&L5I>;
+        rst-gpios  = <&tlmm 61 0x00>;
+        irq-gpios  = <&tlmm 34 0x00>;
+		spi-max-frequency = <4800000>;
+        pinctrl-names = "default";
+        pinctrl-0 = <&gpio_silead_irq_default>;
+
+    };
+    //#endif /*OPLUS_FEATURE_FINGERPRINT*/
+
+    oplus_secure_common {
+        compatible = "oplus,secure_common";
+        oplus,sec_reg_num = <0x780728>;
+        oplus,sec_en_anti_reg = <0x7801D4>;
+        oplus,sec_override1_reg = <0x7860C0>;
+        oplus,override1_en_value = <0x1>;
+    };
+
+    midas_pdev {
+                compatible = "oplus,midas-pdev";
+    };
+};
+
+
+

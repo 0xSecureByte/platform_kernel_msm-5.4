@@ -222,5 +222,8 @@
 };
 
 &sde_dsi {
-	qcom,dsi-default-panel = <&dsi_sw43404_amoled_cmd>;
+    //#ifdef VENDOR_EDIT
+    qcom,dsi-default-panel = <&dsi_oplus19065_samsung_1440_3168_dsc_cmd
+    							&dsi_oplus20031_samsung_1440_3216_dsc_cmd>;
+    //#endif
 };

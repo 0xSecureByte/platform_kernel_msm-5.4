@@ -1,0 +1,12 @@
+#include "../../qcom/lahaina-mtp-v2.1-overlay.dts"
+#include "lahaina-camera-sensor-20085.dtsi"
+#include "peacock-common.dtsi"
+#include "peacock-20085.dtsi"
+#include "nfc/peacock-nfc-sn100t.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. Lahaina MTP v2.1";
+	compatible = "qcom,lahaina-mtp", "qcom,lahaina", "qcom,mtp";
+	qcom,board-id = <0x20108 0>;
+	oplus,dtsi_no = <20085>;
+};

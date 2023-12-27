@@ -253,7 +253,11 @@
 			hw-thd-dat = <22>;
 			hw-thd-sta = <35>;
 			hw-tbuf = <62>;
-			hw-scl-stretch-en = <0>;
+			/* #ifdef VENDOR_EDIT */
+			//hw-scl-stretch-en = <0>;
+			/* #else */
+			hw-scl-stretch-en = <1>;
+			/* #endif */
 			hw-trdhld = <6>;
 			hw-tsp = <3>;
 			cci-clk-src = <37500000>;
@@ -283,7 +287,11 @@
 			hw-thd-dat = <16>;
 			hw-thd-sta = <15>;
 			hw-tbuf = <24>;
-			hw-scl-stretch-en = <0>;
+			/* #ifdef VENDOR_EDIT */
+			//hw-scl-stretch-en = <0>;
+			/* #else */
+			hw-scl-stretch-en = <1>;
+			/* #endif */
 			hw-trdhld = <3>;
 			hw-tsp = <3>;
 			cci-clk-src = <37500000>;
@@ -451,6 +459,7 @@
 				<&apps_smmu 0x2420 0x400>;
 			cam-smmu-label = "icp";
 			qcom,iommu-dma-addr-pool = <0x10c00000 0xee300000>;
+			qcom,iommu-faults = "stall-disable", "non-fatal";
 			iova-region-discard = <0xdff00000 0x300000>;
 			dma-coherent-hint-cached;
 			icp_iova_mem_map: iova-mem-map {
@@ -1881,11 +1890,10 @@
 
 	cam_jpeg_enc: qcom,jpegenc {
 		cell-index = <0>;
-		compatible = "qcom,cam_jpeg_enc_580";
-		reg-names = "jpege_hw","cam_camnoc";
-		reg = <0xac53000 0x4000>,
-			<0x0ac42000 0x8000>;
-		reg-cam-base = <0x53000 0x42000>;
+		compatible = "qcom,cam_jpeg_enc";
+		reg-names = "jpege_hw";
+		reg = <0xac53000 0x4000>;
+		reg-cam-base = <0x53000>;
 		interrupt-names = "jpeg";
 		interrupts = <GIC_SPI 474 IRQ_TYPE_EDGE_RISING>;
 		regulator-names = "camss-vdd";
@@ -1900,19 +1908,15 @@
 		clock-rates = <600000000 0>;
 		src-clock-name = "jpegenc_clk_src";
 		clock-cntl-level = "nominal";
-		cam_hw_pid = <25 26>;
-		cam_hw_rd_mid = <0>;
-		cam_hw_wr_mid = <1>;
 		status = "ok";
 	};
 
 	cam_jpeg_dma: qcom,jpegdma {
 		cell-index = <0>;
-		compatible = "qcom,cam_jpeg_dma_580";
-		reg-names = "jpegdma_hw", "cam_camnoc";
-		reg = <0xac57000 0x4000>,
-			<0x0ac42000 0x8000>;
-		reg-cam-base = <0x57000 0x42000>;
+		compatible = "qcom,cam_jpeg_dma";
+		reg-names = "jpegdma_hw";
+		reg = <0xac57000 0x4000>;
+		reg-cam-base = <0x57000>;
 		interrupt-names = "jpegdma";
 		interrupts = <GIC_SPI 475 IRQ_TYPE_EDGE_RISING>;
 		regulator-names = "camss-vdd";
@@ -1927,9 +1931,6 @@
 		clock-rates = <600000000 0>;
 		src-clock-name = "jpegdma_clk_src";
 		clock-cntl-level = "nominal";
-		cam_hw_pid = <24 27>;
-		cam_hw_rd_mid = <0>;
-		cam_hw_wr_mid = <1>;
 		status = "ok";
 	};
 };

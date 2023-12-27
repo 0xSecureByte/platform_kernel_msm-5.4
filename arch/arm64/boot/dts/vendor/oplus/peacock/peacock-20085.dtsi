@@ -1,0 +1,5 @@
+//#ifdef OPLUS_BUG_STABILITY
+#include "display/lahaina-sde-display-common.dtsi"
+#include "display/lahaina-sde-display.dtsi"
+#include "display/lahaina-sde-display-mtp.dtsi"
+//endif

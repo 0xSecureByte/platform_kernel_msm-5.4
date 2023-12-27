@@ -1,0 +1,18 @@
+/dts-v1/;
+/plugin/;
+
+#include "yupik-overlay.dtsi"
+#include "ziti-common-overlay.dtsi"
+#include "yupik-ziti-audio-overlay.dtsi"
+#include "regulator/wl2868c.dtsi"
+#include "yupik-camera-sensor-ziti.dtsi"
+#include "charge/ziti_charge_22867_overlay.dtsi"
+#include "sensor/ziti-sensor-common.dtsi"
+#include "nfc/ziti-22867-nfc-pn560.dtsi"
+/ {
+	model = "Qualcomm Technologies, Inc. Yupik IDP";
+	compatible = "qcom,yupik-idp", "qcom,yupik", "qcom,idp";
+	qcom,board-id = <34 0>;
+	oplus,dtsi_no = <22867>;
+	oplus,pcb_range = <0 1450>;
+};
