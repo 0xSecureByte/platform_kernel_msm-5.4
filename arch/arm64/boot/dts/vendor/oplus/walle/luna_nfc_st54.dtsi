@@ -1,0 +1,66 @@
+/**********************************************************************************
+* Copyright (c)  2008-2020  Guangdong oplus Mobile Comm Corp., Ltd
+* Description: oplus ST nfc dtsi
+*
+* Version: 1.0
+* Date: 2021-04-13
+* Author: Lonzuming
+*
+* ------------------------------ Revision History: --------------------------------
+* <version>           <date>                <author>                            <desc>
+* Revision 1.0       2021-04-13            Lonzuming           Created for Luna-A ST nfc dts
+***********************************************************************************/
+&soc {
+    //add for nfc_chipset
+    nfc_chipset {
+        compatible = "oplus-nfc-chipset";
+        chipset-21603 = "ST54H";
+        chipset-21604 = "ST54H";
+	chipset-21675 = "ST21H";
+        chipset-21676 = "ST21H";
+    };
+};
+
+
+//ifdef OPLUS_FEATURE_NFC_BRINGUP
+&qupv3_se9_i2c {
+    status = "ok";
+    #address-cells = <1>;
+    #size-cells = <0>;
+    st21nfc@08 {
+        compatible = "st,st21nfc";
+        reg = <0x08>;
+        irq-gpios = <&tlmm 41 0x00>;
+        reset-gpios = <&tlmm 38 0x00>;
+        clkreq-gpios = <&tlmm 39 0x00>;
+        interrupt-parent = <&tlmm>;
+        interrupts = <41 0>;
+        interrupt-names = "nfc_irq";
+        pinctrl-names = "nfc_active", "nfc_suspend";
+        pinctrl-0 = <&nfc_int_active &nfc_enable_active>;
+        pinctrl-1 = <&nfc_int_suspend &nfc_enable_suspend>;
+    };
+};
+
+&qupv3_se12_spi {
+        status = "okay";
+
+        st54spi: st54spi@0 {
+                compatible = "st,st54spi";
+                reg = <0>;
+                spi-max-frequency = <1000000>;
+
+                /* gpio used as SE_PWR_REQ or SE_nRESET */
+                gpio-power_nreset-std = <&tlmm 11 0x00>;
+
+                /* Power management mode: none, ST54H (default), ST54J */
+                power_mode = "ST54H";
+
+                pinctrl-names = "qupv3_se12_spi_sleep", "qupv3_se12_spi_active";
+                pinctrl-0 = <&qupv3_se12_spi_sleep>;
+                pinctrl-1 = <&qupv3_se12_spi_active>;
+
+                status = "okay";
+        };
+};
+//endif OPLUS_FEATURE_NFC_BRINGUP

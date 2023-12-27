@@ -1,4 +1,5 @@
 #include "lahaina-sde-display-common.dtsi"
+#include <dt-bindings/clock/qcom,rpmh.h>
 #include <dt-bindings/clock/qcom,dispcc-lahaina.h>
 
 &tlmm {
@@ -24,13 +25,17 @@
 		regulator-min-microvolt = <5500000>;
 		regulator-max-microvolt = <5500000>;
 		regulator-enable-ramp-delay = <233>;
-		gpio = <&tlmm 12 0>;
+		//#ifdef VENDOR_EDIT
+		//gpio = <&tlmm 12 0>;
+		//#endif
 		enable-active-high;
 		regulator-boot-on;
 		proxy-supply = <&display_panel_avdd>;
 		qcom,proxy-consumer-enable;
 		pinctrl-names = "default";
-		pinctrl-0 = <&display_panel_avdd_default>;
+		//#ifdef VENDOR_EDIT
+		//pinctrl-0 = <&display_panel_avdd_default>;
+		//#endif
 	};
 
 	sde_wb: qcom,wb-display@0 {
@@ -75,7 +80,9 @@
 			  * MDP clock nodes, no actual vote shall be added and this
 			  * change is done just to satisfy sync state requirements.
 			  */
-			 <&clock_dispcc DISP_CC_MDSS_MDP_CLK>;
+			 <&clock_dispcc DISP_CC_MDSS_MDP_CLK>,
+			 <&clock_rpmh RPMH_DIV_CLK1>;
+
 	clock-names = "mux_byte_clk0", "mux_pixel_clk0",
 			"cphy_byte_clk0", "cphy_pixel_clk0",
 			"src_byte_clk0", "src_pixel_clk0",
@@ -86,11 +93,17 @@
 			"src_byte_clk1", "src_pixel_clk1",
 			"shadow_byte_clk1", "shadow_pixel_clk1",
 			"shadow_cphybyte_clk1", "shadow_cphypixel_clk1",
-			"mdp_core_clk";
+			"mdp_core_clk", "div_clk";
 
-	pinctrl-names = "panel_active", "panel_suspend";
+	// add "te1_active", "te1_suspend"
+	pinctrl-names = "panel_active", "panel_suspend", "te1_active", "te1_suspend";
 	pinctrl-0 = <&sde_dsi_active &sde_te_active>;
 	pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend>;
+
+	// #ifdef VENDOR_EDIT
+	pinctrl-2 = <&sde_te1_active>;
+	pinctrl-3 = <&sde_te1_suspend>;
+	// #endif
 
 	qcom,platform-te-gpio = <&tlmm 82 0>;
 	qcom,panel-te-source = <0>;
@@ -98,8 +111,10 @@
 	vddio-supply = <&L12C>;
 	vdd-supply = <&L13C>;
 	avdd-supply = <&display_panel_avdd>;
-	lab-supply = <&ab_vreg>;
-	ibb-supply = <&ibb_vreg>;
+	//#ifdef VENDOR_EDIT
+	//lab-supply = <&ab_vreg>;
+	//ibb-supply = <&ibb_vreg>;
+	//#endif
 };
 
 &sde_dsi1 {
@@ -125,12 +140,13 @@
 		  * MDP clock nodes, no actual vote shall be added and this
 		  * change is done just to satisfy sync state requirements.
 		  */
-		 <&clock_dispcc DISP_CC_MDSS_MDP_CLK>;
+		 <&clock_dispcc DISP_CC_MDSS_MDP_CLK>,
+		 <&clock_rpmh RPMH_DIV_CLK1>;
 	clock-names = "mux_byte_clk0", "mux_pixel_clk0",
 			"cphy_byte_clk0", "cphy_pixel_clk0",
 			"mux_byte_clk1", "mux_pixel_clk1",
 			"cphy_byte_clk1", "cphy_pixel_clk1",
-			"mdp_core_clk";
+			"mdp_core_clk", "div_clk";
 
 	pinctrl-names = "panel_active", "panel_suspend";
 	pinctrl-0 = <&sde_dsi1_active &sde_te1_active>;
@@ -146,7 +162,7 @@
 
 &mdss_mdp {
 	connectors = <&smmu_sde_unsec &smmu_sde_sec &sde_dp &sde_wb &sde_dsi
-		&sde_dsi1 &sde_rscc>;
+			&sde_dsi1 &sde_rscc>;
 };
 
 &dsi_sw43404_amoled_cmd {
@@ -260,3 +276,8 @@
 		};
 	};
 };
+
+//#ifdef OPLUS_FEATURE_PXLW_IRIS5
+#include "pxlw/pxlw-iris5.dtsi"
+#include "pxlw/dsi-panel-pxlw.dtsi"
+//#endif

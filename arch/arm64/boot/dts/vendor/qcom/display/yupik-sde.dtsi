@@ -348,8 +348,8 @@
 
 &mdss_dsi_phy0 {
 	vdda-0p9-supply = <&L10C>;
-	qcom,dsi-pll-ssc-en;
-	qcom,dsi-pll-ssc-mode = "down-spread";
+	/delete-property/ qcom,dsi-pll-ssc-en;
+	/delete-property/ qcom,dsi-pll-ssc-mode;
 	memory-region = <&dfps_data_memory>;
 
 };

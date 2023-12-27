@@ -1,0 +1,12 @@
+#include "../../qcom/lahaina-mtp-overlay.dts"
+#include "lahaina-camera-sensor-21051.dtsi"
+#include "fluorite-common.dtsi"
+#include "fluorite-21051.dtsi"
+#include "nfc/fluorite-nfc-sn100t.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. Lahaina MTP";
+	compatible = "qcom,lahaina-mtp", "qcom,lahaina", "qcom,mtp";
+	qcom,board-id = <0x10008 0>;
+	oplus,dtsi_no = <21051>;
+};

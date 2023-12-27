@@ -15,7 +15,7 @@
 
 &thermal_zones {
 	socd {
-		cooling-maps {
+		thermal_soc_cooling_maps:cooling-maps {
 			socd_cpu4 {
 				trip = <&socd_trip>;
 				cooling-device = <&cpu4_isolate 1 1>;

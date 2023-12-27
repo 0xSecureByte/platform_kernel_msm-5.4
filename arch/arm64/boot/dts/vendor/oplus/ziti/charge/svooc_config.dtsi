@@ -1,0 +1,251 @@
+qcom,vooc-version = <5>;
+qcom,vooc_reply_mcu_bits = <7>;
+qcom,support_vooc_by_normal_charger_path;
+qcom,supported_hiz_gnd_cable;
+qcom,vooc_fw_update_newmethod;
+qcom,smart_chg_bcc_support;
+qcom,vooc-low-temp = <0>;
+qcom,vooc-high-temp = <500>;
+qcom,vooc-low-soc = <1>;
+qcom,vooc-high-soc = <90>;
+qcom,vooc-normal-high-temp = <440>;
+qcom,vooc-warm-allow-soc = <50>;
+qcom,vooc-warm-allow-vol = <4000>;
+
+qcom,vooc-little-cold-temp = <50>;
+qcom,vooc-cool-temp = <120>;
+qcom,vooc-little-cool-temp = <200>;
+qcom,vooc-normal-low-temp = <350>;
+qcom,vooc_batt_over_high_temp = <510>;
+
+qcom,vooc_multistep_adjust_current_support;
+qcom,vooc_multistep_initial_batt_temp = <1000>;
+
+qcom,vooc_strategy_normal_current = <0x13>;
+qcom,vooc_over_high_or_low_current = <0x0>;
+
+qcom,vooc_strategy1_batt_high_temp0 = <366>;
+qcom,vooc_strategy1_batt_high_temp1 = <386>;
+qcom,vooc_strategy1_batt_high_temp2 = <430>;
+qcom,vooc_strategy1_batt_low_temp2 = <420>;
+qcom,vooc_strategy1_batt_low_temp1 = <376>;
+qcom,vooc_strategy1_batt_low_temp0 = <356>;
+
+qcom,vooc_strategy1_high_current0 = <0x0e>;//7A
+qcom,vooc_strategy1_high_current1 = <0x0a>;//5.5A
+qcom,vooc_strategy1_high_current2 = <0x05>;//3A
+qcom,vooc_strategy1_low_current2 = <0x0a>;//5.5A
+qcom,vooc_strategy1_low_current1 = <0x0e>;//7A
+qcom,vooc_strategy1_low_current0 = <0x13>;//9.1A
+
+qcom,abnormal_adapter_current = <0x00 0x00 0x09 0x09 0x07 0x07 0x05 0x05 0x03 0x03>;
+
+pinctrl-names = "switch1_act_switch2_act", "switch1_sleep_switch2_sleep",
+				"switch1_act_switch3_act", "switch1_sleep_switch3_sleep",
+				"switch1_act_switch2_sleep", "switch1_sleep_switch2_act",
+				"clock_active","clock_sleep",
+				"data_active","data_sleep",
+				"reset_active","reset_sleep",
+				"vooc_asic_id_active","vooc_asic_id_sleep";
+pinctrl-0 = <&charging_switch1_active>;
+pinctrl-1 = <&charging_switch1_sleep>;
+pinctrl-2 = <&charging_switch1_active>;
+pinctrl-3 = <&charging_switch1_sleep>;
+pinctrl-4 = <&charging_switch1_active>;
+pinctrl-5 = <&charging_switch1_sleep>;
+pinctrl-6 = <&charging_clock_active>;
+pinctrl-7 = <&charging_clock_sleep>;
+pinctrl-8 = <&charging_data_active>;
+pinctrl-9 = <&charging_data_sleep>;
+pinctrl-10 = <&charging_reset_active>;
+pinctrl-11 = <&charging_reset_sleep>;
+pinctrl-12 = <&vooc_asic_id_active>;
+pinctrl-13 = <&vooc_asic_id_sleep>;
+
+qcom,charging_switch1-gpio 		= <&tlmm 2 0x00>;
+qcom,charging_reset-gpio 		= <&tlmm 96 0x00>;
+qcom,charging_clock-gpio 		= <&tlmm 42 0x00>;
+qcom,charging_data-gpio 		= <&tlmm 43 0x00>;
+qcom,vooc_asic_id-gpio			= <&tlmm 3 0x00>;
+
+qcom,vooc_current_lvl = <1000
+			1500
+			2000
+			2500
+			3000
+			3500
+			4000
+			4500
+			5000
+			5500
+			6000
+			6300
+			6500
+			7000
+			7500
+			8000
+			8500
+			9000
+			9500>;
+
+qcom,svooc_0_to_50_little_cold_stop_cur = <1000>;
+qcom,svooc_0_to_50_cold_stop_cur = <1000>;
+qcom,svooc_0_to_50_little_cool_stop_cur = <1000>;
+qcom,svooc_0_to_50_normal_low_stop_cur = <1000>;
+qcom,svooc_0_to_50_normal_high_stop_cur = <1200>;
+qcom,svooc_0_to_50_warm_stop_cur = <1000>;
+
+qcom,svooc_51_to_75_little_cold_stop_cur = <1000>;
+qcom,svooc_51_to_75_cold_stop_cur = <1000>;
+qcom,svooc_51_to_75_little_cool_stop_cur = <1000>;
+qcom,svooc_51_to_75_normal_low_stop_cur = <1000>;
+qcom,svooc_51_to_75_normal_high_stop_cur = <1200>;
+
+qcom,svooc_76_to_85_little_cold_stop_cur = <1000>;
+qcom,svooc_76_to_85_cold_stop_cur = <1000>;
+qcom,svooc_76_to_85_little_cool_stop_cur = <1000>;
+qcom,svooc_76_to_85_normal_low_stop_cur = <1000>;
+qcom,svooc_76_to_85_normal_high_stop_cur = <1200>;
+
+qcom,svooc_86_to_90_little_cold_stop_cur = <1000>;
+qcom,svooc_86_to_90_cold_stop_cur = <1000>;
+qcom,svooc_86_to_90_little_cool_stop_cur = <1000>;
+qcom,svooc_86_to_90_normal_low_stop_cur = <1000>;
+qcom,svooc_86_to_90_normal_high_stop_cur = <1200>;
+
+qcom,vooc-max-input-volt-support = <11000>;     //11V
+qcom,vooc-max-input-current-support = <9100>;   //9.1A
+
+vooc_charge_strategy_30w {
+	strategy_1 {
+		capacity_range = <0 75>;
+		temp_range = <120 160>;
+		input_current = <4000 4450 0
+				3000 4470 0
+				2000 4480 0>;
+	};
+	strategy_2 {
+		capacity_range = <0 75>;
+		temp_range = <160 410>;
+		input_current = <6000 4200 900
+				5000 4200 0
+				4500 4450 0
+				4000 4450 0
+				3000 4470 0
+				2000 4480 0>;
+	};
+	strategy_3 {
+		capacity_range = <0 75>;
+		temp_range = <410 420>;
+		input_current = <4000 4470 0
+				2000 4480 0>;
+	};
+	strategy_4 {
+		capacity_range = <0 75>;
+		temp_range = <420 425>;
+		input_current = <4000 4480 0>;
+	};
+	strategy_5 {
+		capacity_range = <0 75>;
+		temp_range = <425 435>;
+		input_current = <3000 4480 0>;
+	};
+};
+
+vooc_charge_strategy_65w {
+	strategy_1 {
+		capacity_range = <0 50>;
+		temp_range = <120 160>;
+		input_current = <6000 4200 0
+				4000 4454 0
+				2000 4494 0
+				1500 4500 0>;
+	};
+	strategy_2 {
+		capacity_range = <0 50>;
+		temp_range = <160 370>;
+		input_current = <6500 4200 0
+				6000 4250 300
+				5500 4300 400
+				4500 4454 780
+				3500 4454 0
+				2000 4494 0
+				1500 4500 0>;
+	};
+	strategy_3 {
+		capacity_range = <0 90>;
+		temp_range = <370 430>;
+		input_current = <6500 4200 0
+				6000 4250 300
+				5500 4300 400
+				4500 4454 780
+				3500 4454 0
+				2000 4494 0
+				1600 4500 0>;
+	};
+};
+
+svooc_charge_curve {
+	strategy_soc_0_to_50 {
+		strategy_temp_little_cold =	<4184 23 10 0
+						 4454 15 10 0
+						 4460 10 10 1>;
+		strategy_temp_cool =		<4184 28 15 0
+						 4454 23 10 0
+						 4460 10 10 1>;
+		strategy_temp_little_cool = 	<4184 65 40 0
+						 4484 45 25 0
+						 4514 30 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_low =	<4204 91 75 0
+						 4304 80 55 0
+						 4484 60 35 0
+						 4514 40 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_high =	<4204 91 75 0
+						 4304 80 55 0
+						 4484 60 35 0
+						 4514 40 15 0
+						 4520 15 15 1>;
+		strategy_temp_warm =	<4130 13 13 1>;
+	};
+
+	strategy_soc_50_to_75 {
+		strategy_temp_little_cold =	<4454 15 10 0
+						 4464 10 10 1>;
+		strategy_temp_cool =		<4454 20 10 0
+						 4464 10 10 1>;
+		strategy_temp_little_cool =	<4484 45 25 0
+						 4514 30 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_low =	<4484 50 35 0
+						 4514 40 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_high =	<4484 50 35 0
+						 4514 40 15 0
+						 4520 15 15 1>;
+	};
+
+	strategy_soc_75_to_85 {
+		strategy_temp_little_cold = 	<4460 10 10 0>;
+		strategy_temp_cool =		<4454 15 10 0
+						 4460 10 10 1>;
+		strategy_temp_little_cool =	<4514 30 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_low =	<4514 35 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_high =	<4514 35 15 0
+						 4520 15 15 1>;
+	};
+
+	strategy_soc_85_to_90 {
+		strategy_temp_little_cold = 	<4460 10 10 1>;
+		strategy_temp_cool =		<4460 10 10 1>;
+		strategy_temp_little_cool =	<4514 15 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_low =	<4514 20 13 0
+						 4520 13 13 1>;
+		strategy_temp_normal_high =	<4514 20 15 0
+						 4520 15 15 1>;
+	};
+};

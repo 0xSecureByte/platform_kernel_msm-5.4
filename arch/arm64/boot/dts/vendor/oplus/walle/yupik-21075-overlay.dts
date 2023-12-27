@@ -1,0 +1,14 @@
+/dts-v1/;
+/plugin/;
+
+#include "yupik-21075-overlay.dtsi"
+#include "yupik-walle-overlay.dtsi"
+#include "yupik-walle-audio-overlay.dtsi"
+#include "sensor/walle-sensor-21075.dtsi"
+#include "yupik-camera-sensor-21075.dtsi"
+/ {
+	model = "Qualcomm Technologies, Inc. Yupik IDP";
+	compatible = "qcom,yupik-idp", "qcom,yupik", "qcom,idp";
+	qcom,board-id = <34 0>;
+	oplus,dtsi_no = <21075 22831>;
+};

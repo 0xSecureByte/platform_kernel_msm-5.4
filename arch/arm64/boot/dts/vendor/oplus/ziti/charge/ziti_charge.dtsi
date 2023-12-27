@@ -1,0 +1,1902 @@
+#include "oplus_vadc.h"
+
+&tlmm {
+	charging_reset_active: charging_reset_active {
+		mux {
+			pins = "gpio96";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio96";
+			drive-strength = <2>;
+			bias-pull-up;
+		};
+	};
+
+	charging_reset_sleep: charging_reset_sleep {
+		mux {
+			pins = "gpio96";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio96";
+			drive-strength = <2>;
+			bias-pull-down;
+		};
+	};
+
+	charging_clock_active: charging_clock_active {
+		mux {
+			pins = "gpio42";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio42";
+			drive-strength = <2>;
+			bias-pull-up;
+		};
+	};
+
+	charging_clock_sleep: charging_clock_sleep {
+		mux {
+			pins = "gpio42";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio42";
+			drive-strength = <2>;
+			bias-pull-down;
+		};
+	};
+
+	charging_data_active: charging_data_active {
+		mux {
+			pins = "gpio43";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio43";
+			drive-strength = <2>;
+			bias-pull-down;
+		};
+	};
+
+	charging_data_sleep: charging_data_sleep {
+		mux {
+			pins = "gpio43";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio43";
+			drive-strength = <2>;
+			bias-pull-down;
+		};
+	};
+
+	vooc_asic_id_active: vooc_asic_id_active {
+		mux {
+			pins = "gpio3";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio3";
+			drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+	};
+
+	vooc_asic_id_sleep: vooc_asic_id_sleep {
+		mux {
+			pins = "gpio3";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio3";
+			drive-strength = <2>;
+			bias-pull-down;
+			input-enable;
+		};
+	};
+
+	charging_switch1_active: charging_switch1_active {
+		mux {
+			pins = "gpio2";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio2";
+			bias-pull-up;
+			drive-strength = <2>;
+			output-high;
+		};
+	};
+
+	charging_switch1_sleep: charging_switch1_sleep {
+		mux {
+			pins = "gpio2";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio2";
+			bias-pull-up;
+			drive-strength = <2>;
+			output-low;
+		};
+	};
+
+	chargerid_switch_active: chargerid_switch_active {
+		mux {
+			pins = "gpio62";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio62";
+			bias-pull-up;
+			drive-strength = <2>;
+			output-high;
+		};
+	};
+
+	chargerid_switch_sleep: chargerid_switch_sleep {
+		mux {
+			pins = "gpio62";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio62";
+			bias-pull-down;
+			drive-strength = <2>;
+			output-low;
+		};
+	};
+
+	chargerid_switch_default: chargerid_switch_default {
+		mux {
+			pins = "gpio62";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio62";
+			drive-strength = <2>;
+			bias-disable; /* NO PULL */
+		};
+	};
+
+	chg_qupv3_se3_2uart_active: chg_qupv3_se3_2uart_active {
+		mux {
+			pins = "gpio22", "gpio23";
+			function = "qup05";
+		};
+
+		config {
+			pins = "gpio22", "gpio23";
+			drive-strength = <2>;
+			bias-disable;
+		};
+	};
+
+	chg_qupv3_se3_2uart_sleep: chg_qupv3_se3_2uart_sleep {
+		mux {
+			pins = "gpio22", "gpio23";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio22", "gpio23";
+			drive-strength = <2>;
+			input-enable;
+			bias-pull-down;
+		};
+	};
+
+	mps_otg_en_active: mps_otg_en_active {
+		mux {
+			pins = "gpio100"; /* GPIO 100 */
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio100"; /* GPIO 100 */
+			drive-strength = <2>; //LOW strength
+			bias-disable; //No Pull
+			output-high; //digital output, no invert
+		};
+	};
+
+	mps_otg_en_sleep: mps_otg_en_sleep {
+		mux {
+			pins = "gpio100"; /* GPIO 100 */
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio100"; /* GPIO 100 */
+			drive-strength = <2>; //LOW strength
+			bias-disable; //No Pull
+			output-low; //digital output, no invert
+		};
+	};
+
+        mps_otg_en_default: mps_otg_en_default {
+		mux {
+			pins = "gpio100"; /* GPIO 100 */
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio100"; /* GPIO 100 */
+			drive-strength = <2>; //LOW strength
+			bias-disable; //No Pull
+			output-low; //digital output, no invert
+		};
+        };
+
+	ccdetect_active: ccdetect_active {
+		mux {
+			pins = "gpio60";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio60";
+			drive-strength = <2>;
+			input-enable;
+			//bias-pull-up; /*PULL UP*/
+			bias-disable;
+		};
+	};
+
+	ccdetect_sleep: ccdetect_sleep {
+		mux {
+			pins = "gpio60";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio60";
+			drive-strength = <2>;
+			//output-low;
+			//bias-pull-down; /*PULL DOWN*/
+			input-enable;
+			bias-disable;
+		};
+	};
+
+	ship_active: ship_active {
+		mux {
+			pins = "gpio98";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio98";
+			drive-strength = <2>;
+			output-high;
+		};
+	};
+
+	ship_sleep: ship_sleep {
+		mux {
+			pins = "gpio98";
+			function = "gpio";
+		};
+		config {
+			pins = "gpio98";
+			drive-strength = <2>;
+			output-low;
+		};
+	};
+
+	da9313_hwid_active: da9313_hwid_active {
+		pins = "gpio101";
+		function = "normal";
+		input-enable;
+		bias-pull-up;
+	};
+
+	da9313_hwid_sleep: da9313_hwid_sleep {
+		pins = "gpio101";
+		function = "normal";
+		input-enable;
+		bias-pull-down;
+	};
+
+	da9313_hwid_default: da9313_hwid_default {
+		pins = "gpio101";
+		function = "normal";
+		input-enable;
+		bias-disable;
+	};
+
+	da9313_int: da9313_int {
+		mux {
+			pins = "gpio24";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio24";
+			drive-strength = <2>;
+			input-enable;
+			bias-disable;
+		};
+	};
+
+	mp2650_int: mp2650_int {
+		mux {
+			pins = "gpio102";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio102";
+			drive-strength = <2>;
+			input-enable;
+			bias-disable;
+		};
+	};
+
+	aw_irq: aw_irq {
+		mux {
+			pins = "gpio11";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio11";
+			drive-strength = <2>;
+		};
+	};
+
+	aw_reset: aw_reset {
+		  mux {
+			  pins = "gpio47";
+			  function = "gpio";
+		  };
+
+		  config {
+			  pins = "gpio47";
+			  drive-strength = <2>;
+			  bias-disable;
+		  };
+	  };
+
+	aw_haptics: aw_haptics {
+		aw_irq_gpio_default: aw_irq_gpio_default {
+			mux {
+				pins = "gpio11";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio11";
+				drive-strength = <2>;
+				input-enable;
+				bias-pull-up; /*PULL UP*/
+				//bias-disable;
+			};
+		};
+	};
+};
+
+&qupv3_se8_i2c_pins {
+	qupv3_se8_i2c_pulldown: qupv3_se8_i2c_pulldown {
+		mux {
+			pins = "gpio32", "gpio33";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio32", "gpio33";
+			drive-strength = <2>;
+			bias-pull-down;
+			output-low;
+		};
+	};
+
+	qupv3_se8_i2c_pullup: qupv3_se8_i2c_pullup {
+		mux {
+			pins = "gpio32", "gpio33";
+			function = "gpio";
+		};
+
+		config {
+			pins = "gpio32", "gpio33";
+			drive-strength = <2>;
+			bias-pull-up;
+			input-enable;
+		};
+	};
+};
+
+&pm8350c_gpios {
+	dischg_enable: dischg_enable {
+		pins = "gpio9";
+		function = "normal";
+		bias-disable;
+		power-source = <0>;
+		output-high;
+		qcom,drive-strength = <3>;
+	};
+
+	dischg_disable: dischg_disable {
+		pins = "gpio9";
+		function = "normal";
+		bias-disable;
+		power-source = <0>;
+		output-low;
+		qcom,drive-strength = <3>;
+	};
+};
+
+&pm7250b_gpios {
+	usbtemp_l_gpio_default: usbtemp_l_gpio_default {
+		pins = "gpio1";
+		function = "normal";
+		bias-high-impedance;
+	};
+};
+&pm7325_gpios {
+	usbtemp_r_gpio_default: usbtemp_r_gpio_default {
+		pins = "gpio3";
+		function = "normal";
+		bias-high-impedance;
+	};
+};
+
+&pm7250b_vadc {
+	usb_temp_adc {
+		reg = <ADC5_AMUX_THM4_100K_PU>;
+		label = "usb_temp_adc";
+		qcom,pre-scaling = <1 1>;
+		//qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		oplus,cust_type = <IIO_VOLTAGE>;
+		oplus,cust_scale_fn_type = <SCALE_HW_CALIB_DEFAULT>;
+	};
+};
+
+&pmk8350_vadc {
+	usb_supplementary_temp_adc {
+		reg = <PM7325_ADC7_GPIO2_100K_PU>;
+		label = "usb_supplementary_temp_adc";
+		qcom,pre-scaling = <1 1>;
+		//qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		oplus,cust_type = <IIO_VOLTAGE>;
+		oplus,cust_scale_fn_type = <SCALE_HW_CALIB_DEFAULT>;
+	};
+};
+
+&soc {
+	oplus,track-charge {
+		compatible = "oplus,track-charge";
+		track,fast_chg_break_t_thd = <1000>;
+		track,general_chg_break_t_thd = <200>;
+		track,voocphy_type = <4>;
+		track,wired_max_power = <100000>;
+		track,wired_fast_chg_scheme = <1>;
+	};
+
+	oplus_battery_log: oplus,battery_log {
+		compatible = "oplus,battery_log";
+		oplus,battery_log_support;
+	};
+};
+
+&battery_charger {
+	io-channels	= <&pm7250b_vadc ADC5_AMUX_THM4_100K_PU>,
+		<&pmk8350_vadc PM7325_ADC7_GPIO2_100K_PU>,
+		<&pm7250b_vadc ADC5_AMUX_THM3_100K_PU>,
+		<&pm7250b_vadc ADC5_GPIO3_100K_PU>;
+	io-channel-names = "usb_temp_adc", "usb_supplementary_temp_adc",
+		"conn_therm", "subboard_temp_adc";
+};
+
+&battery_charger {
+	//for oplus chg framework:
+	oplus,chg_ops = "ext-mp2650";
+	qcom,smart_chg_soh_support;
+	qcom,smart_charging_screenoff;
+	qcom,smart_chg_bcc_support;
+	qcom,input_current_charger_ma = <2000>;
+	qcom,pd_input_current_charger_ma = <2000>;
+	qcom,qc_input_current_charger_ma = <2000>;
+	qcom,input_current_usb_ma = <500>;
+	qcom,input_current_cdp_ma = <1500>;
+	qcom,input_current_led_ma = <1200>;
+	qcom,input_current_led_ma_high = <1200>;
+	qcom,input_current_led_ma_warm = <1500>;
+	qcom,input_current_led_ma_normal = <2000>;
+	qcom,led_warm_bat_decidegc = <350>;
+	qcom,led_high_bat_decidegc = <370>;
+	qcom,input_current_camera_ma = <1200>;
+
+	qcom,input_current_vooc_led_ma_high = <2200>;
+	qcom,input_current_vooc_led_ma_warm = <3200>;
+	qcom,input_current_vooc_led_ma_normal = <3600>;
+	qcom,input_current_vooc_ma_normal = <3600>;
+	qcom,vooc_temp_bat_normal_decidegc = <350>;
+	qcom,input_current_vooc_ma_warm = <3200>;
+	qcom,vooc_temp_bat_warm_decidegc = <370>;
+	qcom,input_current_vooc_ma_high = <2200>;
+	qcom,vooc_temp_bat_hot_decidegc = <510>;
+	qcom,charger_current_vooc_ma_normal = <1800>;
+
+	qcom,chg_ctrl_by_calling;
+	qcom,input_current_calling_ma = <1500>;
+
+	//qcom,input_current_led_ma_overtemp = <900>;
+	qcom,overtemp_bat_decidegc = <350>;
+	qcom,iterm_disabled = <0>;
+	qcom,iterm_ma = <132>;
+	qcom,recharge-mv = <100>;
+	qcom,batt_capacity_mah = <5000>;/*typical capacity*/
+	//qcom,batt_capacity_mah = <4400>; /*rated capacity*/
+
+	qcom,removed_bat_decidegc = <390>;  /*<-39C*/
+
+	qcom,cold_bat_decidegc = <100>;  /*-10C~0C*/
+	qcom,temp_cold_vfloat_mv = <4460>;
+	qcom,temp_cold_fastchg_current_ma = <610>;
+
+	qcom,little_cold_bat_decidegc = <0>;	/*0C~5C*/
+	qcom,temp_little_cold_vfloat_mv = <4460>;
+	qcom,temp_little_cold_fastchg_current_ma_high = <1100>;
+	qcom,temp_little_cold_fastchg_current_ma_low = <1100>;
+	qcom,temp_little_cold_fastchg_current_ma = <1100>;
+	qcom,pd_temp_little_cold_fastchg_current_ma_high = <2000>;
+	qcom,pd_temp_little_cold_fastchg_current_ma_low = <1600>;
+	qcom,qc_temp_little_cold_fastchg_current_ma_high = <2000>;
+	qcom,qc_temp_little_cold_fastchg_current_ma_low = <1600>;
+
+	qcom,cool_bat_decidegc = <50>;	/*5C~12C*/
+	qcom,temp_cool_vfloat_mv = <4460>;
+	qcom,temp_cool_fastchg_current_ma_high = <1100>;
+	qcom,temp_cool_fastchg_current_ma_low = <1100>;
+	qcom,pd_temp_cool_fastchg_current_ma_high = <2000>;
+	qcom,pd_temp_cool_fastchg_current_ma_low = <2000>;
+	qcom,qc_temp_cool_fastchg_current_ma_high = <2000>;
+	qcom,qc_temp_cool_fastchg_current_ma_low = <2000>;
+
+	qcom,little_cool_bat_decidegc = <120>;	/*12C~16C*/
+	qcom,temp_little_cool_vfloat_mv = <4460>;
+	qcom,temp_little_cool_fastchg_current_ma = <1100>;
+	qcom,pd_temp_little_cool_fastchg_current_ma = <2000>;
+	qcom,qc_temp_little_cool_fastchg_current_ma = <2000>;
+
+	qcom,normal_bat_decidegc = <160>;	/*16C~44C*/
+	qcom,temp_normal_fastchg_current_ma = <1100>;
+	qcom,temp_normal_vfloat_mv = <4460>;
+	qcom,pd_temp_normal_fastchg_current_ma = <2000>;
+	qcom,qc_temp_normal_fastchg_current_ma = <2000>;
+
+	qcom,warm_bat_decidegc = <450>;		/*45C~53C*/ /*8pin Bat Vooc project need add 3 degree C*/
+	qcom,temp_warm_vfloat_mv = <4130>;
+	qcom,temp_warm_fastchg_current_ma = <1100>;
+	qcom,pd_temp_warm_fastchg_current_ma = <1200>;
+	qcom,qc_temp_warm_fastchg_current_ma = <1200>;
+	qcom,temp_warm_fastchg_current_ma_led_on = <500>;
+
+	qcom,hot_bat_decidegc = <530>;
+
+	qcom,non_standard_vfloat_mv = <3980>;
+	qcom,non_standard_fastchg_current_ma = <500>;
+
+	qcom,short_c_bat_cv_mv = <4330>;
+	qcom,short_c_bat_vfloat_mv = <3800>;
+	qcom,short_c_bat_fastchg_current_ma = <512>;
+
+	qcom,cold_vfloat_sw_limit = <4415>;
+	qcom,little_cold_vfloat_sw_limit = <4415>;
+	qcom,cool_vfloat_sw_limit = <4415>;
+	qcom,little_cool_vfloat_sw_limit = <4415>;
+	qcom,normal_vfloat_sw_limit = <4415>;
+	qcom,warm_vfloat_sw_limit = <4080>;
+	qcom,non_standard_vfloat_sw_limit = <3930>;
+	qcom,short_c_bat_vfloat_sw_limit = <3750>;
+
+	qcom,max_chg_time_sec = <72000>;
+	qcom,charger_hv_thr = <11000>;
+	qcom,charger_recv_thr = <10500>;
+	qcom,charger_lv_thr = <3400>;
+	qcom,vbatt_full_thr = <4435>;
+	qcom,vbatt_hv_thr = <4600>;
+	qcom,vfloat_step_mv = <10>;
+	qcom,non_standard_vfloat_over_sw_limit = <3990>;
+	qcom,cold_vfloat_over_sw_limit = <4465>;
+	qcom,little_cold_vfloat_over_sw_limit = <4465>;
+	qcom,cool_vfloat_over_sw_limit = <4465>;
+	qcom,little_cool_vfloat_over_sw_limit = <4465>;
+	qcom,normal_vfloat_over_sw_limit = <4465>;
+	qcom,warm_vfloat_over_sw_limit = <4140>;
+
+	oplus,quick_mode_gain_support;
+	qcom,support_usbtemp_protect_v2;
+	qcom,usbtemp_batt_temp_low = <50>;
+	qcom,usbtemp_batt_temp_high = <50>;
+	qcom,usbtemp_ntc_temp_low = <57>;
+	qcom,usbtemp_ntc_temp_high = <69>;
+	qcom,usbtemp_temp_gap_low_with_batt_temp = <7>;
+	qcom,usbtemp_temp_gap_high_with_batt_temp = <12>;
+	qcom,usbtemp_temp_gap_low_without_batt_temp = <12>;
+	qcom,usbtemp_temp_gap_high_without_batt_temp = <24>;
+	qcom.usbtemp_rise_fast_temp_low = <3>;
+	qcom.usbtemp_rise_fast_temp_high = <3>;
+	qcom.usbtemp_rise_fast_temp_count_low = <30>;
+	qcom.usbtemp_rise_fast_temp_count_high = <20>;
+
+	qcom,usbtemp_cool_down_ntc_low = <54>;
+	qcom,usbtemp_cool_down_ntc_high = <65>;
+	qcom,usbtemp_cool_down_gap_low = <12>;
+	qcom,usbtemp_cool_down_gap_high = <20>;
+	qcom,usbtemp_cool_down_recover_ntc_low = <48>;
+	qcom,usbtemp_cool_down_recover_ntc_high = <60>;
+	qcom,usbtemp_cool_down_recover_gap_low = <6>;
+	qcom,usbtemp_cool_down_recover_gap_high = <15>;
+
+	qcom,vbatt_power_off = <3300>;
+	qcom,vbatt_soc_1 = <3410>;
+	qcom,vooc_project = <8>;//100W
+	qcom,vbatt_num = <2>;
+	qcom,ffc_support;
+	qcom,dual_ffc;
+	//recharge_after_full;
+
+	qcom,normal_vterm_hw_inc = <18>;
+	qcom,non_normal_vterm_hw_inc = <18>;
+
+	qcom,ff1_normal_fastchg_ma = <550>;
+	qcom,ff1_warm_fastchg_ma = <550>;
+	qcom,ffc2_normal_fastchg_ma = <350>;/*12C~35c*/
+	qcom,ffc2_temp_warm_decidegc = <350>;
+	qcom,ffc2_warm_fastchg_ma = <400>;/*35C~40c*/
+	qcom,ffc2_temp_high_decidegc = <400>;
+	qcom,ffc2_temp_low_decidegc = <120>;
+	qcom,ffc2_exit_step_ma = <150>;
+	qcom,ff1_exit_step_ma = <150>;
+	qcom,ff1_warm_exit_step_ma = <150>;
+	qcom,ffc2_warm_exit_step_ma = <150>;
+
+	qcom,ffc_normal_vfloat_sw_limit = <4480>;
+	qcom,ffc2_normal_vfloat_sw_limit = <4465>;
+	qcom,ffc2_warm_vfloat_sw_limit = <4465>;
+	qcom,ffc_temp_normal_vfloat_mv = <4500>;
+	qcom,ffc1_temp_normal_vfloat_mv = <4500>;
+	qcom,ffc2_temp_normal_vfloat_mv = <4500>;
+	qcom,ffc_normal_vfloat_over_sw_limit = <4500>;
+	qcom,ffc1_normal_vfloat_over_sw_limit = <4500>;
+	qcom,ffc2_normal_vfloat_over_sw_limit = <4500>;
+	full-pre-ffc-mv = <4455>;
+	full_pre_ffc_judge;
+
+	qcom,default_iterm_ma = <132>;
+	qcom,default_temp_normal_fastchg_current_ma = <1100>;
+	qcom,default_normal_vfloat_sw_limit = <4415>;
+	qcom,default_temp_normal_vfloat_mv = <4460>;
+	qcom,default_normal_vfloat_over_sw_limit = <4465>;
+
+	qcom,default_temp_little_cool_fastchg_current_ma = <1100>;
+	qcom,default_little_cool_vfloat_sw_limit = <4415>;
+	qcom,default_temp_little_cool_vfloat_mv = <4460>;
+	qcom,default_little_cool_vfloat_over_sw_limit = <4465>;
+
+	oplus,boot_reset_adapter;
+	oplus,aging_ffc_version = <1>;
+	oplus,smooth_switch_v2;
+	oplus,reserve_chg_soc = <3>;
+	oplus,reserve_dis_soc = <3>;
+	oplus,pdqc_9v_voltage_adaptive;
+	///qcom,offset_temp = <30>;
+	//for control:
+	//qcom,suspend_after_full;
+	qcom,support_abnormal_adapter;
+	qcom,check_batt_full_by_sw;
+	qcom,support_subboard_ntc;
+	qcom,external_gauge;
+	qcom,chg_ctrl_by_lcd;
+	qcom,chg_ctrl_by_vooc;
+	qcom,chg_ctrl_by_camera;
+	qcom,sw_vfloat_over_protect_enable;
+	qcom,usbtemp_batttemp_gap = <12>;
+	qcom,pmic-is-pm7250b;
+	qcom,chargerid_switch-gpio = <&tlmm 62 0x00>;
+	//for PD9V or QC9V
+	qcom,vbatt_pdqc_to_5v_thr = <4100>;
+	qcom,vbatt_pdqc_to_9v_thr = <4000>;/*always 9v*/
+	qcom,vooc_show_ui_soc_decimal;
+	qcom,ui_soc_decimal_speedmin = <20>;//2A
+	qcom,otg_scheme = <1>;//0:cid 1:ccdetect_gpio 2:switch
+	qcom,ccdetect-gpio = <&tlmm 60 0x00>;
+	qcom,ship-gpio = <&tlmm 98 0x00>;
+	qcom,dischg-gpio = <&pm8350c_gpios 9 0x00>;
+	qcom,vooc-max-input-volt-support = <11000>;     // 11V
+	qcom,vooc-max-input-current-support = <9100>;   // 9.1A
+	pinctrl-names = "dischg_enable", "dischg_disable",
+			"chargerid_switch_active", "chargerid_switch_sleep", "chargerid_switch_default",
+			"ccdetect_active", "ccdetect_sleep",
+			"ship_active", "ship_sleep",
+			"chg_qupv3_se3_2uart_active", "chg_qupv3_se3_2uart_sleep",
+			"usbtemp_l_gpio_default", "usbtemp_r_gpio_default";
+
+	pinctrl-0 = <&dischg_enable>;
+	pinctrl-1 = <&dischg_disable>;
+	pinctrl-2 = <&chargerid_switch_active>;
+	pinctrl-3 = <&chargerid_switch_sleep>;
+	pinctrl-4 = <&chargerid_switch_default>;
+	pinctrl-5 = <&ccdetect_active>;
+	pinctrl-6 = <&ccdetect_sleep>;
+	pinctrl-7 = <&ship_active>;
+	pinctrl-8 = <&ship_sleep>;
+	pinctrl-9 = <&chg_qupv3_se3_2uart_active>;
+	pinctrl-10 = <&chg_qupv3_se3_2uart_sleep>;
+	pinctrl-11 = <&usbtemp_l_gpio_default>;
+	pinctrl-12 = <&usbtemp_r_gpio_default>;
+
+	oplus,uart_tx-gpio = <&tlmm 22 0x00>;
+	oplus,uart_rx-gpio = <&tlmm 23 0x00>;
+};
+
+&qupv3_se3_i2c {
+	status = "okay";
+	qcom,clk-freq-out = <400000>;
+	qcom,noise-rjct-scl = <3>;
+	qcom,noise-rjct-sda = <3>;
+
+	mp2650-charger@5c {
+		status = "okay";
+		compatible = "oplus,mp2650-charger";
+		reg = <0x5c 0>;
+
+		qcom,mps_otg_en-gpio = <&tlmm 100 0x00>;
+		pinctrl-names = "mps_otg_en_active", "mps_otg_en_sleep", "mps_otg_en_default", "default";
+		pinctrl-0 = <&mps_otg_en_active>;
+		pinctrl-1 = <&mps_otg_en_sleep>;
+		pinctrl-2 = <&mps_otg_en_default>;
+		pinctrl-3 = <&mp2650_int>;
+	};
+
+	da9313-divider@68 {
+		status = "okay";
+		compatible = "oplus,da9313-divider";
+		reg = <0x68 0>;
+		oplus,da9313-hwid-gpio = <&tlmm 101 0x00>;
+		pinctrl-names = "da9313_hwid_active", "da9313_hwid_sleep", "da9313_hwid_default", "default";
+		pinctrl-0 = <&da9313_hwid_active>;
+		pinctrl-1 = <&da9313_hwid_sleep>;
+		pinctrl-2 = <&da9313_hwid_default>;
+		pinctrl-3 = <&da9313_int>;
+	};
+};
+
+&qupv3_se8_i2c {
+	status = "okay";
+	qcom,clk-freq-out = <100000>;
+	pinctrl-names = "default", "sleep", "pulldown", "pullup";
+	pinctrl-0 = <&qupv3_se8_i2c_active>;
+	pinctrl-1 = <&qupv3_se8_i2c_sleep>;
+	pinctrl-2 = <&qupv3_se8_i2c_pulldown>;
+	pinctrl-3 = <&qupv3_se8_i2c_pullup>;
+
+	bq27541-battery@55 {
+		status = "okay";
+		compatible = "oplus,bq27541-battery";
+		reg = <0x55>;
+		qcom,modify-soc-smooth;
+		qcom,modify-soc-calibration;
+		qcom,batt_bq28z610;
+	};
+
+	rk826_fastcg: rk826_fastcg@0a{
+		status = "okay";
+		compatible = "oplus,rk826-fastcg";
+		reg = <0x0a 0>;
+
+		qcom,vooc_cool_bat_volt = <3450>;
+		qcom,vooc_little_cool_bat_volt = <3400>;
+		qcom,vooc_normal_bat_volt = <3350>;
+		qcom,vooc_warm_bat_volt = <3300>;
+
+		qcom,vooc_cool_bat_suspend_volt = <3450>;
+		qcom,vooc_little_cool_bat_suspend_volt = <3400>;
+		qcom,vooc_normal_bat_suspend_volt = <3350>;
+		qcom,vooc_warm_bat_suspend_volt = <3300>;
+
+		qcom,parse_fw_from_dt;
+		vooc,firmware_data = [
+			00 00 34 55 a4 37 00 00 64 00 00 00 64 00 00 00 48 d1 ab 75 53 ca 4b 38 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 08 00 20 0d 01 00 21 a9 09 00 21 79 09 00 21 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 2b 0a 00 21 00 00 00 00 00 00 00 00 29 0a 00 21 2d 0a 00 21
+			2f 01 00 21 11 09 00 21 2f 01 00 21 31 0a 00 21 2f 01 00 21 2f 01 00 21 2f 01 00 21 2f 01 00 21
+			49 0b 00 21 2f 01 00 21 2f 01 00 21 2f 01 00 21 03 48 85 46 00 f0 dc fb 00 48 00 47 19 20 00 21
+			00 08 00 20 40 1e fd d8 70 47 00 00 08 48 09 49 01 60 08 20 c0 00 01 20 80 f3 10 88 00 bf 00 bf
+			05 48 00 47 fe e7 fe e7 fe e7 fe e7 fe e7 fe e7 00 00 02 50 00 80 00 80 f1 00 00 21 30 b5 0b 46
+			01 46 00 20 20 22 01 24 09 e0 0d 46 d5 40 9d 42 05 d3 1d 46 95 40 49 1b 25 46 95 40 40 19 15 46
+			52 1e 00 2d f1 dc 30 bd 70 b5 00 24 25 46 00 28 01 da 01 24 40 42 00 29 01 da 01 25 49 42 ff f7
+			dd ff ac 42 00 d0 40 42 00 2c 00 d0 49 42 70 bd f8 b5 02 46 4a 40 d4 0f 42 00 4b 00 52 08 5b 08
+			9a 42 02 d2 02 46 08 46 11 46 4a 00 23 d0 c3 0d 4a 00 dd b2 12 0e ad 1a 20 2d 35 da 49 02 01 26
+			49 0a f6 05 8a 19 00 2c 00 d0 52 42 20 21 4f 1b 11 46 b9 40 2a 41 10 18 c2 0d 9a 42 21 d0 00 2c
+			17 d0 01 2d 08 dc da 05 80 1a d2 0f 80 19 d2 07 db b2 00 f0 c4 fa f8 bd da 05 80 1a 01 23 40 00
+			1b 06 c0 18 80 18 5a 42 80 18 ca 0f 10 43 49 00 07 e0 49 08 c2 07 11 43 da 05 80 1a 80 19 40 08
+			80 18 00 f0 a4 fa f8 bd 61 00 01 22 51 1a 00 1b f7 e7 01 22 d2 07 51 40 aa e7 01 22 d2 07 50 40
+			a6 e7 02 46 70 b5 4a 40 d3 0f db 07 40 00 2d d0 4a 00 2a d0 01 0e 14 0e 00 02 12 02 09 19 40 0a
+			52 0a 84 18 e5 01 04 46 54 43 00 0a 12 0a 2e 04 50 43 a4 19 42 19 20 0c c5 43 aa 18 12 0c 01 25
+			ad 03 52 1c 52 19 12 04 7f 39 24 04 00 d0 52 1c 10 43 01 d4 40 00 49 1e c2 b2 0c 06 c0 09 20 18
+			40 1c 40 08 80 2a 02 d0 03 e0 00 20 70 bd 40 08 40 00 00 29 00 da 00 20 18 43 70 bd 70 b5 02 46
+			4a 40 d5 0f 40 00 4a 00 ed 07 40 08 52 08 00 28 14 d0 00 2a 12 d0 c4 0d d3 0d 41 02 01 20 c0 05
+			52 02 49 0a 52 0a e4 1a 09 18 12 18 7d 34 91 42 01 d3 64 1c 00 e0 49 00 00 2c 01 da 00 20 70 bd
+			00 23 91 42 01 d3 89 1a 03 43 40 08 49 00 00 28 f7 d1 00 29 0a d0 91 42 02 d1 01 21 c9 07 05 e0
+			91 42 01 d2 01 21 01 e0 01 21 c9 43 e0 05 c0 18 40 19 00 f0 1c fa 70 bd f0 b5 07 46 08 46 58 40
+			87 b0 c0 0f 04 90 48 00 0e 46 59 00 40 08 49 08 bc 1a 88 41 05 d2 38 46 31 46 1e 46 17 46 0b 46
+			02 46 58 00 40 08 10 43 4c d0 30 0d 03 90 40 05 59 00 40 0d 49 0d 05 90 40 1a 02 90 40 28 72 da
+			18 03 01 21 00 0b 09 05 08 43 01 90 04 98 00 92 00 28 05 d0 01 99 52 42 00 20 88 41 00 92 01 90
+			02 98 40 21 0a 1a 01 99 00 98 00 f0 bd f9 05 46 0c 46 6b 46 07 cb 00 f0 c7 f9 c0 19 71 41 03 9a
+			0e 0d 00 23 d7 17 56 40 1a 46 7a 40 16 43 44 d0 04 9a 00 2a 2d d0 02 9a 01 2a 03 9a 15 dc 12 05
+			c0 1a 91 41 01 26 36 05 00 1c 71 41 d2 0f 05 9e d2 07 00 93 01 92 02 96 2a 46 23 46 00 f0 05 fa
+			07 b0 f0 bd 38 46 31 46 fa e7 16 05 22 4a 0f 46 b2 18 c0 1a b7 41 01 21 09 05 00 1c 4f 41 00 18
+			7f 41 11 46 18 18 79 41 e2 0f 10 43 6d 19 64 41 13 e0 e2 07 6d 08 15 43 64 08 c2 07 14 43 03 9a
+			01 26 12 05 c0 1a 91 41 36 05 00 1c 71 41 ce 07 40 08 30 43 49 08 c0 18 51 41 2a 46 23 46 00 f0
+			c7 f9 cd e7 ff e7 04 98 01 22 40 00 c1 17 12 1a 00 23 8b 41 04 98 31 46 c4 17 38 1a a1 41 ee e7
+			30 b4 01 24 e4 07 63 40 30 bc 55 e7 30 b4 01 24 e4 07 61 40 30 bc 4f e7 00 00 e0 ff f0 b5 1f b4
+			88 b0 0b 99 09 98 00 24 48 40 09 99 c0 0f 49 00 49 08 09 91 c0 07 0b 99 00 90 49 00 49 08 0b 91
+			09 99 08 98 a6 46 08 43 1c d0 0b 99 0a 98 08 43 18 d0 09 98 01 24 40 00 42 0d 48 00 41 0d 09 98
+			24 05 00 03 00 0b 20 43 09 90 0b 98 00 03 00 0b 20 43 0b 90 50 18 1c 49 40 18 00 22 01 90 14 46
+			10 46 05 e0 00 20 01 46 0d b0 f0 bd 03 28 01 da 03 46 00 e0 03 23 9c 46 c1 1a 0a ae 0a e0 5f 00
+			08 ad ed 5b 4f 00 f7 5b 7d 43 00 27 aa 18 7c 41 49 1c 5b 1e 61 45 f2 dd 41 00 04 ab 5a 52 21 04
+			12 0c 0a 43 24 0c 40 1c 08 28 df db 01 98 02 90 00 99 70 46 01 91 00 90 05 9b 04 9a 07 99 06 98
+			00 f0 53 f9 d0 e7 00 00 0d fc ff ff f0 b5 0c 46 5c 40 85 b0 e4 0f e4 07 03 94 4c 00 00 26 64 08
+			59 00 94 46 49 08 02 46 02 96 22 43 21 d0 62 46 0a 43 1e d0 62 00 57 0d 4a 00 0e 03 23 03 55 0d
+			01 24 02 46 2c 49 24 05 78 1b 1b 0b 36 0b 40 18 23 43 26 43 61 46 00 90 1c 46 50 1a b4 41 03 d3
+			00 98 40 1c 00 90 02 e0 92 18 00 98 5b 41 00 28 03 da 00 20 01 46 05 b0 f0 bd 00 20 01 21 09 05
+			07 46 86 46 11 e0 64 46 1d 46 14 1b b5 41 06 d3 65 46 52 1b b3 41 74 46 07 43 0c 43 a6 46 cd 07
+			40 08 49 08 28 43 92 18 5b 41 05 46 0d 43 ea d1 10 46 18 43 13 d0 60 46 19 46 50 40 71 40 08 43
+			06 d0 60 46 10 1a b3 41 06 d2 01 22 00 23 06 e0 00 22 01 23 db 07 02 e0 01 22 d2 43 53 10 00 98
+			74 46 01 05 38 1c 61 41 02 9c 03 9d 00 19 69 41 00 f0 ce f8 bf e7 00 00 fd 03 00 00 c2 17 c1 0f
+			50 40 10 b5 40 18 ca 07 96 23 00 21 00 f0 87 f8 10 bd 10 b5 00 22 96 23 11 46 00 f0 80 f8 10 bd
+			c2 0f 41 00 40 02 01 23 40 0a db 05 d2 07 09 0e c0 18 7f 29 01 da 00 20 70 47 96 29 03 dc 96 23
+			59 1a c8 40 01 e0 96 39 88 40 00 2a f4 d0 40 42 70 47 c2 0f d2 07 40 00 40 08 0b d0 c1 0d 07 23
+			db 01 c9 18 40 02 09 05 40 0a 11 43 c2 08 40 07 11 43 70 47 00 20 01 46 70 47 cb 0f db 07 49 00
+			10 b5 49 08 02 46 0a 43 07 d0 0a 0d 07 24 09 03 e4 01 09 0b 12 1b 00 2a 01 dc 00 20 10 bd c9 00
+			44 0f 0c 43 c1 00 e0 18 d2 05 80 18 00 f0 2f f8 10 bd 00 00 01 22 d2 07 00 28 00 db 10 1a 00 29
+			00 db 51 1a 81 42 70 47 10 b5 20 2a 04 db 01 46 20 3a 91 40 00 20 10 bd 91 40 20 23 9c 1a 03 46
+			e3 40 19 43 90 40 10 bd 10 b5 20 2a 06 db cb 17 08 46 20 3a 10 41 c1 17 0b 43 06 e0 0b 46 13 41
+			d0 40 20 24 a2 1a 91 40 08 43 19 46 10 bd 00 29 04 da 40 1c 49 00 01 d1 40 08 40 00 70 47 70 b4
+			00 24 05 0c 05 d1 10 24 00 04 02 d1 00 29 21 d0 11 24 05 0e 01 d1 00 02 08 34 05 0f 01 d1 00 01
+			24 1d 85 0f 01 d1 80 00 a4 1c 00 28 01 db 40 00 64 1c 00 29 08 d0 20 25 2e 1b 0d 46 f5 40 a1 40
+			00 d0 01 21 29 43 08 43 01 06 1b 1b 00 0a db 1d 02 d5 00 20 70 bc 70 47 db 05 18 18 80 18 00 29
+			f8 da 40 1c 49 00 f5 d1 70 bc 40 08 40 00 70 47 10 b5 00 2b 08 da 00 24 40 1c 61 41 92 18 5b 41
+			1a 43 01 d1 40 08 40 00 10 bd f0 b5 1f b4 82 b0 05 46 0c 00 03 d0 08 46 00 f0 a2 f9 02 e0 00 f0
+			9f f9 20 30 02 46 00 90 21 46 28 46 ff f7 7c ff 04 9b 05 9a 04 46 0f 46 18 43 11 43 08 43 14 d0
+			18 46 10 43 1b d0 00 98 40 21 0a 1a 18 46 05 99 00 f0 40 f8 05 46 0e 46 00 9a 05 99 04 98 ff f7
+			63 ff 08 43 05 d0 01 20 04 e0 20 46 39 46 07 b0 f0 bd 00 20 c1 17 05 43 0e 43 2c 43 37 43 00 99
+			0e 98 63 05 40 1a 79 05 e4 0a 00 22 0c 43 fd 0a 0a 30 02 d5 00 20 01 46 e9 e7 01 05 10 19 69 41
+			0c 9c 0d 9d 00 19 69 41 ff f7 a2 ff df e7 00 00 06 4c 01 25 06 4e 05 e0 e3 68 07 cc 2b 43 0c 3c
+			98 47 10 34 b4 42 f7 d3 ff f7 16 fc 90 37 00 21 a0 37 00 21 10 b5 20 2a 04 db 08 46 20 3a d0 40
+			00 21 10 bd 0b 46 d3 40 d0 40 20 24 a2 1a 91 40 08 43 19 46 10 bd 10 b5 04 46 20 01 00 09 ff f7
+			01 fc 10 bd 00 bf 01 46 40 1e 00 29 fb d1 70 47 10 b5 02 f0 15 f9 04 46 80 20 20 40 00 28 18 d0
+			80 20 02 f0 07 f9 10 48 00 78 00 28 07 d1 02 f0 51 fc 00 20 0d 49 08 70 01 20 0b 49 08 70 0c 48
+			00 78 02 28 02 d1 00 f0 3f f9 0c e0 00 f0 04 fd 09 e0 40 20 20 40 00 28 05 d0 40 20 02 f0 ea f8
+			01 20 04 49 08 70 10 bd 71 01 00 20 38 01 00 20 5f 01 00 20 11 01 00 20 00 bf fe e7 70 b5 04 46
+			0d 46 16 46 2b 46 32 46 21 46 55 20 02 f0 9a f9 70 bd 70 b5 04 46 0d 46 16 46 2b 46 32 46 21 46
+			55 20 02 f0 2d fa 70 bd 70 47 00 00 70 b5 00 21 00 23 0f 22 c4 78 00 2c 25 d0 19 4c e4 68 07 25
+			2d 02 2c 40 2c 1b 21 0a 04 24 63 1a 14 46 cc 40 22 46 44 78 9c 40 21 46 84 78 14 40 21 43 09 01
+			10 4c 03 25 2d 02 64 19 05 78 ad 00 61 51 04 78 e5 06 ed 0e 01 24 ac 40 05 78 6d 11 ad 00 09 4e
+			ad 19 2c 60 0a e0 04 78 e5 06 ed 0e 01 24 ac 40 04 4d 80 35 06 78 76 11 b6 00 ac 51 70 bd 00 00
+			00 ed 00 e0 00 e1 00 e0 70 47 70 47 70 47 00 00 10 b5 00 20 02 f0 88 fa 37 48 00 88 00 28 05 d0
+			35 48 00 88 40 1e 34 49 08 80 15 e0 7d 20 c0 00 31 49 08 80 31 48 00 88 00 28 04 d0 2f 48 00 88
+			40 1e 2e 49 08 80 2e 48 00 88 00 28 04 d0 2c 48 00 88 40 1e 2a 49 08 80 2a 48 00 68 00 28 04 d0
+			28 48 00 68 40 1e 27 49 08 60 27 48 00 68 00 28 04 d0 25 48 00 68 40 1e 23 49 08 60 23 48 00 68
+			00 28 04 d0 21 48 00 68 40 1e 20 49 08 60 20 48 00 78 00 28 04 d0 1e 48 00 78 40 1e 1c 49 08 70
+			1c 48 00 68 00 28 04 d0 1a 48 00 68 40 1e 19 49 08 60 19 48 00 68 00 28 04 d0 17 48 00 68 40 1e
+			15 49 08 60 15 48 00 78 40 1c 14 49 08 70 08 46 00 78 c8 28 0e dd 00 20 08 70 11 48 00 78 00 28
+			05 d0 00 20 01 f0 22 fa 01 20 0e 49 08 70 01 20 0b 49 08 70 10 bd 00 00 3a 01 00 20 3c 01 00 20
+			3e 01 00 20 40 01 00 20 44 01 00 20 48 01 00 20 4c 01 00 20 50 01 00 20 54 01 00 20 38 01 00 20
+			24 01 00 20 10 01 00 20 04 48 00 69 00 28 04 d0 01 20 02 49 48 61 76 20 c8 60 70 47 00 00 01 40
+			20 21 02 0c 01 d0 10 21 10 46 02 0a 01 d0 10 46 08 39 02 09 01 d0 10 46 09 1f 82 08 01 d0 10 46
+			89 1e 42 08 01 d0 88 1e 70 47 08 1a 70 47 30 b4 74 46 64 1e 25 78 64 1c ab 42 04 d3 63 5d 5b 00
+			e3 18 30 bc 18 47 1d 46 f8 e7 02 e0 08 c8 12 1f 08 c1 00 2a fa d1 70 47 70 47 00 20 01 e0 01 c1
+			12 1f 00 2a fb d1 70 47 10 b5 fe 48 00 78 08 28 0b da 01 f0 d1 f9 fc 49 fa 4a 12 78 88 54 f9 48
+			00 78 40 1c f7 49 08 70 10 bd f6 48 00 78 08 28 29 d1 09 20 f3 49 08 70 02 f0 38 fa f2 48 00 78
+			01 28 21 d1 f0 48 40 78 00 28 1d d1 ee 48 80 78 01 28 19 d1 ec 48 c0 78 c0 00 eb 49 09 79 89 00
+			08 43 e9 49 49 79 49 00 08 43 e7 49 89 79 08 43 e6 49 08 70 00 20 e6 49 08 70 e6 48 00 78 00 28
+			d6 d1 e5 49 08 70 8e e0 df 48 00 78 01 28 20 d1 dd 48 40 78 00 28 1c d1 db 48 80 78 00 28 18 d1
+			d9 48 c0 78 c0 00 d8 49 09 79 89 00 08 43 d6 49 49 79 49 00 08 43 d4 49 89 79 08 43 d3 49 08 70
+			00 20 d3 49 08 70 d3 49 08 70 02 20 d2 49 08 70 69 e0 cd 48 40 78 01 28 21 d1 cb 48 80 78 00 28
+			1d d1 c9 48 c0 78 01 28 19 d1 c7 48 00 79 c0 00 c5 49 49 79 89 00 08 43 c3 49 89 79 49 00 08 43
+			c1 49 c9 79 08 43 c1 49 08 70 00 20 c0 49 08 70 c0 48 00 78 00 28 01 d1 bf 49 08 70 84 e7 ba 48
+			40 78 01 28 20 d1 b8 48 80 78 00 28 1c d1 b6 48 c0 78 00 28 18 d1 b4 48 00 79 c0 00 b2 49 49 79
+			89 00 08 43 b0 49 89 79 49 00 08 43 ae 49 c9 79 08 43 ae 49 08 70 00 20 ad 49 08 70 ad 49 08 70
+			02 20 ad 49 08 70 5f e7 a7 48 c0 78 c0 00 a6 49 09 79 89 00 08 43 a4 49 49 79 49 00 08 43 a2 49
+			89 79 08 43 a1 49 08 70 02 20 a3 49 08 70 a0 48 00 78 40 1c 9e 49 08 70 08 46 00 78 02 28 02 d1
+			01 20 9e 49 08 70 9e 48 00 78 00 28 14 d1 9d 49 c8 70 08 71 48 71 88 71 c8 71 08 72 48 72 9a 48
+			00 78 02 28 09 d1 91 48 00 78 00 07 00 0e 97 49 08 70 01 20 93 49 48 71 42 e2 93 48 00 78 01 28
+			0a d1 92 48 00 78 89 49 09 78 08 43 8f 49 08 70 01 20 8c 49 48 71 33 e2 8d 48 00 78 05 28 16 d1
+			88 48 80 7a 87 49 c8 70 08 46 c0 7a 08 71 08 46 00 7b 48 71 08 46 40 7b 88 71 08 46 80 7b c8 71
+			08 46 c0 7b 08 72 08 46 00 7c 48 72 18 e2 80 48 00 78 04 28 09 d1 75 48 00 78 00 07 00 0c 7d 49
+			08 80 01 20 77 49 48 71 0a e2 79 48 00 78 03 28 0b d1 6e 48 00 78 00 02 76 49 09 88 08 43 75 49
+			08 80 01 20 6f 49 48 71 fa e1 71 48 00 78 02 28 0b d1 66 48 00 78 00 01 6e 49 09 88 08 43 6d 49
+			08 80 01 20 67 49 48 71 ea e1 69 48 00 78 01 28 15 d1 68 48 00 88 5d 49 09 78 08 43 65 49 08 80
+			00 f0 b4 fb 01 20 5f 49 48 71 63 48 00 88 61 49 09 88 88 42 90 d1 01 20 60 49 08 70 d0 e1 60 48
+			00 78 00 28 4c d0 5e 48 00 78 40 1e c1 00 08 1a 5c 49 09 68 08 5c 53 49 c8 70 59 48 00 78 40 1e
+			c1 00 08 1a 57 49 09 68 40 18 40 78 4d 49 08 71 53 48 00 78 40 1e c1 00 08 1a 52 49 09 68 40 18
+			80 78 48 49 48 71 4e 48 00 78 40 1e c1 00 08 1a 4c 49 09 68 40 18 c0 78 42 49 88 71 48 48 00 78
+			40 1e c1 00 08 1a 47 49 09 68 40 18 00 79 3d 49 c8 71 43 48 00 78 40 1e c1 00 08 1a 41 49 09 68
+			40 18 40 79 37 49 08 72 3d 48 00 78 40 1e c1 00 08 1a 3c 49 09 68 40 18 80 79 32 49 48 72 7f e1
+			2a 48 00 78 09 28 0c d1 00 20 2f 49 08 70 30 49 08 70 33 49 08 70 01 f0 09 f8 01 20 32 49 08 70
+			52 e6 00 20 28 49 08 70 29 49 08 70 2c 49 08 70 1e 48 00 78 03 00 ff f7 1a fe 10 ef 09 85 a1 d7
+			f0 20 20 20 20 20 20 f8 ec eb ea 20 27 48 00 78 00 28 13 d0 26 48 00 78 00 28 06 d1 01 20 19 49
+			c8 70 08 71 08 72 48 72 02 e0 01 20 15 49 88 71 1f 48 00 78 c0 43 1e 49 08 70 40 e1 1d 48 00 78
+			00 28 39 d0 01 20 0f 49 c8 70 08 71 48 71 88 71 c8 71 08 72 48 72 17 48 00 78 40 1e 15 49 08 70
+			2d e1 00 00 21 01 00 20 19 01 00 20 23 01 00 20 15 01 00 20 60 01 00 20 5f 01 00 20 12 01 00 20
+			22 01 00 20 84 01 00 20 25 01 00 20 26 01 00 20 28 01 00 20 2c 01 00 20 2e 01 00 20 30 01 00 20
+			29 01 00 20 00 01 00 20 18 01 00 20 37 01 00 20 5e 01 00 20 58 01 00 20 b0 48 00 68 b0 49 88 42
+			01 da 00 24 07 e0 ad 49 09 68 ad 4a 88 1a 0a 21 ff f7 9a f8 04 46 60 06 c0 0f aa 49 c8 70 a0 06
+			c0 0f 08 71 e0 06 c0 0f 48 71 20 07 c0 0f 88 71 60 07 c0 0f c8 71 a0 07 c0 0f 08 72 e0 07 c0 0f
+			48 72 dc e0 03 21 49 03 05 20 00 03 02 f0 7c fa 9d 49 08 70 08 46 00 78 02 28 03 d1 01 20 99 49
+			08 71 0a e0 98 48 00 78 01 28 03 d1 95 49 08 71 48 71 02 e0 01 20 93 49 48 71 c0 e0 01 20 93 49
+			08 70 93 48 00 78 40 06 c0 0f 8e 49 c8 70 90 48 00 78 80 06 c0 0f 08 71 8d 48 00 78 c0 06 c0 0f
+			48 71 8b 48 00 78 00 07 c0 0f 88 71 88 48 00 78 40 07 c0 0f c8 71 86 48 00 78 80 07 c0 0f 08 72
+			83 48 00 78 c0 07 c0 0f 48 72 00 20 81 49 08 70 7f 48 00 78 64 21 48 43 ff 30 2d 30 7e 49 08 80
+			0a 20 7e 49 08 70 8a e0 7d 48 00 78 00 28 07 d0 00 20 7c 49 08 70 7a 48 00 78 40 1e 78 49 08 70
+			78 48 00 78 6f 49 c8 70 01 20 48 71 77 e0 3e e0 3c e0 22 e0 09 e0 00 e0 37 e0 03 20 72 49 08 70
+			01 20 68 49 08 71 88 71 69 e0 70 48 00 78 00 28 03 d0 6f 48 00 78 00 28 00 d1 60 e0 6b 48 00 78
+			40 1e 6a 49 08 70 06 20 6a 49 08 70 00 f0 44 ff 69 49 08 70 00 f0 d0 f9 51 e0 68 48 00 78 40 1c
+			67 49 08 70 65 48 00 78 80 1c 66 49 08 70 66 48 00 78 54 49 c8 70 65 48 00 78 08 71 64 48 00 78
+			48 71 64 48 00 78 88 71 39 e0 01 e0 00 e0 00 bf 61 48 00 78 00 28 2f d0 4c 48 00 78 00 28 2b d0
+			5e 48 00 78 02 28 03 d1 01 20 5d 49 08 70 0b e5 5a 48 00 78 40 1c 59 49 08 70 40 49 09 68 40 4a
+			88 1a 0a 21 fe f7 c0 ff 04 46 60 06 c0 0f 3d 49 c8 70 a0 06 c0 0f 08 71 e0 06 c0 0f 48 71 20 07
+			c0 0f 88 71 60 07 c0 0f c8 71 a0 07 c0 0f 08 72 e0 07 c0 0f 48 72 02 e0 01 f0 a0 ff e4 e4 00 bf
+			30 49 48 4a 12 78 88 5c 01 f0 28 ff 45 48 00 78 40 1c 44 49 08 70 08 46 00 78 09 28 4c dd 04 20
+			00 f0 be fa 05 20 00 f0 bb fa 01 f0 01 ff 00 20 3c 49 08 70 3c 49 08 70 3c 49 08 70 2a 48 00 78
+			00 28 05 d0 28 48 00 78 40 1e 27 49 08 70 33 e0 28 48 00 78 00 28 05 d0 26 48 00 78 40 1e 25 49
+			08 70 29 e0 26 48 00 78 00 28 0a d0 24 48 00 78 40 1e 23 49 08 70 23 48 00 78 40 1e 21 49 08 70
+			1a e0 2b 48 00 78 02 28 02 d0 04 28 13 d1 0a e0 0d 48 00 78 01 28 05 d1 12 48 00 78 01 28 01 d1
+			00 f0 44 fe 07 e0 01 20 11 49 08 70 00 f0 94 fe 20 49 08 70 00 bf 00 bf 00 bf 85 e4 0c 01 00 20
+			4c 0d 00 00 84 01 00 20 70 01 00 20 14 01 00 20 59 01 00 20 58 01 00 20 62 01 00 20 64 01 00 20
+			60 01 00 20 17 01 00 20 25 01 00 20 27 01 00 20 34 01 00 20 28 01 00 20 36 01 00 20 04 01 00 20
+			29 01 00 20 2a 01 00 20 06 01 00 20 07 01 00 20 08 01 00 20 09 01 00 20 67 01 00 20 16 01 00 20
+			13 01 00 20 22 01 00 20 21 01 00 20 24 01 00 20 23 01 00 20 35 01 00 20 10 b5 64 48 00 78 08 28
+			0b da 00 f0 09 fe 62 49 60 4a 12 78 88 54 5f 48 00 78 40 1c 5d 49 08 70 10 bd 5c 48 00 78 08 28
+			60 d1 09 20 59 49 08 70 01 f0 70 fe 58 48 00 78 01 28 1b d1 56 48 40 78 00 28 17 d1 54 48 80 78
+			01 28 13 d1 52 48 c0 78 c0 00 51 49 09 79 89 00 08 43 4f 49 49 79 49 00 08 43 4d 49 89 79 08 43
+			4c 49 08 70 00 20 4c 49 08 70 3b e0 48 48 40 78 01 28 1b d1 46 48 80 78 00 28 17 d1 44 48 c0 78
+			01 28 13 d1 42 48 00 79 c0 00 41 49 49 79 89 00 08 43 3f 49 89 79 49 00 08 43 3d 49 c9 79 08 43
+			3c 49 08 70 00 20 3c 49 08 70 b5 e7 38 48 c0 78 c0 00 37 49 09 79 89 00 08 43 35 49 49 79 49 00
+			08 43 33 49 89 79 08 43 32 49 08 70 32 48 00 78 40 1c 31 49 08 70 08 46 00 78 02 28 02 d1 01 20
+			2e 49 08 70 2e 48 00 78 00 28 31 d1 01 20 2d 49 88 70 00 20 c8 70 08 71 48 71 88 71 c8 71 08 72
+			48 72 24 48 00 78 04 28 02 d0 06 28 12 d1 0a e0 25 48 00 78 23 49 c8 70 01 20 c8 71 48 72 00 20
+			22 49 08 70 13 e0 01 20 1e 49 c8 70 00 20 1f 49 08 70 0c e0 1d 48 00 78 02 28 02 d1 01 20 1c 49
+			08 70 1a 48 00 78 40 1c 18 49 08 70 00 bf 00 bf 14 49 13 4a 12 78 88 5c 01 f0 e0 fd 10 48 00 78
+			40 1c 0f 49 08 70 08 46 00 78 09 28 0b dd 04 20 00 f0 76 f9 01 f0 bc fd 00 20 09 49 08 70 03 49
+			08 70 0c 49 08 70 00 bf 46 e7 00 00 21 01 00 20 19 01 00 20 23 01 00 20 15 01 00 20 12 01 00 20
+			22 01 00 20 84 01 00 20 17 01 00 20 16 01 00 20 13 01 00 20 24 01 00 20 28 48 00 78 40 02 28 49
+			09 78 49 00 08 43 27 49 08 80 24 48 00 78 40 06 c0 0f 25 49 48 71 21 48 00 78 80 06 c0 0f c8 72
+			1e 48 00 78 c0 06 c0 0f 08 72 1c 48 00 78 00 07 c0 0f 08 74 19 48 00 78 40 07 c0 0f 88 73 17 48
+			00 78 80 07 c0 0f 48 73 14 48 00 78 c0 07 c0 0f c8 71 13 48 00 78 40 06 c0 0f c8 70 10 48 00 78
+			80 06 c0 0f 08 73 0e 48 00 78 c0 06 c0 0f 08 71 0b 48 00 78 00 07 c0 0f 88 72 09 48 00 78 40 07
+			c0 0f 48 72 06 48 00 78 80 07 c0 0f c8 73 04 48 00 78 c0 07 c0 0f 88 71 70 47 00 00 35 01 00 20
+			36 01 00 20 2e 01 00 20 84 01 00 20 03 48 00 88 03 49 08 40 01 49 08 80 70 47 00 00 2c 01 00 20
+			fe fe 00 00 70 b5 04 46 01 20 00 03 84 42 06 d1 01 f0 3c f8 20 46 01 f0 59 f9 05 46 22 e0 01 20
+			40 03 84 42 06 d1 01 f0 31 f8 20 46 01 f0 4e f9 05 46 17 e0 07 20 00 03 84 42 0c d1 01 f0 26 f8
+			20 46 01 f0 43 f9 05 46 4b 21 c9 00 28 46 01 f0 e7 ff 05 46 06 e0 20 46 01 f0 18 f8 20 46 01 f0
+			35 f9 05 46 28 46 70 bd 70 47 70 47 38 b5 04 46 6a 46 02 21 20 46 ff f7 91 f9 69 46 48 78 00 02
+			09 78 08 43 05 b2 06 2c 02 d1 02 48 28 18 05 b2 28 46 38 bd 55 f5 ff ff 7c b5 11 a0 00 68 01 90
+			01 aa 02 21 3e 20 ff f7 84 f9 00 f0 94 f8 6a 46 04 21 40 20 ff f7 72 f9 68 46 40 78 01 02 68 46
+			00 78 01 43 0c 46 68 46 c0 78 00 02 69 46 89 78 08 43 05 46 ac 42 01 da 28 46 7c bd 20 46 fc e7
+			71 00 00 00 10 b5 01 20 00 03 ff f7 8b ff 04 46 12 49 ff f7 1f f8 10 d3 01 20 40 03 ff f7 82 ff
+			04 46 0e 49 ff f7 16 f8 07 d3 00 20 ff f7 7a ff 04 46 0a 49 ff f7 0e f8 05 d2 09 48 00 78 40 1c
+			07 49 08 70 02 e0 00 20 05 49 08 70 04 48 00 78 09 28 01 dd 01 20 10 bd 00 20 fc e7 00 00 53 43
+			5d 01 00 20 10 b5 04 46 00 2c 02 d0 00 20 00 f0 f1 fe 01 22 11 46 80 20 01 f0 3a fa 00 2c 02 d0
+			01 20 00 f0 e7 fe 10 bd 10 b5 04 46 00 2c 02 d0 00 20 00 f0 df fe 01 22 11 46 40 20 01 f0 28 fa
+			00 2c 02 d0 01 20 00 f0 d5 fe 10 bd 10 b5 00 24 00 bf 03 e0 00 f0 05 f8 60 1c c4 b2 19 2c f9 db
+			10 bd 10 b5 00 f0 17 f8 00 f0 15 f8 00 f0 13 f8 00 f0 11 f8 10 bd 10 b5 00 24 0a 24 03 e0 00 f0
+			0a f8 60 1e c4 b2 00 2c f9 dc 10 bd 10 b5 03 20 ff f7 a8 f8 10 bd 10 b5 22 20 ff f7 a3 f8 10 bd
+			70 b5 04 46 25 46 03 e0 ff f7 f5 ff 68 1e c5 b2 00 2d f9 dc 70 bd 70 47 8a b0 00 20 09 90 08 90
+			00 26 07 90 06 90 05 90 04 90 03 90 02 90 01 90 00 90 e1 20 40 01 f9 49 08 80 ff 20 e1 30 f8 49
+			08 80 f8 48 f8 49 08 60 f8 49 08 60 0a 20 f8 49 08 70 2c e3 01 f0 32 ff f6 48 00 68 00 28 47 d1
+			58 20 01 f0 e3 fc 05 46 f3 48 00 78 00 28 3a d1 1f 2d 05 d1 00 f0 8a fb 01 20 ef 49 08 70 25 e0
+			00 2d 03 d1 71 20 01 f0 71 fc 1f e0 10 2d 05 db 1e 2d 03 da a8 00 28 18 c7 b2 17 e0 0c 2d 05 dd
+			10 2d 03 da a8 00 28 18 c7 b2 0f e0 01 2d 06 dd 0c 2d 04 da 68 1c 81 00 40 18 c7 b2 06 e0 0c 2d
+			01 d1 3f 27 02 e0 01 2d 00 d1 0f 27 db 48 00 78 00 28 08 d1 da 48 02 78 39 46 da 48 00 78 01 f0
+			19 fc d6 49 08 70 7d 20 00 01 d2 49 08 60 db e2 cd 48 00 68 00 28 72 d1 0c 20 ff f7 c7 fe 07 90
+			d1 49 07 98 88 42 05 dd ff f7 65 ff 0c 20 ff f7 bd fe 07 90 07 9c 00 bf c7 48 00 78 00 28 73 d1
+			ca 48 84 42 0a da 06 98 40 1c c0 b2 06 90 06 98 02 28 05 dd 77 20 01 f0 19 fc 01 e0 00 20 06 90
+			c1 49 07 98 88 42 02 dd 75 20 01 f0 0f fc c0 48 84 42 0a dd 02 98 40 1c c0 b2 02 90 02 98 02 28
+			05 dd 74 20 01 f0 02 fc 01 e0 00 20 02 90 b9 48 00 78 01 28 53 d1 b8 48 00 68 b8 49 88 42 02 dd
+			05 20 05 90 25 e0 b4 48 00 68 b4 49 49 1f 88 42 02 dd 04 20 05 90 1c e0 af 48 00 68 af 49 14 39
+			88 42 02 dd 03 20 05 90 13 e0 ab 48 00 68 ab 49 1e 39 88 42 02 dd 02 20 05 90 0a e0 a6 48 00 68
+			23 21 c9 01 88 42 02 dd 01 20 05 90 01 e0 00 20 05 90 a3 48 84 42 03 dd 00 20 04 90 7a e0 c0 e0
+			9f 48 64 38 84 42 02 dd 01 20 04 90 72 e0 9c 48 c8 38 84 42 02 dd 02 20 04 90 6b e0 99 48 84 42
+			03 dd 03 20 04 90 65 e0 a2 e0 96 48 64 38 84 42 02 dd 04 20 04 90 5d e0 05 20 04 90 5a e0 8d 48
+			00 78 02 28 52 d1 8c 48 00 68 8c 49 88 42 02 dd 05 20 05 90 25 e0 88 48 00 68 88 49 49 1f 88 42
+			02 dd 04 20 05 90 1c e0 83 48 00 68 83 49 14 39 88 42 02 dd 03 20 05 90 13 e0 7f 48 00 68 7f 49
+			1e 39 88 42 02 dd 02 20 05 90 0a e0 7a 48 00 68 23 21 c9 01 88 42 02 dd 01 20 05 90 01 e0 00 20
+			05 90 77 48 c8 30 84 42 02 dd 00 20 04 90 21 e0 73 48 64 30 84 42 02 dd 01 20 04 90 1a e0 70 48
+			84 42 02 dd 02 20 04 90 14 e0 6d 48 64 38 84 42 02 dd 03 20 04 90 0d e0 6a 48 64 30 84 42 02 dd
+			04 20 04 90 06 e0 05 20 04 90 03 e0 00 20 05 90 05 20 04 90 04 99 05 98 40 18 05 28 0a dd 01 98
+			40 1c c0 b2 01 90 01 98 05 28 05 dd 5a 20 01 f0 3d fb 01 e0 00 20 01 90 5b 48 00 88 84 42 11 dd
+			59 48 00 88 59 49 88 42 0c dd 59 48 00 78 00 28 05 d0 57 48 00 78 40 1e 55 49 08 70 02 e0 55 20
+			01 f0 24 fb 4c 48 00 68 4c 49 89 1f 88 42 10 dd 4a 48 dc 38 84 42 0c dd 3d 48 00 78 40 1e 3c 49
+			08 70 08 46 00 78 00 28 06 d1 55 20 01 f0 0e fb 02 e0 0a 20 36 49 08 70 7d 20 c0 00 32 49 08 60
+			a2 e1 44 48 00 68 00 28 57 d1 ff f7 a5 fd 06 46 41 48 86 42 03 dc 7d 20 00 01 86 42 0e da ff f7
+			2a fe ff f7 99 fd 06 46 3b 48 86 42 03 dc 7d 20 00 01 86 42 02 da 76 20 01 f0 e8 fa 2e 48 06 60
+			25 48 00 78 00 28 6b d1 1d 48 00 88 00 28 07 d1 24 48 00 78 5b 28 1e dd 5b 20 22 49 08 70 1a e0
+			17 48 00 88 ff 21 2d 31 88 42 07 da 1d 48 00 78 46 28 10 dd 46 20 1b 49 08 70 0c e0 10 48 00 88
+			ff 21 87 31 88 42 06 da 16 48 00 78 50 28 02 dd 50 20 14 49 08 70 21 48 00 78 00 28 4d d1 16 48
+			00 68 16 49 46 39 88 42 3b dd 0e 48 00 78 5b 28 43 dd 5b 20 0b 49 08 70 3f e0 c2 e0 3c 01 00 20
+			3e 01 00 20 20 4e 00 00 44 01 00 20 50 01 00 20 65 01 00 20 48 01 00 20 37 01 00 20 58 01 00 20
+			33 01 00 20 5a 01 00 20 10 27 00 00 30 f8 ff ff 3c 28 00 00 0b 01 00 20 0c 01 00 20 a8 11 00 00
+			7e 04 00 00 52 03 00 00 62 01 00 20 fc 08 00 00 64 01 00 20 40 01 00 20 88 13 00 00 5b 01 00 20
+			87 e0 8b 48 00 68 8b 49 88 42 06 dd 8a 48 00 78 5b 28 02 dd 5b 20 88 49 08 70 85 48 00 68 85 49
+			64 31 88 42 07 dd 84 48 00 78 5b 28 1e dd 5b 20 81 49 08 70 1a e0 7e 48 00 68 21 21 c9 01 88 42
+			07 dd 7d 48 00 78 5b 28 10 dd 5b 20 7a 49 08 70 0c e0 77 48 00 68 77 49 14 31 88 42 06 dd 76 48
+			00 78 5b 28 02 dd 5b 20 73 49 08 70 73 48 00 78 00 28 09 d1 72 48 02 78 72 48 01 78 6e 48 00 78
+			01 f0 08 fa 6d 49 08 70 6f 48 00 78 02 28 07 d1 67 48 00 68 6d 49 88 42 02 dd 5a 20 01 f0 26 fa
+			6b 48 00 78 01 28 1b d1 61 48 00 68 61 49 3c 39 88 42 02 dd 5a 20 01 f0 19 fa 5d 48 00 68 5d 49
+			46 39 88 42 0a dd 08 98 40 1c c0 b2 08 90 08 98 05 28 05 dd 5a 20 01 f0 09 fa 01 e0 00 20 08 90
+			53 48 00 68 59 49 46 31 88 42 02 dd 5a 20 01 f0 fd f9 4f 48 00 68 55 49 3c 31 88 42 0a dd 09 98
+			40 1c c0 b2 09 90 09 98 05 28 05 dd 5a 20 01 f0 ed f9 01 e0 00 20 09 90 ff 20 2d 30 4d 49 08 60
+			82 e0 4d 48 00 68 00 28 29 d1 06 20 ff f7 6e fc 04 46 4a 48 00 78 00 28 1c d1 00 2c 0d dd 44 48
+			00 78 00 28 02 d1 46 48 84 42 06 dc 40 48 00 78 01 28 0d d1 42 48 84 42 0a dd 03 98 40 1c c0 b2
+			03 90 03 98 02 28 05 dd 5c 20 01 f0 bf f9 01 e0 00 20 03 90 ff 20 f5 30 37 49 08 60 54 e0 39 48
+			00 68 00 28 1e d1 35 48 00 78 00 28 0e d1 ff f7 79 fc 00 28 05 d0 00 20 00 f0 b8 f8 01 20 2f 49
+			08 70 19 20 40 01 2f 49 08 60 3d e0 00 98 00 28 04 d1 5d 20 01 f0 fa f9 01 20 00 90 2a 48 29 49
+			08 60 31 e0 29 48 00 78 00 28 2d d1 28 48 00 88 00 28 06 d1 21 48 00 78 00 28 02 d1 5a 20 01 f0
+			85 f9 24 48 00 78 00 28 02 d0 59 20 01 f0 7e f9 21 48 00 78 00 28 02 d0 73 20 01 f0 77 f9 1f 48
+			00 78 00 28 02 d0 72 20 01 f0 70 f9 1c 48 00 78 00 28 03 d1 1b 48 00 78 01 28 02 dd 54 20 01 f0
+			65 f9 14 20 11 49 08 70 2f 20 ff f7 a9 fc d1 e4 0c 01 00 20 68 10 00 00 5a 01 00 20 58 01 00 20
+			33 01 00 20 32 01 00 20 66 01 00 20 6c 11 00 00 0a 01 00 20 40 01 00 20 50 01 00 20 37 01 00 20
+			26 02 00 00 54 01 00 20 10 27 00 00 4c 01 00 20 3c 01 00 20 18 01 00 20 13 01 00 20 12 01 00 20
+			10 01 00 20 61 01 00 20 30 e0 01 f0 d7 fb 18 48 00 68 00 28 0a d1 58 20 01 f0 88 f9 00 28 01 d1
+			01 f0 34 f9 13 48 12 49 08 60 1f e0 12 48 00 78 00 28 1b d1 11 48 00 78 00 28 02 d0 73 20 01 f0
+			15 f9 0f 48 00 78 00 28 02 d0 72 20 01 f0 0e f9 0c 48 00 78 00 28 03 d1 0b 48 00 78 01 28 02 dd
+			54 20 01 f0 03 f9 14 20 03 49 08 70 cd e7 00 00 48 01 00 20 70 17 00 00 4c 01 00 20 13 01 00 20
+			12 01 00 20 10 01 00 20 61 01 00 20 00 28 03 d0 05 49 06 4a 51 60 03 e0 01 21 09 04 03 4a 51 60
+			03 49 08 70 70 47 00 00 01 00 01 00 00 00 05 50 67 01 00 20 70 47 00 00 01 49 48 7c 70 47 00 00
+			40 00 03 50 10 b5 20 20 00 f0 3e fe 04 46 20 46 10 bd 00 00 03 48 00 78 00 28 01 d1 01 20 70 47
+			00 20 fc e7 67 01 00 20 10 b5 03 20 40 03 00 f0 71 fd 01 49 08 60 10 bd 68 01 00 20 10 b5 01 22
+			00 21 08 20 00 f0 c8 fd ff f7 f5 fb 08 20 00 f0 1b fe 04 46 00 2c 06 d0 01 20 05 49 08 70 64 20
+			04 49 08 80 02 e0 00 20 01 49 08 70 10 bd 00 00 6c 01 00 20 6e 01 00 20 10 b5 00 20 00 f0 ac ff
+			c4 b2 64 06 64 0e 20 46 10 bd 10 b5 00 21 08 46 00 f0 16 fe 10 bd 00 00 08 b5 01 21 68 46 01 70
+			00 21 41 70 02 21 81 70 01 21 c1 70 fe f7 be fc 01 20 40 07 fc 49 48 60 fc 48 fd 49 88 60 00 f0
+			83 fa 01 f0 df f9 01 f0 13 fb ff f7 b7 ff f9 48 00 78 01 28 05 d1 03 e0 01 f0 10 fb 00 f0 84 fa
+			fa e7 01 f0 0b fb 00 f0 70 fa ff f7 ce ff 00 20 ff f7 6a fb 01 20 00 f0 4d fa 53 20 01 f0 3e f9
+			05 46 2d 07 2d 0f 00 2d 01 d1 0a 24 16 e0 01 2d 01 d1 3c 24 12 e0 02 2d 01 d1 82 24 0e e0 03 2d
+			01 d1 aa 24 0a e0 04 2d 02 d1 ff 24 69 34 05 e0 05 2d 02 d1 ff 24 f5 34 00 e0 0a 24 32 2c 0b db
+			78 2c 09 da dc 48 dd 49 08 60 04 20 dc 49 08 70 02 20 dc 49 08 70 49 e0 78 2c 0b db a0 2c 09 da
+			d9 48 d6 49 08 60 06 20 d5 49 08 70 01 20 d7 49 08 70 3b e0 a0 2c 0d db ff 20 5f 30 84 42 09 da
+			d3 48 ce 49 08 60 08 20 cd 49 08 70 01 20 cf 49 08 70 2b e0 ff 20 5f 30 84 42 0d db ff 20 af 30
+			84 42 09 da cb 48 c5 49 08 60 08 20 c4 49 08 70 02 20 c6 49 08 70 19 e0 ff 20 af 30 84 42 0c db
+			c5 48 84 42 09 da c5 48 bc 49 08 60 02 20 bc 49 08 70 01 20 c2 49 08 70 08 e0 c2 48 b7 49 08 60
+			04 20 b7 49 08 70 02 20 b6 49 08 70 b4 49 08 78 c1 0f 09 18 49 10 bc 4a 11 70 10 46 00 78 08 21
+			08 40 c0 10 b9 49 08 70 10 46 00 78 04 21 08 40 80 10 b7 49 08 70 10 46 00 78 02 21 08 40 40 10
+			b4 49 08 70 10 46 00 78 c0 07 c0 0f b2 49 08 70 00 f0 e6 ff 00 f0 fb ff 00 f0 4a ff 00 f0 18 ff
+			00 20 ff f7 af fa 00 bf ff f7 05 fb 01 f0 56 fa 01 f0 05 f8 00 28 f7 d0 11 e0 01 f0 4f fa a7 48
+			00 78 00 28 01 d0 00 f0 b1 ff a5 48 00 78 01 28 00 d1 05 e0 a3 48 00 78 00 28 00 d1 00 e0 ec e7
+			00 bf 52 20 00 f0 f2 ff 05 46 01 20 9e 49 08 70 00 2d 01 d1 00 f0 9a ff 01 f0 30 fa 16 e0 01 f0
+			2d fa 96 48 00 78 00 28 02 d0 54 20 00 f0 7e ff 93 48 00 78 01 28 04 d1 94 48 00 78 01 28 00 d1
+			05 e0 90 48 00 78 00 28 00 d1 00 e0 e7 e7 00 bf 01 20 8f 49 08 70 ff f7 f7 f9 8e 48 00 78 00 f0
+			c5 ff 05 46 02 2d 01 d0 00 f0 70 ff 01 f0 06 fa 01 f0 04 fa 87 48 00 78 00 28 03 d0 ff f7 fc f9
+			85 49 08 60 ff f7 72 fa 82 48 00 78 00 28 03 d0 2c 20 ff f7 db f9 c6 b2 55 2e 27 dd ff 20 5f 30
+			84 42 05 db 14 20 7d 49 08 70 7d 49 08 70 8e e0 a0 2c 05 db 14 20 79 49 08 70 79 49 08 70 86 e0
+			78 2c 05 db 0f 20 75 49 08 70 75 49 08 70 7e e0 32 2c 05 db 0a 20 71 49 08 70 71 49 08 70 76 e0
+			0a 20 6e 49 08 70 6e 49 08 70 70 e0 4b 2e 27 dd ff 20 5f 30 84 42 05 db 23 20 68 49 08 70 68 49
+			08 70 64 e0 a0 2c 05 db 23 20 64 49 08 70 64 49 08 70 5c e0 78 2c 05 db 1e 20 60 49 08 70 60 49
+			08 70 54 e0 32 2c 05 db 0f 20 5c 49 08 70 5c 49 08 70 4c e0 0a 20 59 49 08 70 59 49 08 70 46 e0
+			32 2e 27 dd ff 20 5f 30 84 42 05 db 32 20 53 49 08 70 53 49 08 70 3a e0 a0 2c 05 db 32 20 4f 49
+			08 70 4f 49 08 70 32 e0 78 2c 05 db 2d 20 4b 49 08 70 4b 49 08 70 2a e0 32 2c 05 db 14 20 47 49
+			08 70 47 49 08 70 22 e0 0f 20 44 49 08 70 44 49 08 70 1c e0 a0 2c 05 db 5b 20 40 49 08 70 40 49
+			08 70 14 e0 78 2c 05 db 41 20 3c 49 08 70 3c 49 08 70 0c e0 32 2c 05 db 1c 20 38 49 08 70 38 49
+			08 70 04 e0 17 20 35 49 08 70 35 49 08 70 24 48 00 78 01 28 04 d1 0d 20 30 49 08 70 30 49 08 70
+			ff f7 c4 f9 ff f7 e0 fd 58 20 00 f0 ff fe 01 20 2c 49 08 70 23 48 00 78 00 28 01 d1 ff f7 64 fd
+			0c e0 01 f0 3b f9 1d 48 00 78 00 28 03 d1 1e 48 00 78 01 28 02 dd 54 20 00 f0 88 fe ff f7 ba fd
+			01 28 ee d0 ff f7 d8 f9 00 00 02 50 07 00 47 00 00 00 05 50 6c 01 00 20 a0 36 00 21 00 01 00 20
+			04 01 00 20 66 01 00 20 bc 36 00 21 0b 01 00 20 e6 36 00 21 1e 37 00 21 12 02 00 00 56 37 00 21
+			0a 01 00 20 84 36 00 21 05 01 00 20 06 01 00 20 07 01 00 20 08 01 00 20 09 01 00 20 10 01 00 20
+			30 01 00 20 5f 01 00 20 61 01 00 20 2a 01 00 20 31 01 00 20 26 01 00 20 0c 01 00 20 59 01 00 20
+			5a 01 00 20 17 01 00 20 70 b5 02 46 00 29 0a d1 15 4d 16 4e b5 60 ff 25 2d 04 15 43 14 4e 35 43
+			12 4e 35 60 13 e0 01 29 11 d1 d5 06 ed 0e 60 26 16 40 76 00 35 43 2a 46 0b 4d 6d 1c 0b 4e b5 60
+			ff 25 2d 04 15 43 0a 4e 35 43 08 4e 35 60 07 4d ac 68 01 e0 05 4d ac 68 e5 05 ed 0f 00 2d f9 d0
+			02 4d 6b 68 d8 b2 70 bd 01 00 0f 00 00 00 03 40 00 80 00 80 00 28 09 d0 0a 49 09 78 00 29 05 d1
+			00 bf 62 b6 00 bf 07 49 08 70 0a e0 00 28 08 d1 04 49 09 78 00 29 04 d0 00 bf 72 b6 00 bf 01 49
+			08 70 70 47 72 01 00 20 70 47 10 b5 ff f7 12 fd 00 f0 a0 fd 00 f0 75 fd 00 f0 7a fd 00 f0 48 fd
+			ff f7 73 f8 10 bd 00 00 fe b5 05 20 00 03 00 f0 91 fa 05 46 64 21 69 43 08 46 35 49 fd f7 f4 fd
+			34 49 40 18 87 b2 03 20 40 03 00 f0 83 fa 05 46 64 21 69 43 08 46 2e 49 fd f7 e6 fd 2d 49 40 18
+			86 b2 01 20 00 03 ff f7 1d f8 00 90 fe f7 68 f8 00 b2 01 90 00 20 ff f7 15 f8 00 90 fe f7 60 f8
+			00 b2 02 90 38 04 30 43 23 49 08 60 02 98 00 04 01 99 08 43 20 49 48 60 08 46 84 68 20 0c 1f 49
+			88 42 07 d1 1e 48 00 78 00 28 0a d1 01 20 ff f7 ad fc 06 e0 1a 48 00 78 01 28 02 d1 00 20 ff f7
+			a5 fc ff f7 b3 f8 17 48 00 88 00 28 04 dd 15 48 00 88 40 1e 13 49 08 80 12 48 00 88 00 28 15 d1
+			0d 48 84 68 a0 b2 00 28 03 d0 0d 48 00 78 00 28 07 d1 0d 48 20 43 08 49 88 60 64 20 09 49 08 80
+			04 e0 00 20 ff f7 82 fc 00 f0 80 fd fe bd 00 00 22 02 00 00 70 17 00 00 c0 00 02 50 a5 a5 00 00
+			67 01 00 20 6e 01 00 20 ff ff 00 00 f1 b5 82 b0 02 98 01 90 05 21 09 03 01 98 88 42 2b d1 01 20
+			80 05 85 49 08 60 01 21 13 20 ff f7 0d ff 07 46 01 21 12 20 ff f7 08 ff 06 46 38 02 30 43 07 46
+			38 46 fd f7 e6 ff 47 21 09 06 00 90 fd f7 06 fe 7a 49 08 60 01 21 11 20 ff f7 f6 fe 04 46 01 21
+			10 20 ff f7 f1 fe 05 46 21 02 29 43 0c 46 20 b2 73 49 08 80 de e0 03 21 49 03 01 98 88 42 2b d1
+			01 20 40 05 6c 49 08 60 01 21 17 20 ff f7 dc fe 07 46 01 21 16 20 ff f7 d7 fe 06 46 38 02 30 43
+			07 46 38 46 fd f7 b5 ff 47 21 09 06 00 90 fd f7 d5 fd 62 49 08 60 01 21 15 20 ff f7 c5 fe 04 46
+			01 21 14 20 ff f7 c0 fe 05 46 21 02 29 43 0c 46 20 b2 5b 49 08 80 ad e0 07 21 09 03 01 98 88 42
+			4e d1 01 21 1b 20 ff f7 af fe 07 46 01 21 1a 20 ff f7 aa fe 06 46 38 02 30 43 07 46 38 46 fd f7
+			88 ff 47 21 09 06 00 90 fd f7 a8 fd 4b 49 08 60 01 21 19 20 ff f7 98 fe 04 46 01 21 18 20 ff f7
+			93 fe 05 46 20 02 28 43 04 46 20 b2 44 49 08 80 01 21 1f 20 ff f7 88 fe 07 46 01 21 1e 20 ff f7
+			83 fe 06 46 38 02 30 43 07 46 38 46 fd f7 61 ff 47 21 09 06 00 90 fd f7 81 fd 3a 49 08 60 01 21
+			1d 20 ff f7 71 fe 04 46 01 21 1c 20 ff f7 6c fe 05 46 20 02 28 43 04 46 20 b2 33 49 08 80 59 e0
+			01 21 c9 03 01 98 88 42 27 d1 01 21 23 20 ff f7 5b fe 07 46 01 21 22 20 ff f7 56 fe 06 46 38 02
+			30 43 07 46 38 46 fd f7 34 ff 47 21 09 06 00 90 fd f7 54 fd 21 49 08 60 01 21 21 20 ff f7 44 fe
+			04 46 01 21 20 20 ff f7 3f fe 05 46 21 02 29 43 0c 46 20 b2 1a 49 08 80 2c e0 01 21 0f 20 ff f7
+			33 fe 07 46 01 21 0e 20 ff f7 2e fe 06 46 38 02 30 43 07 46 38 46 fd f7 0c ff 47 21 09 06 00 90
+			fd f7 2c fd 0d 49 08 60 01 21 0d 20 ff f7 1c fe 04 46 01 21 0c 20 ff f7 17 fe 05 46 21 02 29 43
+			0c 46 20 b2 06 49 08 80 7d 20 c0 00 84 42 01 dd 0b 20 08 80 fe bd 00 00 00 00 06 50 74 01 00 20
+			7c 01 00 20 78 01 00 20 7e 01 00 20 f1 b5 8c b0 05 20 09 90 0c 9c 6a 48 6a 49 08 60 0f 20 00 07
+			20 43 08 60 68 48 80 89 c0 05 c0 0f 01 21 48 40 05 90 65 48 80 89 40 04 c0 0f 04 90 0b e0 62 48
+			80 89 c0 05 c0 0f 01 21 48 40 05 90 5e 48 80 89 40 04 c0 0f 04 90 05 98 00 28 f0 d0 04 98 00 28
+			ed d0 20 46 00 f0 e8 f8 0b 90 00 27 00 20 0a 90 19 e0 56 48 53 49 08 60 00 bf 52 48 00 68 02 21
+			08 40 00 28 f9 d1 4f 48 80 68 01 b2 0a 98 40 00 06 aa 11 52 0a 98 40 00 06 a9 08 5e c7 19 0a 98
+			40 1c c0 b2 0a 90 09 99 0a 98 88 42 e1 db 05 21 38 46 fd f7 09 fc 07 46 3f b2 07 20 00 03 84 42
+			1d d1 43 48 87 42 1a dd 42 49 00 20 08 5e fd f7 75 fe 3a b2 02 90 0b 99 50 1a fd f7 6f fe 00 90
+			3d 48 01 68 00 98 fd f7 5c fc 01 90 02 99 fd f7 ff fb 03 90 fd f7 8d fe 05 46 0e 46 18 e0 37 49
+			00 20 08 5e fd f7 5a fe 02 90 0b 99 78 1a fd f7 55 fe 00 90 32 48 01 68 00 98 fd f7 42 fc 01 90
+			02 99 fd f7 e5 fb 03 90 fd f7 73 fe 05 46 0e 46 05 20 00 03 84 42 07 d0 03 20 40 03 84 42 03 d0
+			07 20 00 03 84 42 14 d1 00 22 26 4b 28 46 31 46 fd f7 54 fd 00 22 24 4b 01 91 00 90 fd f7 b6 fd
+			00 22 20 4b 03 91 02 90 fd f7 96 fc 05 46 0e 46 20 e0 01 20 c0 03 84 42 0e d1 00 22 1b 4b 28 46
+			31 46 fd f7 3b fd 00 22 17 4b 03 91 02 90 fd f7 9d fd 05 46 0e 46 0d e0 00 22 15 4b 28 46 31 46
+			fd f7 2c fd 00 22 10 4b 03 91 02 90 fd f7 8e fd 05 46 0e 46 28 46 31 46 fd f7 3f fe 0d b0 f0 bd
+			01 00 01 00 00 00 06 50 00 00 05 50 02 00 02 00 77 37 00 00 7e 01 00 20 78 01 00 20 7c 01 00 20
+			74 01 00 20 00 70 a7 40 00 00 e0 40 00 00 59 40 00 c0 a2 40 10 b5 01 46 0b 46 0c 48 0c 4c 20 60
+			80 01 20 60 40 10 20 60 0f 20 00 07 18 43 20 60 00 22 08 48 20 60 00 bf 05 48 00 68 02 24 20 40
+			00 28 f9 d1 02 48 82 68 10 b2 10 bd 01 00 01 00 00 00 06 50 02 00 02 00 01 46 05 22 12 03 91 42
+			07 d0 03 22 52 03 91 42 03 d0 07 22 12 03 91 42 03 d1 0c 4a 0c 4b 1a 60 02 e0 0c 4a 0a 4b 1a 60
+			0b 4a 09 4b 1a 60 00 bf 07 4a 12 68 02 23 1a 40 00 2a f9 d1 04 4a 92 68 10 b2 03 22 52 06 02 4b
+			1a 60 70 47 00 04 00 04 00 00 06 50 00 02 00 02 02 00 02 00 01 49 08 73 70 47 00 00 40 00 03 50
+			04 49 09 78 09 02 01 43 02 4a 12 78 11 43 08 46 70 47 00 00 40 00 03 50 70 b5 0b 46 14 46 00 2b
+			05 d0 11 4d 2d 79 05 43 0f 4e 35 71 1b e0 05 04 05 43 0e 4e 35 60 0c 4d 2d 79 85 43 0a 4e 35 71
+			00 21 0e e0 01 25 8d 40 05 40 00 2d 08 d0 4a 00 25 46 95 40 03 26 96 40 36 04 35 43 03 4e 75 60
+			49 1c 07 29 ee db 70 bd 00 00 03 50 40 00 02 50 10 b5 14 4b 1b 7d 83 43 12 4c 23 75 00 29 04 d0
+			23 46 1b 7e 03 43 23 76 04 e0 0e 4b 1b 7e 83 43 0c 4c 23 76 00 2a 05 d0 0a 4b 1b 7f 03 43 09 4c
+			23 77 04 e0 07 4b 1b 7f 83 43 06 4c 23 77 ff 23 04 4c 20 34 23 72 03 4b 1b 7c 03 43 01 4c 23 74
+			10 bd 00 00 20 00 03 50 01 46 04 48 00 7c 08 40 00 28 01 d0 01 20 70 47 00 20 fc e7 40 00 03 50
+			00 29 05 d0 05 4a 12 78 02 43 04 4b 1a 70 04 e0 02 4a 12 78 82 43 01 4b 1a 70 70 47 00 00 03 50
+			f8 b5 06 46 0c 46 19 48 19 49 08 63 00 12 48 63 0a 20 fd f7 50 fe 01 20 00 06 15 49 08 63 00 12
+			48 63 0a 20 fd f7 47 fe 07 27 3f 06 00 2e 11 d1 03 25 2d 02 00 2c 03 d1 0e 48 0f 49 48 60 0b e0
+			01 2c 03 d1 0d 48 0c 49 48 60 05 e0 0b 48 0a 49 48 60 01 e0 ff 25 01 35 01 20 c0 05 06 49 08 60
+			38 46 28 43 06 49 48 60 f8 bd 00 00 00 01 00 01 00 00 01 50 08 00 08 00 00 00 02 40 01 00 01 00
+			00 00 02 50 f8 b5 04 46 0d 46 16 46 1f 46 01 20 3b 46 32 46 29 46 00 90 20 46 00 f0 01 f8 f8 bd
+			ff b5 81 b0 0d 46 16 46 1f 46 3c 46 1c e0 20 2c 13 dd 20 23 32 46 29 46 01 98 00 f0 17 f8 00 28
+			02 d0 01 20 05 b0 f0 bd 20 36 20 3c 0a 98 00 28 0a d0 28 46 20 30 c5 b2 06 e0 23 46 32 46 29 46
+			01 98 00 f0 03 f8 ed e7 e1 e7 00 00 ff b5 0d 46 00 98 40 06 06 0e 20 2b 02 dd 01 20 04 b0 f0 bd
+			28 02 30 43 28 4f 38 60 28 48 29 4f 38 60 02 20 38 61 00 bf 26 48 00 6a 02 28 fb d1 01 20 30 43
+			21 4f 38 60 21 48 22 4f 38 60 01 20 38 61 00 bf 1f 48 00 6a 01 28 fb d1 1e 48 1d 4f 38 60 38 46
+			43 61 00 bf 1a 48 00 6a 98 42 fb d1 19 48 14 38 17 4f 38 60 00 24 15 e0 17 48 a7 10 bf 00 c1 59
+			11 70 52 1c ff 20 00 02 08 40 00 0a 10 70 52 1c ff 20 00 04 08 40 00 0c 10 70 52 1c 08 0e 10 70
+			52 1c 24 1d 9c 42 e7 db 00 bf 09 48 c0 69 20 27 38 40 20 28 f9 d1 00 20 c0 43 05 4f f8 61 07 48
+			38 60 00 20 aa e7 00 00 00 01 02 40 09 00 ff 00 00 00 02 40 25 00 7f 00 00 02 02 40 00 00 ff 07
+			f8 b5 04 46 0d 46 16 46 1f 46 01 20 3b 46 32 46 29 46 00 90 20 46 00 f0 01 f8 f8 bd ff b5 81 b0
+			0d 46 16 46 1f 46 3c 46 1c e0 1e 2c 13 dd 1e 23 32 46 29 46 01 98 00 f0 17 f8 00 28 02 d0 01 20
+			05 b0 f0 bd 1e 36 1e 3c 0a 98 00 28 0a d0 28 46 1e 30 c5 b2 06 e0 23 46 32 46 29 46 01 98 00 f0
+			03 f8 ed e7 e1 e7 00 00 ff b5 81 b0 0d 46 01 98 40 06 00 0e 00 90 00 26 1c 46 1e 2b 01 dc 00 2b
+			02 d1 01 20 05 b0 f0 bd 28 02 00 9f 38 43 01 46 10 78 52 1c 00 04 01 43 01 2b 03 d0 10 78 52 1c
+			00 06 01 43 24 48 01 60 02 2c 27 dd a4 1e 14 e0 24 1f 00 21 11 78 52 1c 10 78 52 1c 00 02 01 43
+			10 78 52 1c 00 04 01 43 10 78 52 1c 00 06 01 43 19 48 00 1d b7 00 c1 51 76 1c 04 2c e8 dc 10 78
+			57 78 3f 02 38 43 97 78 3f 04 38 43 d7 78 3f 06 38 43 01 46 10 48 00 1d b7 00 c1 51 0f 48 10 4f
+			38 60 98 1c 38 61 00 bf 0d 48 00 6a 9f 1c b8 42 fa d1 0a 48 08 30 0a 4f 38 60 00 bf 08 48 c0 69
+			20 27 38 40 20 28 f9 d1 00 20 c0 43 04 4f f8 61 04 48 38 60 00 20 a5 e7 00 01 02 40 09 00 ff 00
+			00 00 02 40 00 00 ff 01 42 01 02 4b d1 18 01 22 8a 61 70 47 00 00 04 50 01 46 48 01 01 4b c2 18
+			90 68 70 47 00 00 04 50 10 b5 01 46 01 20 4b 01 02 4c 1a 19 13 69 18 40 10 bd 00 00 00 00 04 50
+			30 b5 03 46 5c 01 05 4d 60 19 01 60 00 2a 02 d0 04 24 04 61 01 e0 00 24 04 61 30 bd 00 00 04 50
+			42 01 03 4b d1 18 0a 69 01 23 1a 43 0a 61 70 47 00 00 04 50 76 20 01 49 c8 60 70 47 00 00 01 40
+			0a 4a 50 60 00 22 09 4b 1a 60 00 29 05 d0 1a 46 12 68 02 23 1a 43 05 4b 1a 60 04 4a 12 68 01 23
+			1a 43 02 4b 1a 60 76 22 da 60 70 47 00 00 01 40 10 b5 07 48 07 49 88 60 00 22 11 46 80 20 ff f7
+			ab fd 00 22 11 46 01 20 ff f7 a6 fd 10 bd 00 00 01 00 01 00 40 00 02 50 10 b5 00 22 01 21 80 20
+			ff f7 9a fd 10 bd 10 b5 04 46 00 2c 04 d0 01 21 80 20 ff f7 f5 fd 03 e0 00 21 80 20 ff f7 f0 fd
+			10 bd 10 b5 02 22 00 21 40 20 ff f7 85 fd 10 bd 03 48 04 49 88 60 00 20 03 49 48 71 70 47 00 00
+			10 00 10 00 40 00 02 50 00 00 03 50 00 20 02 49 48 70 01 20 48 71 70 47 00 00 03 50 00 28 03 d0
+			01 21 03 4a 51 70 02 e0 00 21 01 4a 51 70 70 47 00 00 03 50 10 b5 01 22 00 21 20 20 ff f7 5c fd
+			10 bd 10 b5 00 21 20 20 ff f7 ba fd 00 22 01 21 20 20 ff f7 51 fd 10 bd 10 b5 04 46 00 2c 04 d0
+			01 21 20 20 ff f7 ac fd 03 e0 00 21 20 20 ff f7 a7 fd 10 bd 30 b5 03 46 10 48 04 78 10 48 00 78
+			98 42 01 dd 0e 48 03 70 0e 48 01 70 0e 48 02 70 91 42 00 da 0a 46 0a 48 00 78 90 42 02 dd 07 48
+			02 70 03 e0 06 48 00 78 04 4d 28 70 03 48 00 78 84 42 01 d0 05 20 30 bd 00 20 fc e7 59 01 00 20
+			5a 01 00 20 32 01 00 20 33 01 00 20 10 b5 04 46 00 f0 a4 fa 00 20 fe f7 09 ff ff f7 89 ff 20 46
+			00 f0 54 f8 00 f0 02 f8 10 bd 00 00 01 48 02 49 08 60 70 47 b9 fd 00 00 40 00 01 50 10 b5 07 48
+			00 78 02 28 09 d0 05 48 00 78 01 28 03 d1 02 20 02 49 08 70 01 e0 ff f7 e9 ff 10 bd 61 01 00 20
+			10 b5 00 24 ff f7 48 ff 00 bf 0d e0 00 20 ff f7 4a ff 01 20 fe f7 14 fb 01 20 ff f7 44 ff 03 20
+			fe f7 0e fb 60 1c c4 b2 1e 2c ef db 10 bd 08 b5 03 21 68 46 01 70 00 21 41 70 03 21 81 70 01 21
+			c1 70 fd f7 f3 fb 01 22 7d 21 c9 01 00 20 ff f7 d7 fe 08 bd 10 b5 00 20 ff f7 e2 fe 10 bd 10 b5
+			00 20 ff f7 c1 fe 04 46 20 46 10 bd fe b5 05 46 00 27 00 f0 43 fa 01 95 00 20 3e 49 08 70 ff f7
+			50 ff fe f7 d3 fa 00 20 ff f7 56 ff fe f7 ae fa 01 20 ff f7 51 ff 00 24 1f e0 37 48 00 78 00 28
+			03 d0 58 2d 01 d1 ff f7 13 ff 00 f0 27 fa 00 bf 30 48 00 78 00 28 fb d0 00 f0 20 fa 06 20 01 1b
+			01 98 08 41 c0 07 c0 0f 00 90 00 98 ff f7 34 ff 00 20 28 49 08 70 60 1c c4 b2 07 2c dd db 00 f0
+			0d fa 00 24 28 e0 24 48 00 78 00 28 03 d0 58 2d 01 d1 ff f7 ed fe 00 f0 01 fa 00 bf 1d 48 00 78
+			00 28 fb d0 00 f0 fa f9 00 2c 03 d1 ff f7 02 ff fe f7 8c fa 00 20 17 49 08 70 fe f7 73 fe 06 46
+			06 2c 07 d0 00 2c 05 d0 05 20 01 1b 30 46 88 40 38 43 c7 b2 60 1c c4 b2 07 2c d4 db 00 f0 de f9
+			00 bf 0c 48 00 78 00 28 fb d0 00 f0 d7 f9 ff f7 e8 fe fe f7 6b fa 00 20 ff f7 ee fe 00 20 05 49
+			08 70 fe f7 43 fa fe f7 41 fa 00 f0 c7 f9 38 46 fe bd 00 00 11 01 00 20 10 01 00 20 fe b5 05 46
+			00 27 00 f0 bb f9 01 95 00 20 3c 49 08 70 ff f7 c8 fe fe f7 4b fa 00 20 ff f7 ce fe fe f7 26 fa
+			01 20 ff f7 c9 fe 00 24 1f e0 35 48 00 78 00 28 03 d0 58 2d 01 d1 ff f7 8b fe 00 f0 9f f9 00 bf
+			2e 48 00 78 00 28 fb d0 00 f0 98 f9 06 20 01 1b 01 98 08 41 c0 07 c0 0f 00 90 00 98 ff f7 ac fe
+			00 20 26 49 08 70 60 1c c4 b2 07 2c dd db 00 f0 85 f9 00 24 24 e0 22 48 00 78 00 28 03 d0 58 2d
+			01 d1 ff f7 65 fe 00 f0 79 f9 00 bf 1b 48 00 78 00 28 fb d0 00 f0 72 f9 00 2c 03 d1 ff f7 7a fe
+			fe f7 04 fa 00 20 15 49 08 70 fe f7 eb fd 06 46 06 20 01 1b 30 46 88 40 38 43 c7 b2 60 1c c4 b2
+			07 2c d8 db 00 f0 5a f9 00 bf 0c 48 00 78 00 28 fb d0 00 f0 53 f9 ff f7 64 fe fe f7 e7 f9 00 20
+			ff f7 6a fe 00 20 05 49 08 70 fe f7 bf f9 fe f7 bd f9 00 f0 43 f9 38 46 fe bd 00 00 11 01 00 20
+			10 01 00 20 00 20 30 49 08 70 30 49 08 70 30 49 08 70 30 49 08 70 30 49 08 70 30 49 08 70 30 49
+			08 70 30 49 08 70 30 49 08 70 01 20 2f 49 08 70 00 20 48 70 88 70 2e 49 08 70 2e 49 08 70 2e 49
+			08 70 2e 49 08 70 03 20 2d 49 08 70 00 20 2d 49 08 70 2d 49 08 70 2d 49 08 70 2d 49 08 80 40 1e
+			2c 49 08 80 00 20 2c 49 08 70 2c 49 08 70 5b 20 2b 49 08 70 2b 49 08 70 00 20 2b 49 08 70 2b 49
+			08 70 2b 49 08 70 5b 20 2a 49 08 70 2a 49 08 70 01 20 2a 49 08 70 2a 49 08 70 00 20 29 49 08 70
+			29 49 08 70 02 20 29 49 08 70 03 20 28 49 08 70 00 20 28 49 08 70 28 49 08 70 28 49 08 70 28 49
+			08 70 28 49 08 70 70 47 10 01 00 20 17 01 00 20 18 01 00 20 12 01 00 20 13 01 00 20 14 01 00 20
+			15 01 00 20 16 01 00 20 21 01 00 20 84 01 00 20 22 01 00 20 24 01 00 20 25 01 00 20 26 01 00 20
+			27 01 00 20 28 01 00 20 29 01 00 20 2a 01 00 20 2c 01 00 20 2e 01 00 20 30 01 00 20 31 01 00 20
+			32 01 00 20 33 01 00 20 34 01 00 20 37 01 00 20 58 01 00 20 59 01 00 20 5a 01 00 20 5b 01 00 20
+			5c 01 00 20 5d 01 00 20 5e 01 00 20 5f 01 00 20 60 01 00 20 61 01 00 20 66 01 00 20 0a 01 00 20
+			67 01 00 20 0b 01 00 20 f8 b5 05 46 00 24 00 26 00 27 28 46 ff f7 8e fa 04 46 1c 48 00 68 24 1a
+			1b 48 00 68 e1 21 09 01 88 42 01 da 19 4e 77 00 17 48 00 68 18 49 88 42 02 da 16 4e 77 00 1b e0
+			13 48 00 68 14 49 64 31 88 42 02 da 11 4e 77 00 12 e0 0f 48 00 68 7d 21 49 01 88 42 02 da 0d 4e
+			77 00 09 e0 0a 48 00 68 0c 49 88 42 02 da 09 4e 77 00 01 e0 07 4e 77 00 b4 42 01 da 00 20 f8 bd
+			bc 42 01 dd 02 20 fa e7 01 20 f8 e7 68 01 00 20 0c 01 00 20 22 02 00 00 74 0e 00 00 04 10 00 00
+			fe b5 06 46 0c 46 01 21 44 20 fe f7 4d ff 02 90 02 98 04 28 13 d1 15 48 00 68 fd f7 1f f8 13 49
+			01 90 09 68 08 19 fd f7 19 f8 31 46 00 90 fc f7 08 fe 07 46 01 99 fc f7 41 fe 05 46 14 e0 0b 48
+			00 68 fd f7 0b f8 09 49 01 90 09 68 09 19 08 46 c8 38 fd f7 03 f8 31 46 00 90 fc f7 f2 fd 07 46
+			01 99 fc f7 2b fe 05 46 28 46 fe bd 80 01 00 20 10 b5 01 21 00 20 ff f7 a3 fc 10 bd 10 b5 ff f7
+			99 fc 10 bd 00 00 00 01 01 01 01 01 00 00 01 01 01 00 00 00 00 01 00 01 00 01 01 00 01 00 00 01
+			00 00 01 00 01 01 01 01 00 00 01 01 01 00 00 00 00 01 00 01 00 01 01 00 01 00 00 01 00 01 00 01
+			01 00 01 01 00 00 01 01 01 00 00 00 01 01 01 01 00 01 01 00 01 01 00 00 00 00 00 01 01 00 01 01
+			01 00 01 01 01 01 01 00 01 00 00 00 00 01 00 01 00 00 00 00 00 01 01 01 01 00 00 01 00 01 01 00
+			01 00 00 01 00 01 00 00 00 01 01 00 01 01 00 00 00 00 00 01 01 00 01 01 01 00 01 01 01 01 01 00
+			01 00 00 00 00 01 00 01 00 00 00 00 00 01 01 01 01 00 00 01 00 01 01 00 01 00 00 01 00 01 00 00
+			00 01 01 00 01 01 00 00 00 00 00 01 01 01 01 01 01 00 01 01 01 01 00 00 00 01 01 00 01 01 01 00
+			01 01 01 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a0 37 00 21 00 01 00 20 84 00 00 00 aa 0b 00 21
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 02 08 01 03 03 fe d5 34 55 34
+		];
+
+		#include "svooc_config.dtsi"
+	};
+
+	rt5125_fastcg: rt5125_fastcg@0e{
+		status = "okay";
+		compatible = "oplus,rt5125-fastcg";
+		reg = <0x0e 0>;
+
+		qcom,vooc_cool_bat_volt = <3650>;
+		qcom,vooc_little_cool_bat_volt = <3550>;
+		qcom,vooc_normal_bat_volt = <3450>;
+		qcom,vooc_warm_bat_volt = <3350>;
+
+		qcom,vooc_cool_bat_suspend_volt = <3650>;
+		qcom,vooc_little_cool_bat_suspend_volt = <3550>;
+		qcom,vooc_normal_bat_suspend_volt = <3450>;
+		qcom,vooc_warm_bat_suspend_volt = <3350>;
+
+		qcom,parse_fw_from_dt;
+		vooc,firmware_data = [
+			e8 05 00 20 31 01 00 00 39 01 00 00 3b 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 3d 01 00 00 00 00 00 00 00 00 00 00 3f 01 00 00 41 01 00 00
+			a1 04 00 00 d5 09 00 00 c9 07 00 00 43 01 00 00 b5 09 00 00 0d 04 00 00 69 08 00 00 7d 08 00 00
+			a1 09 00 00 dd 07 00 00 f1 07 00 00 2d 03 00 00 25 06 00 00 39 06 00 00 4d 06 00 00 43 01 00 00
+			6d 06 00 00 43 01 00 00 05 08 00 00 00 f0 02 f8 00 f0 3e f8 0c a0 30 c8 08 38 24 18 2d 18 a2 46
+			67 1e ab 46 54 46 5d 46 ac 42 01 d1 00 f0 30 f8 7e 46 0f 3e 0f cc b6 46 01 26 33 42 00 d0 fb 1a
+			a2 46 ab 46 33 43 18 47 d0 2b 00 00 f0 2b 00 00 10 3a 02 d3 78 c8 78 c1 fa d8 52 07 01 d3 30 c8
+			30 c1 01 d5 04 68 0c 60 70 47 00 00 00 23 00 24 00 25 00 26 10 3a 01 d3 78 c1 fb d8 52 07 00 d3
+			30 c1 00 d5 0b 60 70 47 1f b5 1f bd 10 b5 10 bd 00 f0 d8 f8 11 46 ff f7 f7 ff 01 f0 85 ff 00 f0
+			f0 f8 03 b4 ff f7 f2 ff 03 bc 00 f0 f7 f8 00 00 07 48 80 47 07 48 00 47 fe e7 fe e7 fe e7 fe e7
+			fe e7 fe e7 04 48 05 49 03 4a 05 4b 70 47 00 00 65 08 00 00 8d 00 00 00 e8 01 00 20 e8 05 00 20
+			e8 01 00 20 00 22 03 09 8b 42 2c d3 03 0a 8b 42 11 d3 00 23 9c 46 4e e0 03 46 0b 43 3c d4 00 22
+			43 08 8b 42 31 d3 03 09 8b 42 1c d3 03 0a 8b 42 01 d3 94 46 3f e0 c3 09 8b 42 01 d3 cb 01 c0 1a
+			52 41 83 09 8b 42 01 d3 8b 01 c0 1a 52 41 43 09 8b 42 01 d3 4b 01 c0 1a 52 41 03 09 8b 42 01 d3
+			0b 01 c0 1a 52 41 c3 08 8b 42 01 d3 cb 00 c0 1a 52 41 83 08 8b 42 01 d3 8b 00 c0 1a 52 41 43 08
+			8b 42 01 d3 4b 00 c0 1a 52 41 41 1a 00 d2 01 46 52 41 10 46 70 47 5d e0 ca 0f 00 d0 49 42 03 10
+			00 d3 40 42 53 40 00 22 9c 46 03 09 8b 42 2d d3 03 0a 8b 42 12 d3 fc 22 89 01 12 ba 03 0a 8b 42
+			0c d3 89 01 92 11 8b 42 08 d3 89 01 92 11 8b 42 04 d3 89 01 3a d0 92 11 00 e0 89 09 c3 09 8b 42
+			01 d3 cb 01 c0 1a 52 41 83 09 8b 42 01 d3 8b 01 c0 1a 52 41 43 09 8b 42 01 d3 4b 01 c0 1a 52 41
+			03 09 8b 42 01 d3 0b 01 c0 1a 52 41 c3 08 8b 42 01 d3 cb 00 c0 1a 52 41 83 08 8b 42 01 d3 8b 00
+			c0 1a 52 41 d9 d2 43 08 8b 42 01 d3 4b 00 c0 1a 52 41 41 1a 00 d2 01 46 63 46 52 41 5b 10 10 46
+			01 d3 40 42 00 2b 00 d5 49 42 70 47 63 46 5b 10 00 d3 40 42 01 b5 00 20 c0 46 c0 46 02 bd 70 47
+			70 47 70 47 75 46 00 f0 25 f8 ae 46 05 00 69 46 53 46 c0 08 c0 00 85 46 18 b0 20 b5 ff f7 32 ff
+			60 bc 00 27 49 08 b6 46 00 26 c0 c5 c0 c5 c0 c5 c0 c5 c0 c5 c0 c5 c0 c5 c0 c5 40 3d 49 00 8d 46
+			70 47 10 b5 04 46 c0 46 c0 46 20 46 ff f7 09 ff 10 bd 00 00 00 48 70 47 88 01 00 20 01 49 18 20
+			ab be fe e7 26 00 02 00 70 47 00 00 03 48 00 68 01 21 09 03 88 43 01 49 08 60 70 47 00 70 00 40
+			10 b5 01 20 15 49 c8 62 06 20 00 f0 b9 f8 4b 20 c0 01 00 f0 b5 f8 4b 20 c0 01 00 f0 b1 f8 72 b6
+			00 20 00 f0 59 fa 0d 48 40 68 01 28 01 d1 00 24 00 e0 01 24 06 20 00 f0 a3 f8 00 20 07 49 88 62
+			62 b6 06 20 00 f0 9c f8 4b 20 c0 01 00 f0 98 f8 4b 20 c0 01 00 f0 94 f8 20 46 10 bd 00 03 0a 42
+			00 b5 02 46 00 2a 03 d0 00 20 17 49 c8 62 02 e0 01 20 15 49 c8 62 4b 20 c0 01 00 f0 81 f8 4b 20
+			c0 01 00 f0 7d f8 72 b6 01 20 0f 49 88 62 06 20 00 f0 76 f8 06 20 00 f0 73 f8 06 20 00 f0 70 f8
+			00 20 09 49 88 62 62 b6 06 20 00 f0 69 f8 4b 20 c0 01 00 f0 65 f8 4b 20 c0 01 00 f0 61 f8 01 20
+			01 49 c8 62 00 bd 00 00 00 03 0a 42 06 48 c0 69 c1 b2 06 48 c1 70 06 48 00 68 01 21 89 04 88 43
+			03 49 08 60 70 47 00 00 00 30 00 40 81 01 00 20 00 70 00 40 f0 b5 07 46 0d 46 14 46 00 26 00 f0
+			a1 f8 aa 20 00 f0 ca f8 06 46 01 2e 00 d0 22 e0 38 46 00 f0 c3 f8 06 46 01 2e 00 d0 1b e0 00 f0
+			91 f8 ab 20 00 f0 ba f8 06 46 01 2e 00 d0 12 e0 06 e0 01 20 00 f0 54 f8 20 70 64 1c 68 1e c5 b2
+			01 2d f6 dc 00 20 00 f0 4b f8 20 70 64 1c 00 f0 91 f8 01 20 f0 bd 00 f0 8d f8 00 20 fa e7 00 00
+			05 49 09 68 01 22 d2 05 91 43 03 4a 11 60 03 49 89 69 c8 b2 70 47 00 00 00 70 00 40 00 30 00 40
+			00 e0 40 1e 00 28 fc d1 70 47 f0 b5 07 46 0c 46 15 46 00 26 00 f0 56 f8 aa 20 00 f0 7f f8 06 46
+			01 2e 00 d0 17 e0 38 46 00 f0 78 f8 06 46 01 2e 00 d0 10 e0 09 e0 28 78 6d 1c 00 f0 6f f8 06 46
+			01 2e 00 d0 07 e0 60 1e c4 b2 00 2c f3 d1 00 f0 51 f8 01 20 f0 bd 00 f0 4d f8 00 20 fa e7 00 00
+			1c b5 04 46 00 21 01 91 08 21 00 91 1e e0 68 46 00 79 40 06 01 0e 01 91 72 b6 00 20 00 f0 6c f9
+			06 20 ff f7 bd ff 0e 48 41 68 68 46 00 79 01 43 c9 b2 01 91 00 20 0a 49 88 62 62 b6 04 20 ff f7
+			af ff 68 46 00 78 40 1e c1 b2 00 91 68 46 00 78 00 28 dc d1 20 46 ff f7 13 ff 68 46 00 79 1c bd
+			00 03 0a 42 00 b5 01 20 00 f0 46 f9 00 20 00 f0 43 f9 0c 20 ff f7 94 ff 72 b6 00 20 04 49 c8 62
+			0c 20 ff f7 8d ff 00 20 01 49 88 62 62 b6 00 bd 00 03 0a 42 00 b5 00 20 07 49 88 62 c8 62 06 20
+			ff f7 7e ff 00 20 00 f0 27 f9 06 20 ff f7 78 ff 01 20 00 f0 21 f9 00 bd 00 03 0a 42 30 b5 04 46
+			08 25 15 e0 72 b6 e0 11 0d 49 c8 62 06 20 ff f7 67 ff 00 20 00 f0 10 f9 06 20 ff f7 61 ff 00 bf
+			60 06 04 0e 00 20 06 49 88 62 68 1e c5 b2 62 b6 00 2d e7 d1 00 20 02 49 88 62 ff f7 91 fe 30 bd
+			00 03 0a 42 03 48 00 68 01 21 c9 02 88 43 01 49 08 60 70 47 00 70 00 40 03 48 00 68 01 21 89 02
+			88 43 01 49 08 60 70 47 00 70 00 40 05 48 00 68 01 21 49 02 88 43 03 49 08 60 01 20 02 49 08 70
+			70 47 00 00 00 70 00 40 11 00 00 20 10 b5 10 48 00 68 80 21 88 43 0e 49 08 60 0e 48 00 78 00 28
+			0c d1 0d 48 00 68 40 08 40 00 40 1c 0a 49 08 60 00 20 0a 49 08 70 01 20 06 49 08 70 08 48 00 78
+			02 28 02 d1 00 f0 ae f9 01 e0 00 f0 71 fd 10 bd 00 70 00 40 6d 00 00 20 00 10 00 40 38 00 00 20
+			5f 00 00 20 c2 06 d2 0e 01 21 91 40 01 4a 11 60 70 47 00 00 00 e1 00 e0 10 b5 00 28 19 da 1a 4a
+			03 07 1b 0f 08 3b 9b 08 9b 00 d2 58 83 07 dc 0e ff 23 a3 40 9a 43 8b 07 1b 0e 84 07 e4 0e a3 40
+			1a 43 11 4b 04 07 24 0f 08 3c a4 08 a4 00 1a 51 18 e0 0e 4a 03 23 1b 02 d2 18 83 08 9b 00 d2 58
+			83 07 dc 0e ff 23 a3 40 9a 43 8b 07 1b 0e 84 07 e4 0e a3 40 1a 43 05 4b 03 24 24 02 1b 19 84 08
+			a4 00 1a 51 10 bd 00 00 1c ed 00 e0 00 e1 00 e0 10 b5 00 28 19 da 1a 4a 03 07 1b 0f 08 3b 9b 08
+			9b 00 d2 58 83 07 dc 0e ff 23 a3 40 9a 43 8b 07 1b 0e 84 07 e4 0e a3 40 1a 43 11 4b 04 07 24 0f
+			08 3c a4 08 a4 00 1a 51 18 e0 0e 4a 03 23 1b 02 d2 18 83 08 9b 00 d2 58 83 07 dc 0e ff 23 a3 40
+			9a 43 8b 07 1b 0e 84 07 e4 0e a3 40 1a 43 05 4b 03 24 24 02 1b 19 84 08 a4 00 1a 51 10 bd 00 00
+			1c ed 00 e0 00 e1 00 e0 03 48 00 68 01 21 49 05 88 43 01 49 08 60 70 47 00 70 00 40 03 48 00 68
+			01 21 89 03 88 43 01 49 08 60 70 47 00 70 00 40 03 48 00 68 01 21 49 03 88 43 01 49 08 60 70 47
+			00 70 00 40 03 48 00 68 20 21 88 43 01 49 08 60 70 47 00 00 00 70 00 40 01 46 00 20 00 29 0d d1
+			07 e0 01 22 0d 4b 9a 62 40 1c 0d 4a 90 42 00 d9 03 e0 0a 4a 12 68 00 2a f3 d0 0d e0 07 e0 01 22
+			06 4b da 62 40 1c 06 4a 90 42 00 d9 03 e0 03 4a 52 68 00 2a f3 d0 00 bf 70 47 00 00 00 03 0a 42
+			50 c3 00 00 70 47 00 00 03 48 00 68 01 21 49 04 88 43 01 49 08 60 70 47 00 70 00 40 10 b5 3b 48
+			00 68 01 21 09 04 88 43 38 49 08 60 38 48 00 88 00 28 05 d0 36 48 00 88 40 1e 35 49 08 80 15 e0
+			7d 20 c0 00 32 49 08 80 32 48 00 88 00 28 04 d0 30 48 00 88 40 1e 2f 49 08 80 2f 48 00 88 00 28
+			04 d0 2d 48 00 88 40 1e 2b 49 08 80 2b 48 00 68 00 28 04 d0 29 48 00 68 40 1e 28 49 08 60 28 48
+			00 68 00 28 04 d0 26 48 00 68 40 1e 24 49 08 60 24 48 00 68 00 28 04 d0 22 48 00 68 40 1e 21 49
+			08 60 21 48 00 78 00 28 04 d0 1f 48 00 78 40 1e 1d 49 08 70 1d 48 00 68 00 28 04 d0 1b 48 00 68
+			40 1e 1a 49 08 60 1a 48 00 68 00 28 04 d0 18 48 00 68 40 1e 16 49 08 60 16 48 00 78 40 1c 15 49
+			08 70 08 46 00 78 c8 28 0e dd 00 20 08 70 12 48 00 78 00 28 05 d0 00 20 01 f0 e8 fa 01 20 0f 49
+			08 70 01 20 0c 49 08 70 10 bd 00 00 00 70 00 40 3a 00 00 20 3c 00 00 20 3e 00 00 20 40 00 00 20
+			44 00 00 20 48 00 00 20 4c 00 00 20 50 00 00 20 54 00 00 20 38 00 00 20 24 00 00 20 10 00 00 20
+			03 48 00 68 01 21 c9 03 88 43 01 49 08 60 70 47 00 70 00 40 0f 20 05 49 c8 60 05 48 00 68 01 21
+			c9 04 88 43 02 49 08 60 70 47 00 00 00 60 00 40 00 70 00 40 03 48 00 68 01 21 89 05 88 43 01 49
+			08 60 70 47 00 70 00 40 30 b4 74 46 64 1e 25 78 64 1c ab 42 04 d3 63 5d 5b 00 e3 18 30 bc 18 47
+			1d 46 f8 e7 10 b5 fe 48 00 78 08 28 0b da 01 f0 a7 fa fc 49 fa 4a 12 78 88 54 f9 48 00 78 40 1c
+			f7 49 08 70 10 bd f6 48 00 78 08 28 29 d1 09 20 f3 49 08 70 01 f0 ae fd f2 48 00 78 01 28 21 d1
+			f0 48 40 78 00 28 1d d1 ee 48 80 78 01 28 19 d1 ec 48 c0 78 c0 00 eb 49 09 79 89 00 08 43 e9 49
+			49 79 49 00 08 43 e7 49 89 79 08 43 e6 49 08 70 00 20 e6 49 08 70 e6 48 00 78 00 28 d6 d1 e5 49
+			08 70 8e e0 df 48 00 78 01 28 20 d1 dd 48 40 78 00 28 1c d1 db 48 80 78 00 28 18 d1 d9 48 c0 78
+			c0 00 d8 49 09 79 89 00 08 43 d6 49 49 79 49 00 08 43 d4 49 89 79 08 43 d3 49 08 70 00 20 d3 49
+			08 70 d3 49 08 70 02 20 d2 49 08 70 69 e0 cd 48 40 78 01 28 21 d1 cb 48 80 78 00 28 1d d1 c9 48
+			c0 78 01 28 19 d1 c7 48 00 79 c0 00 c5 49 49 79 89 00 08 43 c3 49 89 79 49 00 08 43 c1 49 c9 79
+			08 43 c1 49 08 70 00 20 c0 49 08 70 c0 48 00 78 00 28 01 d1 bf 49 08 70 84 e7 ba 48 40 78 01 28
+			20 d1 b8 48 80 78 00 28 1c d1 b6 48 c0 78 00 28 18 d1 b4 48 00 79 c0 00 b2 49 49 79 89 00 08 43
+			b0 49 89 79 49 00 08 43 ae 49 c9 79 08 43 ae 49 08 70 00 20 ad 49 08 70 ad 49 08 70 02 20 ad 49
+			08 70 5f e7 a7 48 c0 78 c0 00 a6 49 09 79 89 00 08 43 a4 49 49 79 49 00 08 43 a2 49 89 79 08 43
+			a1 49 08 70 02 20 a3 49 08 70 a0 48 00 78 40 1c 9e 49 08 70 08 46 00 78 02 28 02 d1 01 20 9e 49
+			08 70 9e 48 00 78 00 28 14 d1 9d 49 c8 70 08 71 48 71 88 71 c8 71 08 72 48 72 9a 48 00 78 02 28
+			09 d1 91 48 00 78 00 07 00 0e 97 49 08 70 01 20 93 49 48 71 3f e2 93 48 00 78 01 28 0a d1 92 48
+			00 78 89 49 09 78 08 43 8f 49 08 70 01 20 8c 49 48 71 30 e2 8d 48 00 78 05 28 16 d1 88 48 80 7a
+			87 49 c8 70 08 46 c0 7a 08 71 08 46 00 7b 48 71 08 46 40 7b 88 71 08 46 80 7b c8 71 08 46 c0 7b
+			08 72 08 46 00 7c 48 72 15 e2 80 48 00 78 04 28 09 d1 75 48 00 78 00 07 00 0c 7d 49 08 80 01 20
+			77 49 48 71 07 e2 79 48 00 78 03 28 0b d1 6e 48 00 78 00 02 76 49 09 88 08 43 75 49 08 80 01 20
+			6f 49 48 71 f7 e1 71 48 00 78 02 28 0b d1 66 48 00 78 00 01 6e 49 09 88 08 43 6d 49 08 80 01 20
+			67 49 48 71 e7 e1 69 48 00 78 01 28 15 d1 68 48 00 88 5d 49 09 78 08 43 65 49 08 80 00 f0 b2 fb
+			01 20 5f 49 48 71 63 48 00 88 61 49 09 88 88 42 90 d1 01 20 60 49 08 70 cd e1 60 48 00 78 00 28
+			4c d0 5e 48 00 78 40 1e c1 00 08 1a 5c 49 09 68 08 5c 53 49 c8 70 59 48 00 78 40 1e c1 00 08 1a
+			57 49 09 68 40 18 40 78 4d 49 08 71 53 48 00 78 40 1e c1 00 08 1a 52 49 09 68 40 18 80 78 48 49
+			48 71 4e 48 00 78 40 1e c1 00 08 1a 4c 49 09 68 40 18 c0 78 42 49 88 71 48 48 00 78 40 1e c1 00
+			08 1a 47 49 09 68 40 18 00 79 3d 49 c8 71 43 48 00 78 40 1e c1 00 08 1a 41 49 09 68 40 18 40 79
+			37 49 08 72 3d 48 00 78 40 1e c1 00 08 1a 3c 49 09 68 40 18 80 79 32 49 48 72 7c e1 2a 48 00 78
+			09 28 0c d1 00 20 2f 49 08 70 30 49 08 70 33 49 08 70 01 f0 db f8 01 20 32 49 08 70 52 e6 00 20
+			28 49 08 70 29 49 08 70 2c 49 08 70 1e 48 00 78 03 00 ff f7 29 fe 10 f4 09 85 9f d5 e8 20 20 20
+			20 20 20 f5 f2 f1 f0 20 27 48 00 78 00 28 13 d0 26 48 00 78 00 28 06 d1 01 20 19 49 c8 70 08 71
+			08 72 48 72 02 e0 01 20 15 49 88 71 1f 48 00 78 c0 43 1e 49 08 70 3d e1 1d 48 00 78 00 28 39 d0
+			01 20 0f 49 c8 70 08 71 48 71 88 71 c8 71 08 72 48 72 17 48 00 78 40 1e 15 49 08 70 2a e1 00 00
+			21 00 00 20 19 00 00 20 23 00 00 20 15 00 00 20 60 00 00 20 5f 00 00 20 12 00 00 20 22 00 00 20
+			70 00 00 20 25 00 00 20 26 00 00 20 28 00 00 20 2c 00 00 20 2e 00 00 20 30 00 00 20 29 00 00 20
+			00 00 00 20 18 00 00 20 37 00 00 20 5e 00 00 20 58 00 00 20 af 48 00 68 af 49 88 42 01 da 00 24
+			07 e0 ac 49 09 68 ac 4a 88 1a 0a 21 ff f7 84 f9 04 46 60 06 c0 0f a9 49 c8 70 a0 06 c0 0f 08 71
+			e0 06 c0 0f 48 71 20 07 c0 0f 88 71 60 07 c0 0f c8 71 a0 07 c0 0f 08 72 e0 07 c0 0f 48 72 d9 e0
+			09 21 08 20 01 f0 3c fe 9d 49 08 70 08 46 00 78 02 28 03 d1 01 20 99 49 08 71 0a e0 98 48 00 78
+			01 28 03 d1 95 49 08 71 48 71 02 e0 01 20 93 49 48 71 bf e0 01 20 93 49 08 70 93 48 00 78 40 06
+			c0 0f 8e 49 c8 70 90 48 00 78 80 06 c0 0f 08 71 8d 48 00 78 c0 06 c0 0f 48 71 8b 48 00 78 00 07
+			c0 0f 88 71 88 48 00 78 40 07 c0 0f c8 71 86 48 00 78 80 07 c0 0f 08 72 83 48 00 78 c0 07 c0 0f
+			48 72 00 20 81 49 08 70 7f 48 00 78 64 21 48 43 ff 30 2d 30 7e 49 08 80 0a 20 7e 49 08 70 89 e0
+			7d 48 00 78 00 28 07 d0 00 20 7c 49 08 70 7a 48 00 78 40 1e 78 49 08 70 78 48 00 78 6f 49 c8 70
+			01 20 48 71 76 e0 03 20 75 49 08 70 01 20 6b 49 08 71 88 71 6e e0 35 e0 33 e0 19 e0 00 e0 2f e0
+			70 48 00 78 00 28 03 d0 6f 48 00 78 00 28 00 d1 60 e0 6c 48 00 78 40 1e 6a 49 08 70 06 20 6b 49
+			08 70 01 f0 01 f8 6a 49 08 70 00 f0 d1 f9 51 e0 68 48 00 78 40 1c 68 49 08 70 66 48 00 78 80 1c
+			66 49 08 70 66 48 00 78 54 49 c8 70 65 48 00 78 08 71 65 48 00 78 48 71 64 48 00 78 88 71 39 e0
+			01 e0 00 e0 00 bf 62 48 00 78 00 28 2f d0 4d 48 00 78 00 28 2b d0 5f 48 00 78 02 28 03 d1 01 20
+			5d 49 08 70 0e e5 5b 48 00 78 40 1c 59 49 08 70 40 49 09 68 40 4a 88 1a 0a 21 ff f7 ad f8 04 46
+			60 06 c0 0f 3d 49 c8 70 a0 06 c0 0f 08 71 e0 06 c0 0f 48 71 20 07 c0 0f 88 71 60 07 c0 0f c8 71
+			a0 07 c0 0f 08 72 e0 07 c0 0f 48 72 02 e0 01 f0 55 fb e7 e4 00 bf 31 49 48 4a 12 78 88 5c 01 f0
+			af fa 46 48 00 78 40 1c 44 49 08 70 08 46 00 78 09 28 4c dd 04 20 00 f0 93 fb 01 20 00 f0 90 fb
+			01 f0 72 fa 00 20 3d 49 08 70 3d 49 08 70 3d 49 08 70 2b 48 00 78 00 28 05 d0 29 48 00 78 40 1e
+			27 49 08 70 33 e0 29 48 00 78 00 28 05 d0 27 48 00 78 40 1e 25 49 08 70 29 e0 27 48 00 78 00 28
+			0a d0 25 48 00 78 40 1e 23 49 08 70 23 48 00 78 40 1e 22 49 08 70 1a e0 2b 48 00 78 02 28 02 d0
+			04 28 13 d1 0a e0 0e 48 00 78 01 28 05 d1 13 48 00 78 01 28 01 d1 00 f0 19 ff 07 e0 01 20 12 49
+			08 70 00 f0 51 ff 21 49 08 70 00 bf 00 bf 00 bf 88 e4 00 00 0c 00 00 20 4c 0d 00 00 70 00 00 20
+			6c 00 00 20 14 00 00 20 59 00 00 20 58 00 00 20 62 00 00 20 64 00 00 20 60 00 00 20 17 00 00 20
+			25 00 00 20 27 00 00 20 34 00 00 20 28 00 00 20 36 00 00 20 04 00 00 20 29 00 00 20 2a 00 00 20
+			06 00 00 20 07 00 00 20 08 00 00 20 09 00 00 20 67 00 00 20 16 00 00 20 13 00 00 20 22 00 00 20
+			21 00 00 20 24 00 00 20 23 00 00 20 35 00 00 20 10 b5 64 48 00 78 08 28 0b da 00 f0 e1 fe 62 49
+			60 4a 12 78 88 54 5f 48 00 78 40 1c 5d 49 08 70 10 bd 5c 48 00 78 08 28 60 d1 09 20 59 49 08 70
+			01 f0 e8 f9 58 48 00 78 01 28 1b d1 56 48 40 78 00 28 17 d1 54 48 80 78 01 28 13 d1 52 48 c0 78
+			c0 00 51 49 09 79 89 00 08 43 4f 49 49 79 49 00 08 43 4d 49 89 79 08 43 4c 49 08 70 00 20 4c 49
+			08 70 3b e0 48 48 40 78 01 28 1b d1 46 48 80 78 00 28 17 d1 44 48 c0 78 01 28 13 d1 42 48 00 79
+			c0 00 41 49 49 79 89 00 08 43 3f 49 89 79 49 00 08 43 3d 49 c9 79 08 43 3c 49 08 70 00 20 3c 49
+			08 70 b5 e7 38 48 c0 78 c0 00 37 49 09 79 89 00 08 43 35 49 49 79 49 00 08 43 33 49 89 79 08 43
+			32 49 08 70 32 48 00 78 40 1c 31 49 08 70 08 46 00 78 02 28 02 d1 01 20 2e 49 08 70 2e 48 00 78
+			00 28 31 d1 01 20 2d 49 88 70 00 20 c8 70 08 71 48 71 88 71 c8 71 08 72 48 72 24 48 00 78 04 28
+			02 d0 06 28 12 d1 0a e0 25 48 00 78 23 49 c8 70 01 20 c8 71 48 72 00 20 22 49 08 70 13 e0 01 20
+			1e 49 c8 70 00 20 1f 49 08 70 0c e0 1d 48 00 78 02 28 02 d1 01 20 1c 49 08 70 1a 48 00 78 40 1c
+			18 49 08 70 00 bf 00 bf 14 49 13 4a 12 78 88 5c 01 f0 66 f9 10 48 00 78 40 1c 0f 49 08 70 08 46
+			00 78 09 28 0b dd 04 20 00 f0 4a fa 01 f0 2c f9 00 20 09 49 08 70 03 49 08 70 0c 49 08 70 00 bf
+			46 e7 00 00 21 00 00 20 19 00 00 20 23 00 00 20 15 00 00 20 12 00 00 20 22 00 00 20 70 00 00 20
+			17 00 00 20 16 00 00 20 13 00 00 20 24 00 00 20 28 48 00 78 40 02 28 49 09 78 49 00 08 43 27 49
+			08 80 24 48 00 78 40 06 c0 0f 25 49 48 71 21 48 00 78 80 06 c0 0f c8 72 1e 48 00 78 c0 06 c0 0f
+			08 72 1c 48 00 78 00 07 c0 0f 08 74 19 48 00 78 40 07 c0 0f 88 73 17 48 00 78 80 07 c0 0f 48 73
+			14 48 00 78 c0 07 c0 0f c8 71 13 48 00 78 40 06 c0 0f c8 70 10 48 00 78 80 06 c0 0f 08 73 0e 48
+			00 78 c0 06 c0 0f 08 71 0b 48 00 78 00 07 c0 0f 88 72 09 48 00 78 40 07 c0 0f 48 72 06 48 00 78
+			80 07 c0 0f c8 73 04 48 00 78 c0 07 c0 0f 88 71 70 47 00 00 35 00 00 20 36 00 00 20 2e 00 00 20
+			70 00 00 20 03 48 00 88 03 49 08 40 01 49 08 80 70 47 00 00 2c 00 00 20 fe fe 00 00 10 b5 01 46
+			00 22 0b 20 01 23 83 40 36 4c 23 60 00 bf 02 29 07 d1 35 48 00 68 8b 03 98 43 c0 18 32 4b 18 60
+			06 e0 31 48 00 68 01 23 db 03 98 43 2e 4b 18 60 03 29 08 d1 2c 48 00 68 01 23 9b 03 98 43 c0 18
+			29 4b 18 60 06 e0 28 48 00 68 01 23 9b 03 98 43 25 4b 18 60 04 29 07 d1 23 48 00 68 cb 02 98 43
+			c0 18 21 4b 18 60 06 e0 1f 48 00 68 01 23 5b 03 98 43 1d 4b 18 60 05 29 08 d1 1b 48 00 68 01 23
+			1b 03 98 43 c0 18 18 4b 18 60 06 e0 16 48 00 68 01 23 1b 03 98 43 14 4b 18 60 13 48 00 68 f0 23
+			98 43 0b 01 f0 24 23 40 18 43 0f 4b 18 60 18 46 00 68 02 23 98 43 80 1c 0b 4b 18 60 18 46 00 68
+			40 08 40 00 40 1c 18 60 06 e0 07 48 00 68 c0 07 c0 0f 00 28 00 d1 00 e0 f7 e7 00 bf 02 48 42 68
+			90 b2 10 bd 00 e1 00 e0 00 40 00 40 70 47 70 47 78 b5 05 46 00 26 0f e0 6a 46 02 21 28 46 fe f7
+			89 ff 01 28 00 d1 09 e0 4b 20 c0 01 fe f7 c8 ff 00 20 00 90 70 1c c6 b2 03 2e ed db 00 bf 69 46
+			48 78 00 02 09 78 08 43 04 b2 06 2d 02 d1 02 48 20 18 04 b2 20 46 78 bd 55 f5 ff ff fe b5 20 a0
+			00 68 02 90 00 20 00 90 23 e0 02 aa 02 21 3e 20 fe f7 ab ff 06 46 01 2e 11 d1 00 f0 03 f9 01 aa
+			04 21 40 20 fe f7 56 ff 07 46 01 2f 00 d1 13 e0 4b 20 c0 01 fe f7 94 ff 00 20 01 90 05 e0 4b 20
+			c0 01 fe f7 8d ff 00 20 01 90 00 98 40 1c c0 b2 00 90 00 98 03 28 d8 db 00 bf 68 46 40 79 04 02
+			68 46 00 79 04 43 68 46 c0 79 05 02 69 46 89 79 0d 43 ac 42 01 da 28 46 fe bd 20 46 fc e7 00 00
+			71 00 00 00 00 b5 02 20 ff f7 18 ff 0f 49 88 42 0b db 03 20 ff f7 12 ff 0c 49 88 42 05 db 04 20
+			ff f7 0c ff 09 49 88 42 05 da 09 48 00 78 40 1c 07 49 08 70 02 e0 00 20 05 49 08 70 04 48 00 78
+			09 28 01 dd 01 20 00 bd 00 20 fc e7 41 08 00 00 5d 00 00 20 10 b5 04 46 00 2c 02 d0 00 20 00 f0
+			19 ff 00 21 10 20 ff f7 83 f8 10 20 ff f7 3a f8 13 48 00 68 80 21 88 43 11 49 08 60 11 48 00 69
+			04 21 88 43 0f 49 08 61 08 46 00 69 40 08 40 00 40 1c 08 61 08 46 00 69 ff 21 81 31 88 43 80 30
+			08 49 08 61 08 46 00 69 49 15 88 43 40 18 05 49 08 61 00 2c 02 d0 01 20 00 f0 ec fe 10 bd 00 00
+			00 70 00 40 00 50 00 40 10 b5 04 46 00 2c 02 d0 00 20 00 f0 df fe 00 21 0e 20 ff f7 49 f8 0e 20
+			ff f7 00 f8 13 48 00 68 01 21 49 02 88 43 11 49 08 60 11 48 00 68 04 21 88 43 0f 49 08 60 08 46
+			00 68 40 08 40 00 40 1c 08 60 08 46 00 68 ff 21 81 31 88 43 80 30 08 49 08 60 08 46 00 68 49 15
+			88 43 40 18 04 49 08 60 00 2c 02 d0 01 20 00 f0 b1 fe 10 bd 00 70 00 40 00 50 00 40 08 b5 0a 20
+			00 90 01 e0 00 f0 06 f8 00 98 41 1e 00 91 00 28 f8 d1 08 bd 08 b5 05 48 00 90 00 e0 00 bf 00 98
+			41 1e 00 91 00 28 f9 d1 08 bd 00 00 ed 08 00 00 08 b5 05 48 00 90 00 e0 00 bf 00 98 41 1e 00 91
+			00 28 f9 d1 08 bd 00 00 88 13 00 00 08 b5 2c 20 00 90 00 e0 00 bf 00 98 41 1e 00 91 00 28 f9 d1
+			08 bd 00 00 08 b5 05 48 00 90 00 e0 00 bf 00 98 41 1e 00 91 00 28 f9 d1 08 bd 00 00 37 02 00 00
+			10 b5 02 46 14 46 03 e0 ff f7 ec ff 60 1e c4 b2 00 2c f9 dc 10 bd 70 47 8a b0 00 20 09 90 08 90
+			00 26 07 90 06 90 05 90 04 90 03 90 02 90 01 90 00 90 e1 20 40 01 f9 49 08 80 ff 20 e1 30 f8 49
+			08 80 f8 48 f8 49 08 60 f8 49 08 60 0a 20 f8 49 08 70 2c e3 01 f0 bc f9 f6 48 00 68 00 28 47 d1
+			58 20 00 f0 d3 ff 05 46 f3 48 00 78 00 28 3a d1 1f 2d 05 d1 00 f0 8a fb 01 20 ef 49 08 70 25 e0
+			00 2d 03 d1 71 20 00 f0 4b ff 1f e0 10 2d 05 db 1e 2d 03 da a8 00 28 18 c7 b2 17 e0 0c 2d 05 dd
+			10 2d 03 da a8 00 28 18 c7 b2 0f e0 01 2d 06 dd 0c 2d 04 da 68 1c 81 00 40 18 c7 b2 06 e0 0c 2d
+			01 d1 3f 27 02 e0 01 2d 00 d1 0f 27 db 48 00 78 00 28 08 d1 da 48 02 78 39 46 da 48 00 78 00 f0
+			f3 fe d6 49 08 70 7d 20 00 01 d2 49 08 60 db e2 cd 48 00 68 00 28 72 d1 0c 20 ff f7 39 fe 07 90
+			d1 49 07 98 88 42 05 dd ff f7 52 ff 0c 20 ff f7 2f fe 07 90 07 9c 00 bf c7 48 00 78 00 28 73 d1
+			ca 48 84 42 0a da 06 98 40 1c c0 b2 06 90 06 98 02 28 05 dd 77 20 00 f0 f3 fe 01 e0 00 20 06 90
+			c1 49 07 98 88 42 02 dd 75 20 00 f0 e9 fe c0 48 84 42 0a dd 02 98 40 1c c0 b2 02 90 02 98 02 28
+			05 dd 74 20 00 f0 dc fe 01 e0 00 20 02 90 b9 48 00 78 01 28 53 d1 b8 48 00 68 b8 49 88 42 02 dd
+			05 20 05 90 25 e0 b4 48 00 68 b4 49 49 1f 88 42 02 dd 04 20 05 90 1c e0 af 48 00 68 af 49 14 39
+			88 42 02 dd 03 20 05 90 13 e0 ab 48 00 68 ab 49 1e 39 88 42 02 dd 02 20 05 90 0a e0 a6 48 00 68
+			23 21 c9 01 88 42 02 dd 01 20 05 90 01 e0 00 20 05 90 a3 48 84 42 03 dd 00 20 04 90 7a e0 c0 e0
+			9f 48 64 38 84 42 02 dd 01 20 04 90 72 e0 9c 48 c8 38 84 42 02 dd 02 20 04 90 6b e0 99 48 84 42
+			03 dd 03 20 04 90 65 e0 a2 e0 96 48 64 38 84 42 02 dd 04 20 04 90 5d e0 05 20 04 90 5a e0 8d 48
+			00 78 02 28 52 d1 8c 48 00 68 8c 49 88 42 02 dd 05 20 05 90 25 e0 88 48 00 68 88 49 49 1f 88 42
+			02 dd 04 20 05 90 1c e0 83 48 00 68 83 49 14 39 88 42 02 dd 03 20 05 90 13 e0 7f 48 00 68 7f 49
+			1e 39 88 42 02 dd 02 20 05 90 0a e0 7a 48 00 68 23 21 c9 01 88 42 02 dd 01 20 05 90 01 e0 00 20
+			05 90 77 48 c8 30 84 42 02 dd 00 20 04 90 21 e0 73 48 64 30 84 42 02 dd 01 20 04 90 1a e0 70 48
+			84 42 02 dd 02 20 04 90 14 e0 6d 48 64 38 84 42 02 dd 03 20 04 90 0d e0 6a 48 64 30 84 42 02 dd
+			04 20 04 90 06 e0 05 20 04 90 03 e0 00 20 05 90 05 20 04 90 04 99 05 98 40 18 05 28 0a dd 01 98
+			40 1c c0 b2 01 90 01 98 05 28 05 dd 5a 20 00 f0 17 fe 01 e0 00 20 01 90 5b 48 00 88 84 42 11 dd
+			59 48 00 88 59 49 88 42 0c dd 59 48 00 78 00 28 05 d0 57 48 00 78 40 1e 55 49 08 70 02 e0 55 20
+			00 f0 fe fd 4c 48 00 68 4c 49 89 1f 88 42 10 dd 4a 48 dc 38 84 42 0c dd 3d 48 00 78 40 1e 3c 49
+			08 70 08 46 00 78 00 28 06 d1 55 20 00 f0 e8 fd 02 e0 0a 20 36 49 08 70 7d 20 c0 00 32 49 08 60
+			a2 e1 44 48 00 68 00 28 57 d1 ff f7 27 fd 06 46 41 48 86 42 03 dc 7d 20 00 01 86 42 0e da ff f7
+			17 fe ff f7 1b fd 06 46 3b 48 86 42 03 dc 7d 20 00 01 86 42 02 da 76 20 00 f0 c2 fd 2e 48 06 60
+			25 48 00 78 00 28 6b d1 1d 48 00 88 00 28 07 d1 24 48 00 78 5b 28 1e dd 5b 20 22 49 08 70 1a e0
+			17 48 00 88 ff 21 2d 31 88 42 07 da 1d 48 00 78 46 28 10 dd 46 20 1b 49 08 70 0c e0 10 48 00 88
+			ff 21 87 31 88 42 06 da 16 48 00 78 50 28 02 dd 50 20 14 49 08 70 21 48 00 78 00 28 4d d1 16 48
+			00 68 16 49 46 39 88 42 3b dd 0e 48 00 78 5b 28 43 dd 5b 20 0b 49 08 70 3f e0 c2 e0 3c 00 00 20
+			3e 00 00 20 20 4e 00 00 44 00 00 20 50 00 00 20 65 00 00 20 48 00 00 20 37 00 00 20 58 00 00 20
+			33 00 00 20 5a 00 00 20 10 27 00 00 30 f8 ff ff 3c 28 00 00 0b 00 00 20 0c 00 00 20 a8 11 00 00
+			7e 04 00 00 52 03 00 00 62 00 00 20 fc 08 00 00 64 00 00 20 40 00 00 20 88 13 00 00 5b 00 00 20
+			87 e0 8b 48 00 68 8b 49 88 42 06 dd 8a 48 00 78 5b 28 02 dd 5b 20 88 49 08 70 85 48 00 68 85 49
+			64 31 88 42 07 dd 84 48 00 78 5b 28 1e dd 5b 20 81 49 08 70 1a e0 7e 48 00 68 21 21 c9 01 88 42
+			07 dd 7d 48 00 78 5b 28 10 dd 5b 20 7a 49 08 70 0c e0 77 48 00 68 77 49 14 31 88 42 06 dd 76 48
+			00 78 5b 28 02 dd 5b 20 73 49 08 70 73 48 00 78 00 28 09 d1 72 48 02 78 72 48 01 78 6e 48 00 78
+			00 f0 e2 fc 6d 49 08 70 6f 48 00 78 02 28 07 d1 67 48 00 68 6d 49 88 42 02 dd 5a 20 00 f0 00 fd
+			6b 48 00 78 01 28 1b d1 61 48 00 68 61 49 3c 39 88 42 02 dd 5a 20 00 f0 f3 fc 5d 48 00 68 5d 49
+			46 39 88 42 0a dd 08 98 40 1c c0 b2 08 90 08 98 05 28 05 dd 5a 20 00 f0 e3 fc 01 e0 00 20 08 90
+			53 48 00 68 59 49 46 31 88 42 02 dd 5a 20 00 f0 d7 fc 4f 48 00 68 55 49 3c 31 88 42 0a dd 09 98
+			40 1c c0 b2 09 90 09 98 05 28 05 dd 5a 20 00 f0 c7 fc 01 e0 00 20 09 90 ff 20 2d 30 4d 49 08 60
+			82 e0 4d 48 00 68 00 28 29 d1 06 20 ff f7 e0 fb 04 46 4a 48 00 78 00 28 1c d1 00 2c 0d dd 44 48
+			00 78 00 28 02 d1 46 48 84 42 06 dc 40 48 00 78 01 28 0d d1 42 48 84 42 0a dd 03 98 40 1c c0 b2
+			03 90 03 98 02 28 05 dd 5c 20 00 f0 99 fc 01 e0 00 20 03 90 ff 20 f5 30 37 49 08 60 54 e0 39 48
+			00 68 00 28 1e d1 35 48 00 78 00 28 0e d1 ff f7 19 fc 00 28 05 d0 00 20 00 f0 b8 f8 01 20 2f 49
+			08 70 19 20 40 01 2f 49 08 60 3d e0 00 98 00 28 04 d1 5d 20 00 f0 ea fc 01 20 00 90 2a 48 29 49
+			08 60 31 e0 29 48 00 78 00 28 2d d1 28 48 00 88 00 28 06 d1 21 48 00 78 00 28 02 d1 5a 20 00 f0
+			5f fc 24 48 00 78 00 28 02 d0 59 20 00 f0 58 fc 21 48 00 78 00 28 02 d0 73 20 00 f0 51 fc 1f 48
+			00 78 00 28 02 d0 72 20 00 f0 4a fc 1c 48 00 78 00 28 03 d1 1b 48 00 78 01 28 02 dd 54 20 00 f0
+			3f fc 14 20 11 49 08 70 2f 20 ff f7 a9 fc d1 e4 0c 00 00 20 68 10 00 00 5a 00 00 20 58 00 00 20
+			33 00 00 20 32 00 00 20 66 00 00 20 6c 11 00 00 0a 00 00 20 40 00 00 20 50 00 00 20 37 00 00 20
+			26 02 00 00 54 00 00 20 10 27 00 00 4c 00 00 20 3c 00 00 20 18 00 00 20 13 00 00 20 12 00 00 20
+			10 00 00 20 61 00 00 20 30 e0 00 f0 61 fe 18 48 00 68 00 28 0a d1 58 20 00 f0 78 fc 00 28 01 d1
+			00 f0 0e fc 13 48 12 49 08 60 1f e0 12 48 00 78 00 28 1b d1 11 48 00 78 00 28 02 d0 73 20 00 f0
+			ef fb 0f 48 00 78 00 28 02 d0 72 20 00 f0 e8 fb 0c 48 00 78 00 28 03 d1 0b 48 00 78 01 28 02 dd
+			54 20 00 f0 dd fb 14 20 03 49 08 70 cd e7 00 00 48 00 00 20 70 17 00 00 4c 00 00 20 13 00 00 20
+			12 00 00 20 10 00 00 20 61 00 00 20 00 28 07 d0 08 49 09 6b 80 22 91 43 80 31 06 4a 11 63 05 e0
+			04 49 09 6b 80 22 91 43 02 4a 11 63 02 49 08 70 70 47 00 00 00 40 00 40 67 00 00 20 70 47 00 00
+			02 49 49 69 49 06 c8 0f 70 47 00 00 00 50 00 40 02 49 49 68 49 06 c8 0f 70 47 00 00 00 50 00 40
+			03 48 00 6b 00 06 c0 0f 01 21 48 40 70 47 00 00 00 40 00 40 00 b5 09 20 ff f7 40 fa 01 49 08 60
+			00 bd 00 00 68 00 00 20 02 49 89 68 c8 b2 40 06 40 0e 70 47 00 10 00 40 18 48 40 69 80 21 88 43
+			16 49 48 61 08 46 80 69 88 61 15 48 00 68 01 21 c9 05 88 43 12 49 08 60 00 20 01 21 81 40 11 4a
+			11 60 00 bf 0d 48 00 68 fe 21 88 43 1c 30 0b 49 08 60 08 46 40 69 20 21 88 43 20 30 07 49 48 61
+			08 46 40 69 10 21 88 43 04 49 48 61 08 46 40 69 80 21 88 43 80 30 01 49 48 61 70 47 00 30 00 40
+			00 70 00 40 00 e1 00 e0 00 f0 38 fa 00 f0 ca fc 00 f0 96 fd 00 f0 9c fd 00 f0 31 fa ff f7 bc ff
+			00 20 ff f7 31 fb 01 20 00 f0 14 fa 53 20 00 f0 35 fc 05 46 2d 07 2d 0f 00 2d 01 d1 0a 24 16 e0
+			01 2d 01 d1 3c 24 12 e0 02 2d 01 d1 82 24 0e e0 03 2d 01 d1 aa 24 0a e0 04 2d 02 d1 ff 24 69 34
+			05 e0 05 2d 02 d1 ff 24 f5 34 00 e0 0a 24 32 2c 0b db 78 2c 09 da db 48 db 49 08 60 04 20 db 49
+			08 70 02 20 da 49 08 70 49 e0 78 2c 0b db a0 2c 09 da d8 48 d4 49 08 60 06 20 d4 49 08 70 01 20
+			d5 49 08 70 3b e0 a0 2c 0d db ff 20 5f 30 84 42 09 da d2 48 cc 49 08 60 08 20 cc 49 08 70 01 20
+			cd 49 08 70 2b e0 ff 20 5f 30 84 42 0d db ff 20 af 30 84 42 09 da ca 48 c3 49 08 60 08 20 c3 49
+			08 70 02 20 c4 49 08 70 19 e0 ff 20 af 30 84 42 0c db c4 48 84 42 09 da c3 48 bb 49 08 60 02 20
+			ba 49 08 70 01 20 c1 49 08 70 08 e0 c0 48 b6 49 08 60 04 20 b5 49 08 70 02 20 b5 49 08 70 b3 49
+			08 78 c1 0f 09 18 49 10 ba 4a 11 70 10 46 00 78 08 21 08 40 c0 10 b8 49 08 70 10 46 00 78 04 21
+			08 40 80 10 b5 49 08 70 10 46 00 78 02 21 08 40 40 10 b3 49 08 70 10 46 00 78 c0 07 c0 0f b1 49
+			08 70 00 f0 cd fa 00 f0 e3 fa 00 f0 ed f9 00 f0 95 f9 00 21 0b 20 fe f7 9f fa 00 20 ff f7 4a fa
+			00 bf ff f7 08 fb 00 f0 e3 fc 00 f0 f7 fa 00 28 f7 d0 11 e0 00 f0 dc fc a3 48 00 78 00 28 01 d0
+			00 f0 8e fa a1 48 00 78 01 28 00 d1 05 e0 a0 48 00 78 00 28 00 d1 00 e0 ec e7 00 bf 52 20 00 f0
+			e5 fa 05 46 01 20 9b 49 08 70 00 2d 01 d1 00 f0 77 fa 00 f0 bd fc 16 e0 00 f0 ba fc 92 48 00 78
+			00 28 02 d0 54 20 00 f0 5b fa 90 48 00 78 01 28 04 d1 91 48 00 78 01 28 00 d1 05 e0 8c 48 00 78
+			00 28 00 d1 00 e0 e7 e7 00 bf 01 20 8b 49 08 70 ff f7 6c f9 8a 48 00 78 00 f0 b8 fa 05 46 02 2d
+			01 d0 00 f0 4d fa 00 f0 93 fc 00 f0 91 fc 84 48 00 78 00 28 03 d0 ff f7 81 f9 82 49 08 60 ff f7
+			5d fa 7f 48 00 78 00 28 03 d0 2c 20 ff f7 50 f9 c6 b2 55 2e 27 dd ff 20 5f 30 84 42 05 db 14 20
+			79 49 08 70 79 49 08 70 8e e0 a0 2c 05 db 14 20 75 49 08 70 75 49 08 70 86 e0 78 2c 05 db 0f 20
+			71 49 08 70 71 49 08 70 7e e0 32 2c 05 db 0a 20 6d 49 08 70 6d 49 08 70 76 e0 0a 20 6a 49 08 70
+			6a 49 08 70 70 e0 4b 2e 27 dd ff 20 5f 30 84 42 05 db 23 20 64 49 08 70 64 49 08 70 64 e0 a0 2c
+			05 db 23 20 60 49 08 70 60 49 08 70 5c e0 78 2c 05 db 1e 20 5c 49 08 70 5c 49 08 70 54 e0 32 2c
+			05 db 0f 20 58 49 08 70 58 49 08 70 4c e0 0a 20 55 49 08 70 55 49 08 70 46 e0 32 2e 27 dd ff 20
+			5f 30 84 42 05 db 32 20 4f 49 08 70 4f 49 08 70 3a e0 a0 2c 05 db 32 20 4b 49 08 70 4b 49 08 70
+			32 e0 78 2c 05 db 2d 20 47 49 08 70 47 49 08 70 2a e0 32 2c 05 db 14 20 43 49 08 70 43 49 08 70
+			22 e0 0f 20 40 49 08 70 40 49 08 70 1c e0 a0 2c 05 db 5b 20 3c 49 08 70 3c 49 08 70 14 e0 78 2c
+			05 db 41 20 38 49 08 70 38 49 08 70 0c e0 32 2c 05 db 1c 20 34 49 08 70 34 49 08 70 04 e0 17 20
+			31 49 08 70 31 49 08 70 20 48 00 78 01 28 04 d1 0d 20 2d 49 08 70 2d 49 08 70 ff f7 af f9 ff f7
+			e9 fd 58 20 00 f0 f2 f9 01 20 29 49 08 70 20 48 00 78 00 28 01 d1 ff f7 67 fd 0c e0 00 f0 c8 fb
+			19 48 00 78 00 28 03 d1 1a 48 00 78 01 28 02 dd 54 20 00 f0 65 f9 ff f7 c3 fd 01 28 ee d0 ff f7
+			db f9 00 00 a8 2b 00 00 00 00 00 20 04 00 00 20 66 00 00 20 c4 2b 00 00 0b 00 00 20 ee 2b 00 00
+			26 2c 00 00 12 02 00 00 5e 2c 00 00 0a 00 00 20 8c 2b 00 00 05 00 00 20 06 00 00 20 07 00 00 20
+			08 00 00 20 09 00 00 20 10 00 00 20 30 00 00 20 5f 00 00 20 61 00 00 20 2a 00 00 20 31 00 00 20
+			26 00 00 20 0c 00 00 20 59 00 00 20 5a 00 00 20 17 00 00 20 00 28 06 d0 07 49 09 78 00 29 02 d1
+			05 49 08 70 07 e0 00 28 05 d1 03 49 09 78 00 29 01 d0 01 49 08 70 70 47 6e 00 00 20 70 47 00 b5
+			ff f7 5c fd 00 f0 a0 f8 00 f0 48 f8 00 f0 5c f8 00 f0 04 f8 ff f7 2b f8 00 bd 00 00 09 48 00 69
+			04 21 88 43 07 49 08 61 08 46 00 69 30 21 88 43 04 49 08 61 08 46 00 69 40 08 40 00 40 1c 08 61
+			70 47 00 00 00 50 00 40 09 48 00 69 40 08 40 00 07 49 08 61 08 46 00 69 04 21 88 43 00 1d 04 49
+			08 61 08 46 00 69 02 21 88 43 01 49 08 61 70 47 00 50 00 40 00 28 07 d0 07 49 09 69 02 22 91 43
+			89 1c 05 4a 11 61 05 e0 03 49 09 69 02 22 91 43 01 4a 11 61 70 47 00 00 00 50 00 40 09 48 00 68
+			04 21 88 43 07 49 08 60 08 46 00 68 30 21 88 43 10 30 04 49 08 60 08 46 00 68 40 08 40 00 40 1c
+			08 60 70 47 00 50 00 40 09 48 40 69 04 21 88 43 07 49 48 61 08 46 40 69 30 21 88 43 04 49 48 61
+			08 46 40 69 40 08 40 00 40 1c 48 61 70 47 00 00 00 50 00 40 09 48 40 69 02 21 88 43 07 49 48 61
+			08 46 40 69 40 08 40 00 48 61 08 46 40 69 04 21 88 43 00 1d 01 49 48 61 70 47 00 00 00 50 00 40
+			00 28 07 d0 07 49 49 69 02 22 91 43 89 1c 05 4a 51 61 05 e0 03 49 49 69 02 22 91 43 01 4a 51 61
+			70 47 00 00 00 50 00 40 09 48 40 68 04 21 88 43 07 49 48 60 08 46 40 68 30 21 88 43 20 30 04 49
+			48 60 08 46 40 68 40 08 40 00 40 1c 48 60 70 47 00 50 00 40 09 48 40 68 02 21 88 43 07 49 48 60
+			08 46 40 68 40 08 40 00 48 60 08 46 40 68 04 21 88 43 00 1d 01 49 48 60 70 47 00 00 00 50 00 40
+			00 28 07 d0 07 49 49 68 02 22 91 43 89 1c 05 4a 51 60 05 e0 03 49 49 68 02 22 91 43 01 4a 51 60
+			70 47 00 00 00 50 00 40 30 b5 03 46 10 48 04 78 10 48 00 78 98 42 01 dd 0e 48 03 70 0e 48 01 70
+			0e 48 02 70 91 42 00 da 0a 46 0a 48 00 78 90 42 02 dd 07 48 02 70 03 e0 06 48 00 78 04 4d 28 70
+			03 48 00 78 84 42 01 d0 05 20 30 bd 00 20 fc e7 59 00 00 20 5a 00 00 20 32 00 00 20 33 00 00 20
+			10 b5 04 46 00 f0 54 fa 00 20 ff f7 2f fc ff f7 4b ff 20 46 00 f0 6a f8 00 f0 02 f8 10 bd 00 00
+			00 bf 04 48 04 49 c8 60 bf f3 4f 8f 00 bf 00 bf fe e7 00 00 04 00 fa 05 00 ed 00 e0 10 b5 07 48
+			00 78 02 28 09 d0 05 48 00 78 01 28 03 d1 02 20 02 49 08 70 01 e0 ff f7 e3 ff 10 bd 61 00 00 20
+			10 b5 00 24 ff f7 e0 fe 00 bf 0d e0 00 20 ff f7 f1 fe 01 20 ff f7 34 f8 01 20 ff f7 eb fe 03 20
+			ff f7 2e f8 60 1c c4 b2 1e 2c ef db 10 bd 00 00 07 20 01 21 81 40 0f 4a 11 60 00 bf 0e 48 40 68
+			7d 21 c9 01 08 46 0c 49 48 60 08 46 00 68 40 21 88 43 40 30 08 49 08 60 08 46 00 68 20 21 88 43
+			20 30 05 49 08 60 08 46 00 68 40 08 40 00 08 60 70 47 00 00 00 e1 00 e0 00 10 00 40 02 49 09 68
+			c8 07 c0 0f 70 47 00 00 00 10 00 40 fe b5 05 46 00 27 00 f0 dd f9 01 95 00 20 3e 49 08 70 ff f7
+			29 ff fe f7 d3 ff 00 20 ff f7 3a ff fe f7 a6 ff 01 20 ff f7 35 ff 00 24 1f e0 37 48 00 78 00 28
+			03 d0 58 2d 01 d1 ff f7 bf fe 00 f0 c1 f9 00 bf 30 48 00 78 00 28 fb d0 00 f0 ba f9 06 20 01 1b
+			01 98 08 41 c0 07 c0 0f 00 90 00 98 ff f7 18 ff 00 20 28 49 08 70 60 1c c4 b2 07 2c dd db 00 f0
+			a7 f9 00 24 28 e0 24 48 00 78 00 28 03 d0 58 2d 01 d1 ff f7 99 fe 00 f0 9b f9 00 bf 1d 48 00 78
+			00 28 fb d0 00 f0 94 f9 00 2c 03 d1 ff f7 cc fe fe f7 8c ff 00 20 17 49 08 70 ff f7 89 fb 06 46
+			06 2c 07 d0 00 2c 05 d0 05 20 01 1b 30 46 88 40 38 43 c7 b2 60 1c c4 b2 07 2c d4 db 00 f0 78 f9
+			00 bf 0c 48 00 78 00 28 fb d0 00 f0 71 f9 ff f7 c1 fe fe f7 6b ff 00 20 ff f7 d2 fe 00 20 05 49
+			08 70 fe f7 3b ff fe f7 39 ff 00 f0 61 f9 38 46 fe bd 00 00 11 00 00 20 10 00 00 20 fe b5 05 46
+			00 27 00 f0 55 f9 01 95 00 20 3c 49 08 70 ff f7 a1 fe fe f7 4b ff 00 20 ff f7 b2 fe fe f7 1e ff
+			01 20 ff f7 ad fe 00 24 1f e0 35 48 00 78 00 28 03 d0 58 2d 01 d1 ff f7 37 fe 00 f0 39 f9 00 bf
+			2e 48 00 78 00 28 fb d0 00 f0 32 f9 06 20 01 1b 01 98 08 41 c0 07 c0 0f 00 90 00 98 ff f7 90 fe
+			00 20 26 49 08 70 60 1c c4 b2 07 2c dd db 00 f0 1f f9 00 24 24 e0 22 48 00 78 00 28 03 d0 58 2d
+			01 d1 ff f7 11 fe 00 f0 13 f9 00 bf 1b 48 00 78 00 28 fb d0 00 f0 0c f9 00 2c 03 d1 ff f7 44 fe
+			fe f7 04 ff 00 20 15 49 08 70 ff f7 01 fb 06 46 06 20 01 1b 30 46 88 40 38 43 c7 b2 60 1c c4 b2
+			07 2c d8 db 00 f0 f4 f8 00 bf 0c 48 00 78 00 28 fb d0 00 f0 ed f8 ff f7 3d fe fe f7 e7 fe 00 20
+			ff f7 4e fe 00 20 05 49 08 70 fe f7 b7 fe fe f7 b5 fe 00 f0 dd f8 38 46 fe bd 00 00 11 00 00 20
+			10 00 00 20 00 20 2f 49 08 70 2f 49 08 70 2f 49 08 70 2f 49 08 70 2f 49 08 70 2f 49 08 70 2f 49
+			08 70 2f 49 08 70 2f 49 08 70 01 20 2e 49 08 70 00 20 48 70 88 70 2d 49 08 70 2d 49 08 70 2d 49
+			08 70 2d 49 08 70 03 20 2c 49 08 70 00 20 2c 49 08 70 2c 49 08 70 2c 49 08 70 2c 49 08 80 40 1e
+			2b 49 08 80 00 20 2b 49 08 70 2b 49 08 70 5b 20 2a 49 08 70 2a 49 08 70 00 20 2a 49 08 70 2a 49
+			08 70 2a 49 08 70 5b 20 29 49 08 70 29 49 08 70 01 20 29 49 08 70 29 49 08 70 00 20 28 49 08 70
+			28 49 08 70 02 20 28 49 08 70 03 20 27 49 08 70 00 20 27 49 08 70 27 49 08 70 27 49 08 70 27 49
+			08 70 70 47 10 00 00 20 17 00 00 20 18 00 00 20 12 00 00 20 13 00 00 20 14 00 00 20 15 00 00 20
+			16 00 00 20 21 00 00 20 70 00 00 20 22 00 00 20 24 00 00 20 25 00 00 20 26 00 00 20 27 00 00 20
+			28 00 00 20 29 00 00 20 2a 00 00 20 2c 00 00 20 2e 00 00 20 30 00 00 20 31 00 00 20 32 00 00 20
+			33 00 00 20 34 00 00 20 37 00 00 20 58 00 00 20 59 00 00 20 5a 00 00 20 5b 00 00 20 5c 00 00 20
+			5d 00 00 20 5e 00 00 20 5f 00 00 20 60 00 00 20 61 00 00 20 66 00 00 20 0a 00 00 20 0b 00 00 20
+			f3 b5 81 b0 0d 46 00 24 00 26 00 27 00 20 00 90 01 98 fe f7 73 fc 04 46 28 46 fe f7 6f fc 06 46
+			a4 1b 7d 27 ff 00 78 00 00 90 bc 42 01 da 00 20 fe bd 00 98 84 42 01 dd 02 20 f9 e7 01 20 f7 e7
+			5a 20 02 49 08 61 80 20 08 61 70 47 00 70 00 40 5a 20 05 49 08 61 08 46 00 69 40 21 88 43 40 30
+			01 49 08 61 70 47 00 00 00 70 00 40 00 00 00 01 01 01 01 01 00 00 01 01 01 00 00 00 00 01 00 01
+			00 01 01 00 01 00 00 01 00 00 01 00 01 01 01 01 00 00 01 01 01 00 00 00 00 01 00 01 00 01 01 00
+			01 00 00 01 00 01 00 01 01 00 01 01 00 00 01 01 01 00 00 00 01 01 01 01 00 01 01 00 01 01 00 00
+			00 00 00 01 01 00 01 01 01 00 01 01 01 01 01 00 01 00 00 00 00 01 00 01 00 00 00 00 00 01 01 01
+			01 00 00 01 00 01 01 00 01 00 00 01 00 01 00 00 00 01 01 00 01 01 00 00 00 00 00 01 01 00 01 01
+			01 00 01 01 01 01 01 00 01 00 00 00 00 01 00 01 00 00 00 00 00 01 01 01 01 00 00 01 00 01 01 00
+			01 00 00 01 00 01 00 00 00 01 01 00 01 01 00 00 00 00 00 01 01 01 01 01 01 00 01 01 01 01 00 00
+			00 01 01 00 01 01 01 00 01 01 01 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 b8 2c 00 00 00 00 00 20
+			70 00 00 00 d0 00 00 00 28 2d 00 00 70 00 00 20 78 05 00 00 ec 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+			00 00 00 00 00 00 00 00 00 02 02 08 01 03 05 fe d4 34 55 34
+		];
+		#include "svooc_config.dtsi"
+	};
+};
+
+&pm7250b_bcl {
+	qcom,support-12A;
+};
+
+&usb_qmp_dp_phy {
+	status = "disabled";
+};
+
+&usb2_phy1 {
+	status = "disabled";
+};
+
+&usb0 {
+	/delete-property/ extcon;
+	dwc3@a600000 {
+		usb-phy = <&usb2_phy0>, <&usb_nop_phy>;
+		snps,usb2-lpm-disable;
+		maximum-speed = "high-speed";
+		dr_mode = "otg";
+	};
+};
+
+&usb1 {
+	status = "disabled";
+	dwc3@8c00000 {
+		status = "disabled";
+	};
+};
+
+&usb2_phy0 {
+	qcom,param-override-seq =
+			<0xe7 0x6c
+			 0xcc 0x70
+			 0x08 0x74
+			 0x70 0x78>;
+
+	qcom,param-override-seq-host =
+			<0x07 0x6c
+			 0xca 0x70
+			 0x08 0x74
+			 0x70 0x78>;
+};
+
+&pm7325_gpios {
+	pa_4g_gpio_default: pa_4g_gpio_default {
+		pins = "gpio1";
+		function = "normal";
+		bias-high-impedance;
+	};
+	pa_5g_gpio_default: pa_5g_gpio_default {
+		pins = "gpio4";
+		function = "normal";
+		bias-high-impedance;
+	};
+};
+
+&pm7250b_gpios {
+	cp_therm_gpio_default: cp_therm_gpio_default {
+		pins = "gpio8";
+		function = "normal";
+		bias-high-impedance;
+	};
+	bat_therm_a_board_gpio_default: bat_therm_a_board_gpio_default {
+		pins = "gpio5";
+		function = "normal";
+		bias-high-impedance;
+	};
+};
+
+&pmk8350_vadc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pa_4g_gpio_default &pa_5g_gpio_default>;
+
+	pa_4g_adc {
+		reg = <PM7325_ADC7_AMUX_THM5_100K_PU>;
+		label = "pa_4g_adc";
+		qcom,pre-scaling = <1 1>;
+		//qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		oplus,cust_type = <IIO_TEMP>;
+		oplus,cust_scale_fn_type = <SCALE_HW_CALIB_THERM_100K_PULLUP>;
+	};
+	pa_5g_adc {
+		reg = <PM7325_ADC7_GPIO3_100K_PU>;
+		label = "pa_5g_adc";
+		qcom,pre-scaling = <1 1>;
+		//qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		oplus,cust_type = <IIO_TEMP>;
+		oplus,cust_scale_fn_type = <SCALE_HW_CALIB_THERM_100K_PULLUP>;
+	};
+};
+
+
+&pm7250b_vadc {
+	pinctrl-names = "default";
+	pinctrl-0 = <&cp_therm_gpio_default &bat_therm_a_board_gpio_default>;
+
+	cp_therm_adc {
+		reg = <ADC5_GPIO4_100K_PU>;
+		label = "cp_therm_adc";
+		qcom,pre-scaling = <1 1>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		oplus,cust_type = <IIO_TEMP>;
+		oplus,cust_scale_fn_type = <SCALE_HW_CALIB_THERM_100K_PULLUP>;
+	};
+	bat_therm_a_board_adc {
+		reg = <ADC5_GPIO3_100K_PU>;
+		label = "bat_therm_a_board_adc";
+		qcom,pre-scaling = <1 1>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		oplus,cust_type = <IIO_TEMP>;
+		oplus,cust_scale_fn_type = <SCALE_HW_CALIB_THERM_100K_PULLUP>;
+	};
+};
+
+&pmk8350_adc_tm {
+	io-channels = <&pmk8350_vadc PM7325_ADC7_AMUX_THM1_100K_PU>,
+			<&pmk8350_vadc PM7325_ADC7_AMUX_THM2_100K_PU>,
+			<&pmk8350_vadc PM7325_ADC7_AMUX_THM3_100K_PU>,
+			<&pmk8350_vadc PM7325_ADC7_AMUX_THM4_100K_PU>,
+			<&pmk8350_vadc PMK8350_ADC7_AMUX_THM1_100K_PU>,
+			<&pmk8350_vadc PM7325_ADC7_AMUX_THM5_100K_PU>,
+			<&pmk8350_vadc PM7325_ADC7_GPIO3_100K_PU>;
+
+	pa_4g_therm {
+		reg = <PM7325_ADC7_AMUX_THM5_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
+	pa_5g_therm {
+		reg = <PM7325_ADC7_GPIO3_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+};
+
+&pm7250b_adc_tm {
+	io-channels = <&pm7250b_vadc ADC5_AMUX_THM1_100K_PU>,
+			<&pm7250b_vadc ADC5_AMUX_THM3_100K_PU>,
+			<&pm7250b_vadc ADC5_GPIO4_100K_PU>,
+			<&pm7250b_vadc ADC5_GPIO3_100K_PU>;
+
+	cp_ic_therm {
+		reg = <ADC5_GPIO4_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
+	tbatt_a_therm {
+		reg = <ADC5_GPIO3_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+};
+
+&thermal_zones {
+        pa_4g_therm-usr {
+                polling-delay-passive = <0>;
+                polling-delay = <0>;
+                thermal-governor = "user_space";
+                thermal-sensors = <&pmk8350_adc_tm PM7325_ADC7_AMUX_THM5_100K_PU>;
+                wake-capable-sensor;
+                trips {
+                        active-config0 {
+                                temperature = <125000>;
+                                hysteresis = <1000>;
+                                type = "passive";
+                        };
+                };
+        };
+
+        pa_5g_therm-usr {
+                polling-delay-passive = <0>;
+                polling-delay = <0>;
+                thermal-governor = "user_space";
+                thermal-sensors = <&pmk8350_adc_tm PM7325_ADC7_GPIO3_100K_PU>;
+                wake-capable-sensor;
+                trips {
+                        active-config0 {
+                                temperature = <125000>;
+                                hysteresis = <1000>;
+                                type = "passive";
+                        };
+                };
+        };
+
+        cp_ic_therm-usr {
+                polling-delay-passive = <0>;
+                polling-delay = <0>;
+                thermal-governor = "user_space";
+                thermal-sensors = <&pm7250b_adc_tm ADC5_GPIO4_100K_PU>;
+                wake-capable-sensor;
+                trips {
+                        active-config0 {
+                                temperature = <125000>;
+                                hysteresis = <1000>;
+                                type = "passive";
+                        };
+                };
+        };
+
+        tbatt_a_therm-usr {
+                polling-delay-passive = <0>;
+                polling-delay = <0>;
+                thermal-governor = "user_space";
+                thermal-sensors = <&pm7250b_adc_tm ADC5_GPIO3_100K_PU>;
+                wake-capable-sensor;
+                trips {
+                        active-config0 {
+                                temperature = <125000>;
+                                hysteresis = <1000>;
+                                type = "passive";
+                        };
+                };
+        };
+};
+
+/* #ifdef OPLUS_FEATURE_CHG_BASIC */
+&qupv3_se2_i2c {
+	status = "ok";
+	/* AWINIC AW8697 Haptic */
+	aw8697_haptic@5A {
+		compatible = "awinic,aw8697_haptic";
+		reg = <0x5A>;
+		reset-gpio = <&tlmm 47 0>;
+		irq-gpio = <&tlmm 11 0>;
+		status = "ok";
+		qcom,device_id = <815>; /* 809 */
+		oplus,rtp_f0_range = <1620 1780>;
+		/* haptic ic : aw86927 */
+		oplus,aw86927_boost_voltage = <80>; /* 0x50 */
+		haptic_hv_vmax = /bits/ 8 < 0x28 0x28 0x28 0x28 0x28 0x28 0x28 0x2C 0x30 0x34 0x38 0x3C 0x40 0x44 0x48 0x4C 0x50 >;
+		haptic_hv_gain = /bits/ 8 < 0x49 0x51 0x5A 0x62 0x6B 0x73 0x7C 0x80 0x80 0x80 0x80 0x80 0x80 0x80 0x80 0x80 0x80 >;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&aw_irq_gpio_default>;
+	};
+	/* AWINIC AW8697 Haptic End */
+};
+/* #endif OPLUS_FEATURE_CHG_BASIC */

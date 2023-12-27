@@ -1,0 +1,14 @@
+&sde_dsi {
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	/delete-property/ pinctrl-1;
+	pinctrl-names = "panel_active", "panel_suspend";
+	pinctrl-0 = <&sde_dsi_active &sde_te_active>;
+	pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend>;
+};
+
+&mdss_mdp {
+	/delete-property/ connectors;
+	connectors = <&smmu_sde_unsec &smmu_sde_sec &sde_wb &sde_dsi
+			&sde_dsi1 &sde_rscc>;
+};
