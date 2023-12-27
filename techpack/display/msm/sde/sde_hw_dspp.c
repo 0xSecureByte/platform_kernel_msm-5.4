@@ -66,17 +66,26 @@ static void dspp_pcc(struct sde_hw_dspp *c)
 	else if (c->cap->sblk->pcc.version ==
 			(SDE_COLOR_PROCESS_VER(0x4, 0x0))) {
 		ret = reg_dmav1_init_dspp_op_v4(SDE_DSPP_PCC, c->idx);
+#ifdef OPLUS_BUG_STABILITY
+		if (!ret)
+			c->ops.setup_pcc = sde_setup_dspp_pccv4;
+#else
 		if (!ret)
 			c->ops.setup_pcc = reg_dmav1_setup_dspp_pccv4;
+#endif  /* OPLUS_BUG_STABILITY */
 		else
 			c->ops.setup_pcc = sde_setup_dspp_pccv4;
 	} else if (c->cap->sblk->pcc.version ==
 			(SDE_COLOR_PROCESS_VER(0x5, 0x0))) {
 		ret = reg_dmav1_init_dspp_op_v4(SDE_DSPP_PCC, c->idx);
+#ifdef OPLUS_BUG_STABILITY
+			c->ops.setup_pcc = sde_setup_dspp_pccv4;
+#else
 		if (!ret)
 			c->ops.setup_pcc = reg_dmav1_setup_dspp_pccv5;
 		else
 			c->ops.setup_pcc = NULL;
+#endif  /* OPLUS_BUG_STABILITY */
 	}
 }
 
@@ -281,10 +290,7 @@ static void dspp_rc(struct sde_hw_dspp *c)
 		}
 
 		ret = reg_dmav1_init_dspp_op_v4(SDE_DSPP_RC, c->idx);
-		if (!ret)
-			c->ops.setup_rc_data =
-					sde_hw_rc_setup_data_dma;
-		else
+
 			c->ops.setup_rc_data =
 					sde_hw_rc_setup_data_ahb;
 

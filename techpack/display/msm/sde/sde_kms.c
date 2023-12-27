@@ -59,9 +59,24 @@
 #include "soc/qcom/secure_buffer.h"
 #include <linux/qtee_shmbridge.h>
 #include <linux/haven/hh_irq_lend.h>
+#if defined(OPLUS_FEATURE_PXLW_IRIS5) || defined(OPLUS_FEATURE_PXLW_IRISSOFT)
+#include "iris/dsi_iris5_api.h"
+#endif
 
 #define CREATE_TRACE_POINTS
 #include "sde_trace.h"
+#ifdef OPLUS_BUG_STABILITY
+#include "oplus_display_private_api.h"
+#include "oplus_onscreenfingerprint.h"
+#endif
+
+#ifdef OPLUS_BUG_STABILITY
+#include "oplus_adfr.h"
+#endif
+
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_THEIA)
+#include <soc/oplus/system/theia_send_event.h> /* for theia_send_event etc */
+#endif
 
 /* defines for secure channel call */
 #define MEM_PROTECT_SD_CTRL_SWITCH 0x18
@@ -989,9 +1004,11 @@ static void _sde_kms_drm_check_dpms(struct drm_atomic_state *old_state,
 			notifier_data.refresh_rate = new_fps;
 			notifier_data.id = connector->base.id;
 
+#ifndef OPLUS_BUG_STABILITY
 			if (connector->panel)
 				drm_panel_notifier_call_chain(connector->panel,
 							event, &notifier_data);
+#endif
 		}
 	}
 
@@ -1148,6 +1165,12 @@ static void sde_kms_prepare_commit(struct msm_kms *kms,
 	rc = pm_runtime_get_sync(sde_kms->dev->dev);
 	if (rc < 0) {
 		SDE_ERROR("failed to enable power resources %d\n", rc);
+#ifdef OPLUS_BUG_STABILITY
+		SDE_MM_ERROR("DisplayDriverID@@407$$failed to enable power resources %d\n", rc);
+#endif /* OPLUS_BUG_STABILITY */
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_THEIA)
+		theia_send_event(THEIA_EVENT_HARDWARE_ERROR, THEIA_LOGINFO_KERNEL_LOG, current->pid, "failed to enable power resources");
+#endif
 		SDE_EVT32(rc, SDE_EVTLOG_ERROR);
 		goto end;
 	}
@@ -1260,7 +1283,7 @@ static void _sde_kms_release_splash_resource(struct sde_kms *sde_kms,
 		for (i = 0; i < SDE_POWER_HANDLE_DBUS_ID_MAX; i++)
 			sde_power_data_bus_set_quota(phandle, i,
 				SDE_POWER_HANDLE_ENABLE_BUS_AB_QUOTA,
-				phandle->ib_quota[i]);
+				SDE_POWER_HANDLE_ENABLE_BUS_IB_QUOTA);
 		pm_runtime_put_sync(sde_kms->dev->dev);
 		sde_kms->splash_data.num_splash_displays--;
 	}
@@ -1286,7 +1309,7 @@ static void _sde_kms_release_splash_resource(struct sde_kms *sde_kms,
 		for (i = 0; i < SDE_POWER_HANDLE_DBUS_ID_MAX; i++)
 			sde_power_data_bus_set_quota(phandle, i,
 				SDE_POWER_HANDLE_ENABLE_BUS_AB_QUOTA,
-				phandle->ib_quota[i]);
+				SDE_POWER_HANDLE_ENABLE_BUS_IB_QUOTA);
 
 		pm_runtime_put_sync(sde_kms->dev->dev);
 	}
@@ -1474,6 +1497,8 @@ static void sde_kms_complete_commit(struct msm_kms *kms,
 	struct drm_connector_state *old_conn_state;
 	struct msm_display_conn_params params;
 	struct sde_vm_ops *vm_ops;
+	struct drm_encoder *drm_enc;
+	bool update_perf = true;
 	int i, rc = 0;
 
 	if (!kms || !old_state)
@@ -1492,7 +1517,14 @@ static void sde_kms_complete_commit(struct msm_kms *kms,
 	SDE_ATRACE_BEGIN("sde_kms_complete_commit");
 
 	for_each_old_crtc_in_state(old_state, crtc, old_crtc_state, i) {
-		sde_crtc_complete_commit(crtc, old_crtc_state);
+		drm_for_each_encoder_mask(drm_enc, crtc->dev, old_crtc_state->encoder_mask) {
+			if (sde_encoder_in_clone_mode(drm_enc))
+				continue;
+
+			sde_encoder_update_complete_commit(drm_enc, old_crtc_state, &update_perf);
+		}
+
+		sde_crtc_complete_commit(crtc, old_crtc_state, update_perf);
 
 		/* complete secure transitions if any */
 		if (sde_kms->smmu_state.transition_type == POST_COMMIT)
@@ -1531,6 +1563,24 @@ static void sde_kms_complete_commit(struct msm_kms *kms,
 
 	for_each_old_crtc_in_state(old_state, crtc, old_crtc_state, i)
 		_sde_kms_release_splash_resource(sde_kms, crtc);
+
+#ifdef OPLUS_BUG_STABILITY
+	if (oplus_adfr_is_support()) {
+		if (oplus_adfr_get_vsync_mode() == OPLUS_DOUBLE_TE_VSYNC) {
+			SDE_ATRACE_BEGIN("sde_kms_adfr_vsync_source_switch");
+			for_each_old_crtc_in_state(old_state, crtc, old_crtc_state, i) {
+				sde_kms_adfr_vsync_source_switch(kms, crtc);
+			}
+			SDE_ATRACE_END("sde_kms_adfr_vsync_source_switch");
+		} else if (oplus_adfr_get_vsync_mode() == OPLUS_EXTERNAL_TE_TP_VSYNC) {
+			SDE_ATRACE_BEGIN("sde_kms_adfr_vsync_switch");
+			for_each_old_crtc_in_state(old_state, crtc, old_crtc_state, i) {
+				sde_kms_adfr_vsync_switch(kms, crtc);
+			}
+			SDE_ATRACE_END("sde_kms_adfr_vsync_switch");
+		}
+	}
+#endif
 
 	SDE_EVT32_VERBOSE(SDE_EVTLOG_FUNC_EXIT);
 	SDE_ATRACE_END("sde_kms_complete_commit");
@@ -1597,7 +1647,7 @@ static void sde_kms_wait_for_commit_done(struct msm_kms *kms,
 
 	sde_crtc_static_cache_read_kickoff(crtc);
 
-	SDE_ATRACE_END("sde_ksm_wait_for_commit_done");
+	SDE_ATRACE_END("sde_kms_wait_for_commit_done");
 }
 
 static void sde_kms_prepare_fence(struct msm_kms *kms,
@@ -1748,7 +1798,11 @@ static int _sde_kms_setup_displays(struct drm_device *dev,
 		.soft_reset   = dsi_display_soft_reset,
 		.pre_kickoff  = dsi_conn_pre_kickoff,
 		.clk_ctrl = dsi_display_clk_ctrl,
+#ifdef OPLUS_BUG_STABILITY
+		.set_power = dsi_display_oplus_set_power,
+#else
 		.set_power = dsi_display_set_power,
+#endif
 		.get_mode_info = dsi_conn_get_mode_info,
 		.get_dst_format = dsi_display_get_dst_format,
 		.post_kickoff = dsi_conn_post_kickoff,
@@ -1763,7 +1817,12 @@ static int _sde_kms_setup_displays(struct drm_device *dev,
 		.install_properties = NULL,
 		.set_allowed_mode_switch = dsi_conn_set_allowed_mode_switch,
 		.get_qsync_min_fps = dsi_display_get_qsync_min_fps,
+#ifdef OPLUS_BUG_STABILITY
+		// enable qsync on/off cmds
+		.prepare_commit = dsi_display_pre_commit,
+#else
 		.prepare_commit = dsi_conn_prepare_commit,
+#endif
 		.get_num_lm_from_mode = dsi_conn_get_lm_from_mode,
 	};
 	static const struct sde_connector_ops wb_ops = {
@@ -3076,6 +3135,11 @@ static int sde_kms_atomic_check(struct msm_kms *kms,
 	sde_kms = to_sde_kms(kms);
 	dev = sde_kms->dev;
 
+	if (!dev) {
+		SDE_ERROR("invalid device\n");
+		return -EINVAL;
+	}
+
 	SDE_ATRACE_BEGIN("atomic_check");
 	if (sde_kms_is_suspend_blocked(dev)) {
 		SDE_DEBUG("suspended, skip atomic_check\n");
@@ -4144,6 +4208,9 @@ static const struct msm_kms_funcs kms_funcs = {
 	.check_for_splash = sde_kms_check_for_splash,
 	.get_mixer_count = sde_kms_get_mixer_count,
 	.get_dsc_count = sde_kms_get_dsc_count,
+#if defined(OPLUS_FEATURE_PXLW_IRIS5) || defined(OPLUS_FEATURE_PXLW_IRISSOFT)
+	.iris_operate = iris_sde_kms_iris_operate,
+#endif
 };
 
 static int _sde_kms_mmu_destroy(struct sde_kms *sde_kms)

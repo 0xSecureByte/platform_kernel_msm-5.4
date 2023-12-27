@@ -3,6 +3,7 @@ ccflags-y := -I$(srctree)/include/drm -I$(srctree)/techpack/display/msm -I$(srct
 ccflags-y += -I$(srctree)/techpack/display/msm/sde
 ccflags-y += -I$(srctree)/techpack/display/rotator
 ccflags-y += -I$(srctree)/techpack/display/hdcp
+ccflags-y += -I$(srctree)/techpack/display/oplus
 ccflags-y += -I$(srctree)/drivers/clk/qcom/
 
 msm_drm-$(CONFIG_DRM_MSM_DP) += dp/dp_altmode.o \
@@ -138,6 +139,26 @@ msm_drm-$(CONFIG_DRM_MSM) += \
 	msm_cooling_device.o \
 	msm_prop.o
 
+#ifdef OPLUS_BUG_STABILITY
+###########################################################################################
+#build oplus so
+msm_drm-$(CONFIG_DRM_OPLUS) += ../oplus/oplus_dsi_support.o \
+	../oplus/oplus_display_private_api.o \
+	../oplus/oplus_dc_diming.o \
+	../oplus/oplus_onscreenfingerprint.o \
+	../oplus/oplus_aod.o \
+	../oplus/oplus_ffl.o \
+	../oplus/oplus_display_panel.o \
+	../oplus/oplus_display_panel_power.o \
+	../oplus/oplus_display_panel_seed.o \
+	../oplus/oplus_display_panel_common.o \
+	../oplus/oplus_display_panel_hbm.o \
+	../oplus/oplus_display_esd.o \
+	../oplus/oplus_bl.o
+#endif /*OPLUS_BUG_STABILITY*/
+
+msm_drm-$(CONFIG_DRM_OPLUS) += ../oplus/oplus_adfr.o
+
 msm_drm-$(CONFIG_HDCP_QSEECOM) += ../hdcp/msm_hdcp.o \
 
 msm_drm-$(CONFIG_MSM_SDE_ROTATOR) += ../rotator/sde_rotator_dev.o \
@@ -157,6 +178,31 @@ msm_drm-$(CONFIG_MSM_SDE_ROTATOR) += ../rotator/sde_rotator_dev.o \
 	../rotator/sde_rotator_r1_debug.o \
 	../rotator/sde_rotator_r3_debug.o
 
-obj-$(CONFIG_DISPLAY_BUILD)	+= msm_drm.o
+oplus_notify-$(CONFIG_DRM_OPLUS_NOTIFY) += ../oplus/oplus_notify.o
+oplus_lcm_brightness_notify-$(CONFIG_DRM_LCM_BRIGHTNESS_NOTIFY) += ../oplus/oplus_lcm_brightness_notify.o
 
+ifeq ($(findstring OPLUS_FEATURE_PXLW_IRIS5,$(KBUILD_CFLAGS)),OPLUS_FEATURE_PXLW_IRIS5)
+msm_drm-$(CONFIG_DRM_MSM_DSI) += dsi/iris/dsi_iris5_ioctl.o \
+                               dsi/iris/dsi_iris5_lightup.o \
+                               dsi/iris/dsi_iris5_lightup_ocp.o \
+                               dsi/iris/dsi_iris5_lp.o \
+                               dsi/iris/dsi_iris5_lut.o \
+                               dsi/iris/dsi_iris5_pq.o \
+                               dsi/iris/dsi_iris5_mode_switch.o \
+                               dsi/iris/dsi_iris5_cmds.o \
+                               dsi/iris/dsi_iris5_i3c.o \
+                               dsi/iris/dsi_iris5_i2c.o \
+                               dsi/iris/dsi_iris5_loop_back.o \
+                               dsi/iris/dsi_iris5_gpio.o \
+                               dsi/iris/dsi_iris5_frc.o \
+                               dsi/iris/dsi_iris5_timing_switch.o \
+                               dsi/iris/dsi_iris5_dbg.o \
+                               dsi/iris/msm_iris5_extended.o \
+                               dsi/iris/sde_iris5_extended.o \
+                               dsi/iris/dsi_iris5_extended.o
+endif #/* OPLUS_FEATURE_PXLW_IRIS5 */
+
+obj-$(CONFIG_DISPLAY_BUILD)	+= msm_drm.o
+obj-$(CONFIG_DRM_OPLUS_NOTIFY) += oplus_notify.o
 obj-$(CONFIG_DRM_FBDEV_EMULATION) += msm_fbdev.o
+obj-$(CONFIG_DRM_LCM_BRIGHTNESS_NOTIFY) += oplus_lcm_brightness_notify.o

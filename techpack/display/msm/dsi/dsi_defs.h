@@ -31,6 +31,16 @@
 								##__VA_ARGS__)
 #define DSI_DEBUG(fmt, ...)	DRM_DEV_DEBUG(NULL, "[msm-dsi-debug]: "fmt, \
 								##__VA_ARGS__)
+
+#ifdef OPLUS_BUG_STABILITY
+#include <soc/oplus/system/oplus_mm_kevent_fb.h>
+#define DSI_MM_ERR(fmt, ...)	\
+	do { \
+			DRM_DEV_ERROR(NULL, "[msm-dsi-error]: " fmt, ##__VA_ARGS__); \
+			mm_fb_display_kevent_named(MM_FB_KEY_RATELIMIT_1H, fmt, ##__VA_ARGS__); \
+	} while(0)
+#endif /* OPLUS_BUG_STABILITY */
+
 /**
  * enum dsi_pixel_format - DSI pixel formats
  * @DSI_PIXEL_FORMAT_RGB565:
@@ -289,8 +299,95 @@ enum dsi_cmd_set_type {
 	DSI_CMD_SET_POST_TIMING_SWITCH,
 	DSI_CMD_SET_QSYNC_ON,
 	DSI_CMD_SET_QSYNC_OFF,
+#ifdef OPLUS_BUG_STABILITY
+	DSI_CMD_POST_ON_BACKLIGHT,
+	DSI_CMD_AOD_ON,
+	DSI_CMD_AOD_OFF,
+	DSI_CMD_HBM_ON,
+	DSI_CMD_HBM_OFF,
+	DSI_CMD_AOD_HBM_ON,
+	DSI_CMD_AOD_HBM_OFF,
+	DSI_CMD_SEED_MODE0,
+	DSI_CMD_SEED_MODE1,
+	DSI_CMD_SEED_MODE2,
+	DSI_CMD_SEED_MODE3,
+	DSI_CMD_SEED_MODE4,
+	DSI_CMD_SEED_MODE8,
+	DSI_CMD_SEED_OFF,
+	DSI_CMD_NORMAL_HBM_ON,
+	DSI_CMD_AOD_HIGH_LIGHT_MODE,
+	DSI_CMD_AOD_LOW_LIGHT_MODE,
+	DSI_CMD_SPR_MODE0,
+	DSI_CMD_SPR_MODE1,
+	DSI_CMD_SPR_MODE2,
+	DSI_CMD_DATA_DIMMING_ON,
+	DSI_CMD_DATA_DIMMING_OFF,
+	DSI_CMD_OSC_CLK_MODEO0,
+	DSI_CMD_OSC_CLK_MODEO1,
+	DSI_CMD_SET_PANEL_ID1,
+	DSI_CMD_READ_SAMSUNG_PANEL_REGISTER_ON,
+	DSI_CMD_READ_SAMSUNG_PANEL_REGISTER_OFF,
+	/* ID9 and above use */
+	DSI_CMD_SET_OPEC_ON,
+	/* ID7 and ID8 use */
+	DSI_CMD_SET_OPEC_ON_ID7,
+	/* ID7 and above use */
+	DSI_CMD_LOADING_EFFECT_MODE1,
+	/* ID1~ID6 and ID15 use */
+	DSI_CMD_LOADING_EFFECT_MODE1_ID6,
+	DSI_CMD_LOADING_EFFECT_MODE2,
+	DSI_CMD_LOADING_EFFECT_MODE2_ID6,
+	DSI_CMD_LOADING_EFFECT_OFF,
+	DSI_CMD_LOADING_EFFECT_OFF_ID6,
+	DSI_CMD_HBM_ENTER_SWITCH,
+	DSI_CMD_HBM_EXIT_SWITCH,
+	DSI_CMD_HBM_AOR_RESTORE,
+	DSI_CMD_SET_LP1_PVT,  /*DSI_CMD_SET_LP1*/
+	DSI_CMD_SET_NOLP_PVT, /*DSI_CMD_SET_NOLP*/
+	DSI_CMD_AOD_HBM_ON_PVT,  /*DSI_CMD_AOD_HBM_ON*/
+	DSI_CMD_AOD_HBM_OFF_PVT, /*DSI_CMD_AOD_HBM_OFF*/
+#endif
+#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+	DSI_CMD_SET_ABYP,
+#endif
+
+#ifdef OPLUS_BUG_STABILITY
+	DSI_CMD_QSYNC_MIN_FPS_0,
+	DSI_CMD_QSYNC_MIN_FPS_1,
+	DSI_CMD_QSYNC_MIN_FPS_2,
+	DSI_CMD_QSYNC_MIN_FPS_3,
+	DSI_CMD_QSYNC_MIN_FPS_4,
+	DSI_CMD_QSYNC_MIN_FPS_5,
+	DSI_CMD_QSYNC_MIN_FPS_6,
+	DSI_CMD_QSYNC_MIN_FPS_7,
+	DSI_CMD_QSYNC_MIN_FPS_8,
+	DSI_CMD_QSYNC_MIN_FPS_9,
+	DSI_CMD_FAKEFRAME,
+	DSI_CMD_ADFR_PRE_SWITCH,
+	DSI_CMD_DLY_ON,
+	DSI_CMD_DLY_OFF,
+	DSI_CMD_SEED_DC_MODE0,
+	DSI_CMD_SEED_DC_MODE1,
+	DSI_CMD_SEED_DC_MODE2,
+	DSI_CMD_ROUND_CORNER_ON,
+	DSI_CMD_ROUND_CORNER_OFF,
+	DSI_CMD_CABC_OFF,
+	DSI_CMD_CABC_UI,
+	DSI_CMD_CABC_IMAGE,
+	DSI_CMD_CABC_VIDEO,
+	/* Add for 21005 esd check switch page */
+	DSI_CMD_ESD_SWITCH_PAGE,
+	DSI_CMD_FPS_CHANGE,
+	DSI_CMD_PANEL_INFO_SWITCH_PAGE,
+	DSI_CMD_DEFAULT_SWITCH_PAGE,
+#endif
+
 	DSI_CMD_SET_MAX
 };
+
+#ifdef OPLUS_BUG_STABILITY
+#define DSI_CMD_QSYNC_MIN_FPS_COUNTS 10
+#endif
 
 /**
  * enum dsi_cmd_set_state - command set state
@@ -632,6 +729,28 @@ struct dsi_display_mode_priv_info {
 	struct msm_roi_caps roi_caps;
 	bool widebus_support;
 	u32 allowed_mode_switch;
+#ifdef OPLUS_BUG_STABILITY
+	int fod_on_vblank;
+	int fod_off_vblank;
+#endif /* OPLUS_BUG_STABILITY */
+
+#ifdef OPLUS_BUG_STABILITY
+	u32 qsync_min_fps_sets_size;
+	u32 qsync_min_fps_sets[DSI_CMD_QSYNC_MIN_FPS_COUNTS];
+	u32 current_qsync_mode;
+	// fakeframe_config: 0st Bit:firsttime 1st Bit:secondtime, 1:enable 0:disable
+	// for example, 3 mean both first and second time should send fake frame
+	u32 fakeframe_config;
+	u32 deferred_fakeframe_time;
+#endif
+#ifdef OPLUS_BUG_STABILITY
+	/* Add for apollo */
+	/* width & period of vsync may not conform to refresh rate
+	 * add variable to store width & period of vsync
+	 */
+	u32 vsync_width;
+	u32 vsync_period;
+#endif /* OPLUS_BUG_STABILITY */
 };
 
 /**
@@ -647,6 +766,9 @@ struct dsi_display_mode {
 	struct dsi_mode_info timing;
 	u32 pixel_clk_khz;
 	u32 dsi_mode_flags;
+#ifdef OPLUS_BUG_STABILITY
+	u32 vsync_source;
+#endif
 	enum dsi_op_mode panel_mode;
 	bool is_preferred;
 	struct dsi_display_mode_priv_info *priv_info;

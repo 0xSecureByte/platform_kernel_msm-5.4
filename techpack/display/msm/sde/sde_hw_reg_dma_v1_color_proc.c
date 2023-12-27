@@ -4059,6 +4059,7 @@ static void _dspp_igcv4_off(struct sde_hw_dspp *ctx, void *cfg)
 	_perform_sbdma_kickoff(ctx, hw_cfg, dma_ops, blk, IGC);
 }
 
+extern oplus_dither_enable;
 void reg_dmav2_setup_dspp_igcv4(struct sde_hw_dspp *ctx, void *cfg)
 {
 	struct drm_msm_igc_lut *lut_cfg;
@@ -4132,9 +4133,16 @@ void reg_dmav2_setup_dspp_igcv4(struct sde_hw_dspp *ctx, void *cfg)
 		data[j++] = (u16)(lut_cfg->c0[i] << 4);
 		data[j++] = (u16)(lut_cfg->c1[i] << 4);
 	}
+#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+	// WA: set last IGC values
+	data[j++] = (u16)(lut_cfg->c2_last << 4);
+	data[j++] = (u16)(lut_cfg->c0_last << 4);
+	data[j++] = (u16)(lut_cfg->c1_last << 4);
+#else
 	data[j++] = (4095 << 4);
 	data[j++] = (4095 << 4);
 	data[j++] = (4095 << 4);
+#endif
 	REG_DMA_SETUP_OPS(dma_write_cfg, 0, (u32 *)data, len,
 			REG_BLK_LUT_WRITE, 0, 0, 0);
 	/* table select is only relevant to SSPP Gamut */
@@ -4150,9 +4158,15 @@ void reg_dmav2_setup_dspp_igcv4(struct sde_hw_dspp *ctx, void *cfg)
 	}
 
 	reg = BIT(8);
-	if (lut_cfg->flags & IGC_DITHER_ENABLE) {
+	if(oplus_dither_enable) {
+		lut_cfg->strength = 4;
 		reg |= BIT(4);
 		reg |= (lut_cfg->strength & IGC_DITHER_DATA_MASK);
+	} else {
+		if (lut_cfg->flags & IGC_DITHER_ENABLE) {
+			reg |= BIT(4);
+			reg |= (lut_cfg->strength & IGC_DITHER_DATA_MASK);
+		}
 	}
 
 	REG_DMA_SETUP_OPS(dma_write_cfg, ctx->cap->sblk->igc.base + 0x4,

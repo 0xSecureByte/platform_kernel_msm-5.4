@@ -206,6 +206,10 @@ int sde_cp_ltm_off_event_handler(struct drm_crtc *crtc_drm, bool en,
  */
 void sde_cp_crtc_res_change(struct drm_crtc *crtc_drm);
 
+#ifdef OPLUS_BUG_STABILITY
+struct sde_kms *get_kms_(struct drm_crtc *crtc);
+#endif
+
 /**
  * sde_cp_crtc_vm_primary_handoff: Properly handoff CRTC color mode features
  * when switching from primary VM to trusted VM

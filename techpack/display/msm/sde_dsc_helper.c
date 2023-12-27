@@ -6,6 +6,9 @@
 #include "msm_drv.h"
 #include "sde_dsc_helper.h"
 #include "sde_kms.h"
+#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+#include "iris/dsi_iris5_api.h"
+#endif
 
 
 #define SDE_DSC_PPS_SIZE       128
@@ -80,6 +83,10 @@ static char sde_dsc_rc_range_max_qp[DSC_RATIO_TYPE_MAX][DSC_NUM_BUF_RANGES] = {
 	{2, 5, 5, 6, 6, 7, 7, 8, 9, 9, 10, 11, 11, 12, 13},
 	};
 
+#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+static char dsi_dsc_rc_range_max_qp_1_1_pxlw[15] = {
+	8, 8, 9, 10, 11, 11, 11, 12, 13, 13, 14, 14, 15, 15, 16};
+#endif
 /*
  * Rate control - bpg offset values for each ratio type in sde_dsc_ratio_type
  */
@@ -223,15 +230,20 @@ int sde_dsc_populate_dsc_config(struct drm_dsc_config *dsc, int scr_ver) {
 
 	dsc->rc_model_size = 8192;
 
-	if ((dsc->dsc_version_major == 0x1) &&
-			(dsc->dsc_version_minor == 0x1)) {
+//#ifdef OPLUS_BUG_STABILITY
+	if ((dsc->dsc_version_major == 0x1) && (dsc->dsc_version_minor == 0x1)) {
 		if (scr_ver == 0x1)
 			dsc->first_line_bpg_offset = 15;
+		#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+		else if (iris_is_chip_supported() && dsc->bits_per_component == 10 && (DSC_BPP(*dsc) == 10))
+		dsc->first_line_bpg_offset = 9;
+		#endif
 		else
 			dsc->first_line_bpg_offset = 12;
 	} else if (dsc->dsc_version_minor == 0x2) {
-		dsc->first_line_bpg_offset = _get_dsc_v1_2_bpg_offset(dsc);
+			dsc->first_line_bpg_offset = _get_dsc_v1_2_bpg_offset(dsc);
 	}
+//#endif
 
 	dsc->rc_edge_factor = 6;
 	dsc->rc_tgt_offset_high = 3;
@@ -255,6 +267,11 @@ int sde_dsc_populate_dsc_config(struct drm_dsc_config *dsc, int scr_ver) {
 			sde_dsc_rc_range_min_qp[ratio_idx][i];
 		dsc->rc_range_params[i].range_max_qp =
 			sde_dsc_rc_range_max_qp[ratio_idx][i];
+#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+		if (iris_is_chip_supported() && ratio_idx == DSC_V11_10BPC_10BPP)
+			dsc->rc_range_params[i].range_max_qp =
+				dsi_dsc_rc_range_max_qp_1_1_pxlw[i];
+#endif
 		dsc->rc_range_params[i].range_bpg_offset =
 			sde_dsc_rc_range_bpg[ratio_idx][i];
 	}

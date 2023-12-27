@@ -167,7 +167,7 @@ struct sde_power_handle {
 	u32 last_event_handled;
 	struct sde_rsc_client *rsc_client;
 	bool rsc_client_init;
-	u64 ib_quota[SDE_POWER_HANDLE_DBUS_ID_MAX];
+	//u64 ib_quota[SDE_POWER_HANDLE_DBUS_ID_MAX];
 };
 
 /**
