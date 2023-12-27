@@ -834,9 +834,12 @@ static void _sde_core_perf_crtc_update_check(struct drm_crtc *crtc,
 	struct sde_core_perf_params *old = &sde_crtc->cur_perf;
 	struct sde_core_perf_params *new = &sde_crtc->new_perf;
 	int i;
+	bool bw_change_req = true;
 
 	if (!kms)
 		return;
+
+	bw_change_req = sde_encoder_in_crtc_has_fps_switch_flag_set(crtc) ? false : true;
 
 	for (i = 0; i < SDE_POWER_HANDLE_DBUS_ID_MAX; i++) {
 		/*
@@ -882,8 +885,8 @@ static void _sde_core_perf_crtc_update_check(struct drm_crtc *crtc,
 				get_sde_rsc_current_state(SDE_RSC_INDEX) !=
 				SDE_RSC_CLK_STATE) {
 			/* update new bandwidth in all cases */
-			if (params_changed && ((new->bw_ctl[i] !=
-					old->bw_ctl[i]) ||
+			if (bw_change_req && params_changed &&
+				 ((new->bw_ctl[i] != old->bw_ctl[i]) ||
 					(new->max_per_pipe_ib[i] !=
 					old->max_per_pipe_ib[i]))) {
 				old->bw_ctl[i] = new->bw_ctl[i];

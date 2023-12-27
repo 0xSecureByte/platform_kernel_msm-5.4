@@ -11,6 +11,12 @@
 #include "sde_hw_pingpong.h"
 #include "sde_dbg.h"
 #include "sde_kms.h"
+#include "dsi_display.h"
+#include "oplus_display_private_api.h"
+
+#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+#include "iris/dsi_iris5_api.h"
+#endif
 
 #define PP_TEAR_CHECK_EN                0x000
 #define PP_SYNC_CONFIG_VSYNC            0x004
@@ -322,9 +328,16 @@ static int sde_hw_pp_setup_dither(struct sde_hw_pingpong *pp,
 	struct drm_msm_dither *dither = (struct drm_msm_dither *)cfg;
 	u32 base = 0, offset = 0, data = 0, i = 0;
 
+//#ifdef OPLUS_BUG_STABILITY
+	struct dsi_display *display = get_main_display();
+	if (!display || !display->panel) {
+		pr_err("sde_hw_pp_setup_dither failed to find display panel \n");
+		return -EINVAL;
+	}
+//#endif
+
 	if (!pp)
 		return -EINVAL;
-
 	c = &pp->hw;
 	base = pp->caps->sblk->dither.base;
 	if (!dither) {
@@ -346,11 +359,24 @@ static int sde_hw_pp_setup_dither(struct sde_hw_pingpong *pp,
 		return -EINVAL;
 
 	offset += 4;
-	data = dither_depth_map[dither->c0_bitdepth] & REG_MASK(2);
-	data |= (dither_depth_map[dither->c1_bitdepth] & REG_MASK(2)) << 2;
-	data |= (dither_depth_map[dither->c2_bitdepth] & REG_MASK(2)) << 4;
-	data |= (dither_depth_map[dither->c3_bitdepth] & REG_MASK(2)) << 6;
-	data |= (dither->temporal_en) ? (1 << 8) : 0;
+#if defined(OPLUS_FEATURE_PXLW_IRIS5)
+	iris_sde_update_dither_depth_map(dither_depth_map);
+#endif
+//#ifdef OPLUS_BUG_STABILITY
+	if (!strcmp(display->panel->oplus_priv.vendor_name, "AMS662ZS01")) {
+		data = 2 & REG_MASK(2);
+		data |= (2 & REG_MASK(2)) << 2;
+		data |= (2 & REG_MASK(2)) << 4;
+		data |= (2 & REG_MASK(2)) << 6;
+		data |=  (1 << 8);
+	} else {
+//#endif
+		data = dither_depth_map[dither->c0_bitdepth] & REG_MASK(2);
+		data |= (dither_depth_map[dither->c1_bitdepth] & REG_MASK(2)) << 2;
+		data |= (dither_depth_map[dither->c2_bitdepth] & REG_MASK(2)) << 4;
+		data |= (dither_depth_map[dither->c3_bitdepth] & REG_MASK(2)) << 6;
+		data |= (dither->temporal_en) ? (1 << 8) : 0;
+	}
 	SDE_REG_WRITE(c, base + offset, data);
 
 	for (i = 0; i < DITHER_MATRIX_SZ - 3; i += 4) {
@@ -361,13 +387,15 @@ static int sde_hw_pp_setup_dither(struct sde_hw_pingpong *pp,
 			((dither->matrix[i + 3] & REG_MASK(4)) << 12);
 		SDE_REG_WRITE(c, base + offset, data);
 	}
-
-	if (test_bit(SDE_PINGPONG_DITHER_LUMA, &pp->caps->features)
-				&& (dither->flags & DITHER_LUMA_MODE))
+//#ifdef OPLUS_BUG_STABILITY
+	if((strcmp(display->panel->name, "samsung amb655x fhd cmd mode dsc dsi panel") == 0) ||
+		!strcmp(display->panel->oplus_priv.vendor_name, "AMS662ZS01") ||
+		is_support_panel_dither(display->panel)) {
 		SDE_REG_WRITE(c, base, 0x11);
-	else
-		SDE_REG_WRITE(c, base, 1);
-
+	} else {
+		SDE_REG_WRITE(c, base, 0);
+	}
+//#endif
 	return 0;
 }
 

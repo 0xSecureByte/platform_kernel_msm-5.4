@@ -338,6 +338,18 @@ struct sde_encoder_phys {
 	int vfp_cached;
 	enum frame_trigger_mode_type frame_trigger_mode;
 	bool recovered;
+
+#ifdef OPLUS_BUG_STABILITY
+	//2 : transferring (wr_ptr_irq)
+	//1 : transfer finish (pp_tx_done_irq)
+	//0 : panel read finish (rd_ptr_irq)
+	//disable qsync or wait vblank to avoid tearing
+	atomic_t frame_state;
+	//threshold for current frame
+	u32 current_sync_threshold_start;
+	//threshold for current qsync mode
+	u32 qsync_sync_threshold_start;
+#endif
 };
 
 static inline int sde_encoder_phys_inc_pending(struct sde_encoder_phys *phys)

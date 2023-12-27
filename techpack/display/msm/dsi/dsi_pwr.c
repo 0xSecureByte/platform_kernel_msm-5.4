@@ -433,6 +433,10 @@ int dsi_pwr_enable_regulator(struct dsi_regulator_info *regs, bool enable)
 	return rc;
 }
 
+#ifdef OPLUS_BUG_STABILITY
+EXPORT_SYMBOL(dsi_pwr_enable_regulator);
+#endif
+
 /*
  * dsi_pwr_panel_regulator_mode_set()
  * set the AB/IBB regulator mode for OLED panel

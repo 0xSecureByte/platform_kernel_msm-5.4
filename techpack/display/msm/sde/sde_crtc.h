@@ -400,6 +400,7 @@ struct sde_crtc {
 enum sde_crtc_dirty_flags {
 	SDE_CRTC_DIRTY_DEST_SCALER,
 	SDE_CRTC_DIRTY_DIM_LAYERS,
+	SDE_CRTC_DIRTY_UIDLE,
 	SDE_CRTC_DIRTY_MAX,
 };
 
@@ -463,6 +464,13 @@ struct sde_crtc_state {
 	struct sde_hw_scaler3_lut_cfg scl3_lut_cfg;
 
 	struct sde_core_perf_params new_perf;
+#ifdef OPLUS_BUG_STABILITY
+	bool fingerprint_mode;
+	bool fingerprint_pressed;
+	bool fingerprint_defer_sync;
+	struct sde_hw_dim_layer *fingerprint_dim_layer;
+	bool aod_skip_pcc;
+#endif
 };
 
 enum sde_crtc_irq_state {
@@ -626,7 +634,7 @@ void sde_crtc_prepare_commit(struct drm_crtc *crtc,
  * @old_state: Pointer to drm crtc old state object
  */
 void sde_crtc_complete_commit(struct drm_crtc *crtc,
-		struct drm_crtc_state *old_state);
+	struct drm_crtc_state *old_state, bool update_perf);
 
 /**
  * sde_crtc_init - create a new crtc object
@@ -914,6 +922,10 @@ void sde_crtc_misr_setup(struct drm_crtc *crtc, bool enable, u32 frame_count);
  */
 void sde_crtc_get_misr_info(struct drm_crtc *crtc,
 		struct sde_crtc_misr_info *crtc_misr_info);
+
+#ifdef OPLUS_BUG_STABILITY
+struct sde_kms *_sde_crtc_get_kms_(struct drm_crtc *crtc);
+#endif
 
 /**
  * sde_crtc_set_bpp - set src and target bpp values
