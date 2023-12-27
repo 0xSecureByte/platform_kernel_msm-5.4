@@ -172,6 +172,10 @@ ifdef CONFIG_SND_SOC_MSM_QDSP6V2_VM
 	Q6_OBJS += q6_init.o
 endif
 
+ifdef CONFIG_OPLUS_FEATURE_MM_FEEDBACK
+	Q6_OBJS += oplus_lvve_err_fb.o
+endif
+
 ifdef CONFIG_MSM_AVTIMER
 	Q6_OBJS += avtimer.o
 endif

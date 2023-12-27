@@ -43,6 +43,21 @@
 #include "msm_dailink.h"
 #include "msm-common.h"
 
+#ifdef OPLUS_FEATURE_AUDIO_FTM
+#include "dailink_extends.h"
+#endif /* OPLUS_FEATURE_AUDIO_FTM */
+
+#ifdef OPLUS_ARCH_EXTENDS
+#include "codecs/sia81xx/sia81xx_aux_dev_if.h"
+#endif /* OPLUS_ARCH_EXTENDS */
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
+#include "feedback/oplus_audio_kernel_fb.h"
+#ifdef dev_err
+#undef dev_err
+#define dev_err dev_err_fb_delay
+#endif
+#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
+
 #define DRV_NAME "lahaina-asoc-snd"
 #define __CHIPSET__ "LAHAINA "
 #define MSM_DAILINK_NAME(name) (__CHIPSET__#name)
@@ -74,7 +89,11 @@
 #define CODEC_EXT_CLK_RATE          9600000
 #define ADSP_STATE_READY_TIMEOUT_MS 3000
 #define DEV_NAME_STR_LEN            32
+#ifndef OPLUS_ARCH_EXTENDS
 #define WCD_MBHC_HS_V_MAX           1600
+#else /* OPLUS_ARCH_EXTENDS */
+#define WCD_MBHC_HS_V_MAX           1700
+#endif /* OPLUS_ARCH_EXTENDS */
 
 #define TDM_CHANNEL_MAX		8
 #define TDM_SLOT_OFFSET_MAX 	32
@@ -1007,6 +1026,116 @@ static int dmic_0_1_gpio_cnt;
 static int dmic_2_3_gpio_cnt;
 static int dmic_4_5_gpio_cnt;
 
+#ifdef OPLUS_FEATURE_EAR_PROTECTION
+typedef struct {
+	unsigned int val_l;
+	unsigned int val_r;
+	unsigned int sample_rate;
+	unsigned int channels;
+} peak_val;
+
+static unsigned int ep_port_id = 0x400e; /* AFE_PORT_ID_SLIMBUS_MULTI_CHAN_7_RX */
+static char const* ep_ctrl_text[] = {"OFF", "ON"};
+static const struct soc_enum ep_ctrl_enum =
+	SOC_ENUM_SINGLE_EXT(ARRAY_SIZE(ep_ctrl_text), ep_ctrl_text);
+
+extern int afe_ear_protection_get_peak_val(int port_id, peak_val* val);
+extern int afe_ear_protection_ctrl_set(int port_id, unsigned int val);
+
+static int peak_value_get(struct snd_kcontrol *kcontrol,
+			       struct snd_ctl_elem_value *ucontrol)
+{
+	int ret = 0;
+	peak_val data;
+
+	ret = afe_ear_protection_get_peak_val(ep_port_id, &data);
+
+	if (ret) {
+		pr_err("%s(), peak val get failed, ret = %d", __func__, ret);
+		return ret;
+	}
+
+	ucontrol->value.integer.value[0] = data.val_l;
+	ucontrol->value.integer.value[1] = data.val_r;
+	ucontrol->value.integer.value[2] = data.sample_rate;
+	ucontrol->value.integer.value[3] = data.channels;
+
+	return ret;
+};
+
+static int ep_ctrl_put(struct snd_kcontrol *kcontrol,
+		struct snd_ctl_elem_value *ucontrol)
+{
+	int ret = 0;
+	unsigned int val = 0;
+
+	if ((kcontrol == NULL) || (ucontrol == NULL)) {
+		pr_err("%s(), invalid param", __func__);
+		return -EINVAL;
+	}
+
+	val = ucontrol->value.integer.value[0];
+
+	ret = afe_ear_protection_ctrl_set(ep_port_id, val);
+	if (ret) {
+		pr_err("%s(), apr set failed, ret = %d", __func__, ret);
+	}
+
+	return ret;
+}
+
+static int peak_value_info(struct snd_kcontrol *kcontrol,
+			       struct snd_ctl_elem_info *uinfo)
+{
+	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
+	uinfo->count = 4;
+	uinfo->value.integer.min = 0;
+	uinfo->value.integer.max = 0x7fffffff; /* 32 bit value,  */
+
+	return 0;
+}
+
+static int ep_port_get(struct snd_kcontrol *kcontrol,
+			      struct snd_ctl_elem_value *ucontrol)
+{
+	if ((kcontrol == NULL) || (ucontrol == NULL)) {
+		pr_err("%s(), invalid param", __func__);
+		return -EINVAL;
+	}
+
+	ucontrol->value.integer.value[0]  = ep_port_id;
+	pr_info("%s(), current port id = 0x%x", __func__, ep_port_id);
+
+	return 0;
+}
+
+static int ep_port_put(struct snd_kcontrol *kcontrol,
+			      struct snd_ctl_elem_value *ucontrol)
+{
+	if ((kcontrol == NULL) || (ucontrol == NULL)) {
+		pr_err("%s(), invalid param", __func__);
+		return -EINVAL;
+	}
+
+	ep_port_id = ucontrol->value.integer.value[0];
+	pr_info("%s(), new port id = 0x%x", __func__, ep_port_id);
+
+	return 0;
+}
+
+static const struct snd_kcontrol_new ear_protection_controls[] = {
+	SOC_ENUM_EXT("EP_CTRL", ep_ctrl_enum, NULL, ep_ctrl_put),
+	SOC_SINGLE_EXT("EP_PORT", 0, 0, UINT_MAX, 0, ep_port_get, ep_port_put),
+	{
+		.iface = SNDRV_CTL_ELEM_IFACE_MIXER,
+		.name = "PEAK_VALUE",
+		.access = SNDRV_CTL_ELEM_ACCESS_READ,
+		.info = peak_value_info,
+		.get = peak_value_get
+	},
+};
+#endif /* OPLUS_FEATURE_EAR_PROTECTION */
+
 static void *def_wcd_mbhc_cal(void);
 
 static int msm_rx_tx_codec_init(struct snd_soc_pcm_runtime*);
@@ -1019,7 +1148,11 @@ static int msm_int_wsa_init(struct snd_soc_pcm_runtime*);
 static struct wcd_mbhc_config wcd_mbhc_cfg = {
 	.read_fw_bin = false,
 	.calibration = NULL,
+	#ifndef OPLUS_ARCH_EXTENDS
 	.detect_extn_cable = true,
+	#else /* OPLUS_ARCH_EXTENDS */
+	.detect_extn_cable = false,
+	#endif /* OPLUS_ARCH_EXTENDS */
 	.mono_stero_detection = false,
 	.swap_gnd_mic = NULL,
 	.hs_ext_micbias = true,
@@ -1036,11 +1169,19 @@ static struct wcd_mbhc_config wcd_mbhc_cfg = {
 	.mbhc_micbias = MIC_BIAS_2,
 	.anc_micbias = MIC_BIAS_2,
 	.enable_anc_mic_detect = false,
+	#ifndef OPLUS_ARCH_EXTENDS
 	.moisture_duty_cycle_en = true,
+	#else /*OPLUS_ARCH_EXTENDS*/
+	.moisture_duty_cycle_en = false,
+	#endif /*OPLUS_ARCH_EXTENDS*/
 };
 
 /* set audio task affinity to core 1 & 2 */
+#ifndef OPLUS_ARCH_EXTENDS
 static const unsigned int audio_core_list[] = {1, 2};
+#else
+static const unsigned int audio_core_list[] = {0, 1, 2, 3};
+#endif /* OPLUS_ARCH_EXTENDS */
 static cpumask_t audio_cpu_map = CPU_MASK_NONE;
 static struct dev_pm_qos_request *msm_audio_req;
 static unsigned int qos_client_active_cnt;
@@ -4636,6 +4777,7 @@ static const struct snd_kcontrol_new msm_int_wcd9385_snd_controls[] = {
 			cdc_dma_rx_sample_rate_put),
 };
 
+#ifndef OPLUS_BUG_STABILITY
 static const struct snd_kcontrol_new msm_common_snd_controls[] = {
 	SOC_ENUM_EXT("USB_AUDIO_RX SampleRate", usb_rx_sample_rate,
 			usb_audio_rx_sample_rate_get,
@@ -4995,6 +5137,316 @@ static const struct snd_kcontrol_new msm_common_snd_controls[] = {
 		SND_SOC_NOPM, 0, 0xFFFF, 0, TDM_SLOT_OFFSET_MAX,
 		tdm_rx_slot_mapping_get, tdm_rx_slot_mapping_put),
 };
+#else /* OPLUS_BUG_STABILITY */
+static const struct snd_kcontrol_new msm_common_snd_controls[] = {
+	SOC_ENUM_EXT("USB_AUDIO_RX SampleRate", usb_rx_sample_rate,
+			usb_audio_rx_sample_rate_get,
+			usb_audio_rx_sample_rate_put),
+	SOC_ENUM_EXT("USB_AUDIO_TX SampleRate", usb_tx_sample_rate,
+			usb_audio_tx_sample_rate_get,
+			usb_audio_tx_sample_rate_put),
+	SOC_ENUM_EXT("USB_AUDIO_RX Format", usb_rx_format,
+			usb_audio_rx_format_get, usb_audio_rx_format_put),
+	SOC_ENUM_EXT("USB_AUDIO_TX Format", usb_tx_format,
+			usb_audio_tx_format_get, usb_audio_tx_format_put),
+	SOC_ENUM_EXT("USB_AUDIO_RX Channels", usb_rx_chs,
+			usb_audio_rx_ch_get, usb_audio_rx_ch_put),
+	SOC_ENUM_EXT("USB_AUDIO_TX Channels", usb_tx_chs,
+			usb_audio_tx_ch_get, usb_audio_tx_ch_put),
+	SOC_ENUM_EXT("PROXY_RX Channels", proxy_rx_chs,
+			proxy_rx_ch_get, proxy_rx_ch_put),
+	SOC_ENUM_EXT("Display Port RX Channels", ext_disp_rx_chs,
+			ext_disp_rx_ch_get, ext_disp_rx_ch_put),
+	SOC_ENUM_EXT("Display Port RX Bit Format", ext_disp_rx_format,
+			ext_disp_rx_format_get, ext_disp_rx_format_put),
+	SOC_ENUM_EXT("Display Port RX SampleRate", ext_disp_rx_sample_rate,
+			ext_disp_rx_sample_rate_get,
+			ext_disp_rx_sample_rate_put),
+	SOC_ENUM_EXT("Display Port1 RX Channels", ext_disp_rx_chs,
+			ext_disp_rx_ch_get, ext_disp_rx_ch_put),
+	SOC_ENUM_EXT("Display Port1 RX Bit Format", ext_disp_rx_format,
+			ext_disp_rx_format_get, ext_disp_rx_format_put),
+	SOC_ENUM_EXT("Display Port1 RX SampleRate", ext_disp_rx_sample_rate,
+			ext_disp_rx_sample_rate_get,
+			ext_disp_rx_sample_rate_put),
+	SOC_ENUM_EXT("BT SampleRate", bt_sample_rate,
+			msm_bt_sample_rate_get,
+			msm_bt_sample_rate_put),
+	SOC_ENUM_EXT("BT SampleRate RX", bt_sample_rate_rx,
+			msm_bt_sample_rate_rx_get,
+			msm_bt_sample_rate_rx_put),
+	SOC_ENUM_EXT("BT SampleRate TX", bt_sample_rate_tx,
+			msm_bt_sample_rate_tx_get,
+			msm_bt_sample_rate_tx_put),
+	SOC_ENUM_EXT("AFE_LOOPBACK_TX Channels", afe_loopback_tx_chs,
+			afe_loopback_tx_ch_get, afe_loopback_tx_ch_put),
+	SOC_ENUM_EXT("VI_FEED_TX Channels", vi_feed_tx_chs,
+			msm_vi_feed_tx_ch_get, msm_vi_feed_tx_ch_put),
+};
+
+static const struct snd_kcontrol_new msm_tdm_snd_controls[] = {
+	SOC_ENUM_EXT("PRI_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
+			tdm_rx_sample_rate_get,
+			tdm_rx_sample_rate_put),
+	SOC_ENUM_EXT("SEC_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
+			tdm_rx_sample_rate_get,
+			tdm_rx_sample_rate_put),
+	SOC_ENUM_EXT("TERT_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
+			tdm_rx_sample_rate_get,
+			tdm_rx_sample_rate_put),
+	SOC_ENUM_EXT("QUAT_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
+			tdm_rx_sample_rate_get,
+			tdm_rx_sample_rate_put),
+	SOC_ENUM_EXT("QUIN_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
+			tdm_rx_sample_rate_get,
+			tdm_rx_sample_rate_put),
+	SOC_ENUM_EXT("SEN_TDM_RX_0 SampleRate", tdm_rx_sample_rate,
+			tdm_rx_sample_rate_get,
+			tdm_rx_sample_rate_put),
+	SOC_ENUM_EXT("PRI_TDM_TX_0 SampleRate", tdm_tx_sample_rate,
+			tdm_tx_sample_rate_get,
+			tdm_tx_sample_rate_put),
+	SOC_ENUM_EXT("SEC_TDM_TX_0 SampleRate", tdm_tx_sample_rate,
+			tdm_tx_sample_rate_get,
+			tdm_tx_sample_rate_put),
+	SOC_ENUM_EXT("TERT_TDM_TX_0 SampleRate", tdm_tx_sample_rate,
+			tdm_tx_sample_rate_get,
+			tdm_tx_sample_rate_put),
+	SOC_ENUM_EXT("QUAT_TDM_TX_0 SampleRate", tdm_tx_sample_rate,
+			tdm_tx_sample_rate_get,
+			tdm_tx_sample_rate_put),
+	SOC_ENUM_EXT("QUIN_TDM_TX_0 SampleRate", tdm_tx_sample_rate,
+			tdm_tx_sample_rate_get,
+			tdm_tx_sample_rate_put),
+	SOC_ENUM_EXT("SEN_TDM_TX_0 SampleRate", tdm_tx_sample_rate,
+			tdm_tx_sample_rate_get,
+			tdm_tx_sample_rate_put),
+	SOC_ENUM_EXT("PRI_TDM_RX_0 Format", tdm_rx_format,
+			tdm_rx_format_get,
+			tdm_rx_format_put),
+	SOC_ENUM_EXT("SEC_TDM_RX_0 Format", tdm_rx_format,
+			tdm_rx_format_get,
+			tdm_rx_format_put),
+	SOC_ENUM_EXT("TERT_TDM_RX_0 Format", tdm_rx_format,
+			tdm_rx_format_get,
+			tdm_rx_format_put),
+	SOC_ENUM_EXT("QUAT_TDM_RX_0 Format", tdm_rx_format,
+			tdm_rx_format_get,
+			tdm_rx_format_put),
+	SOC_ENUM_EXT("QUIN_TDM_RX_0 Format", tdm_rx_format,
+			tdm_rx_format_get,
+			tdm_rx_format_put),
+	SOC_ENUM_EXT("SEN_TDM_RX_0 Format", tdm_rx_format,
+			tdm_rx_format_get,
+			tdm_rx_format_put),
+	SOC_ENUM_EXT("PRI_TDM_TX_0 Format", tdm_tx_format,
+			tdm_tx_format_get,
+			tdm_tx_format_put),
+	SOC_ENUM_EXT("SEC_TDM_TX_0 Format", tdm_tx_format,
+			tdm_tx_format_get,
+			tdm_tx_format_put),
+	SOC_ENUM_EXT("TERT_TDM_TX_0 Format", tdm_tx_format,
+			tdm_tx_format_get,
+			tdm_tx_format_put),
+	SOC_ENUM_EXT("QUAT_TDM_TX_0 Format", tdm_tx_format,
+			tdm_tx_format_get,
+			tdm_tx_format_put),
+	SOC_ENUM_EXT("QUIN_TDM_TX_0 Format", tdm_tx_format,
+			tdm_tx_format_get,
+			tdm_tx_format_put),
+	SOC_ENUM_EXT("SEN_TDM_TX_0 Format", tdm_tx_format,
+			tdm_tx_format_get,
+			tdm_tx_format_put),
+	SOC_ENUM_EXT("PRI_TDM_RX_0 Channels", tdm_rx_chs,
+			tdm_rx_ch_get,
+			tdm_rx_ch_put),
+	SOC_ENUM_EXT("SEC_TDM_RX_0 Channels", tdm_rx_chs,
+			tdm_rx_ch_get,
+			tdm_rx_ch_put),
+	SOC_ENUM_EXT("TERT_TDM_RX_0 Channels", tdm_rx_chs,
+			tdm_rx_ch_get,
+			tdm_rx_ch_put),
+	SOC_ENUM_EXT("QUAT_TDM_RX_0 Channels", tdm_rx_chs,
+			tdm_rx_ch_get,
+			tdm_rx_ch_put),
+	SOC_ENUM_EXT("QUIN_TDM_RX_0 Channels", tdm_rx_chs,
+			tdm_rx_ch_get,
+			tdm_rx_ch_put),
+	SOC_ENUM_EXT("SEN_TDM_RX_0 Channels", tdm_rx_chs,
+			tdm_rx_ch_get,
+			tdm_rx_ch_put),
+	SOC_ENUM_EXT("PRI_TDM_TX_0 Channels", tdm_tx_chs,
+			tdm_tx_ch_get,
+			tdm_tx_ch_put),
+	SOC_ENUM_EXT("SEC_TDM_TX_0 Channels", tdm_tx_chs,
+			tdm_tx_ch_get,
+			tdm_tx_ch_put),
+	SOC_ENUM_EXT("TERT_TDM_TX_0 Channels", tdm_tx_chs,
+			tdm_tx_ch_get,
+			tdm_tx_ch_put),
+	SOC_ENUM_EXT("QUAT_TDM_TX_0 Channels", tdm_tx_chs,
+			tdm_tx_ch_get,
+			tdm_tx_ch_put),
+	SOC_ENUM_EXT("QUIN_TDM_TX_0 Channels", tdm_tx_chs,
+			tdm_tx_ch_get,
+			tdm_tx_ch_put),
+	SOC_ENUM_EXT("SEN_TDM_TX_0 Channels", tdm_tx_chs,
+			tdm_tx_ch_get,
+			tdm_tx_ch_put),
+	SOC_SINGLE_MULTI_EXT("TDM Slot Map", SND_SOC_NOPM, 0, 255, 0,
+			TDM_MAX_SLOTS + MAX_PATH, NULL, tdm_slot_map_put),
+};
+
+static const struct snd_kcontrol_new msm_auxpcm_snd_controls[] = {
+	SOC_ENUM_EXT("PRIM_AUX_PCM_RX SampleRate", prim_aux_pcm_rx_sample_rate,
+			aux_pcm_rx_sample_rate_get,
+			aux_pcm_rx_sample_rate_put),
+	SOC_ENUM_EXT("SEC_AUX_PCM_RX SampleRate", sec_aux_pcm_rx_sample_rate,
+			aux_pcm_rx_sample_rate_get,
+			aux_pcm_rx_sample_rate_put),
+	SOC_ENUM_EXT("TERT_AUX_PCM_RX SampleRate", tert_aux_pcm_rx_sample_rate,
+			aux_pcm_rx_sample_rate_get,
+			aux_pcm_rx_sample_rate_put),
+	SOC_ENUM_EXT("QUAT_AUX_PCM_RX SampleRate", quat_aux_pcm_rx_sample_rate,
+			aux_pcm_rx_sample_rate_get,
+			aux_pcm_rx_sample_rate_put),
+	SOC_ENUM_EXT("QUIN_AUX_PCM_RX SampleRate", quin_aux_pcm_rx_sample_rate,
+			aux_pcm_rx_sample_rate_get,
+			aux_pcm_rx_sample_rate_put),
+	SOC_ENUM_EXT("SEN_AUX_PCM_RX SampleRate", sen_aux_pcm_rx_sample_rate,
+			aux_pcm_rx_sample_rate_get,
+			aux_pcm_rx_sample_rate_put),
+	SOC_ENUM_EXT("PRIM_AUX_PCM_TX SampleRate", prim_aux_pcm_tx_sample_rate,
+			aux_pcm_tx_sample_rate_get,
+			aux_pcm_tx_sample_rate_put),
+	SOC_ENUM_EXT("SEC_AUX_PCM_TX SampleRate", sec_aux_pcm_tx_sample_rate,
+			aux_pcm_tx_sample_rate_get,
+			aux_pcm_tx_sample_rate_put),
+	SOC_ENUM_EXT("TERT_AUX_PCM_TX SampleRate", tert_aux_pcm_tx_sample_rate,
+			aux_pcm_tx_sample_rate_get,
+			aux_pcm_tx_sample_rate_put),
+	SOC_ENUM_EXT("QUAT_AUX_PCM_TX SampleRate", quat_aux_pcm_tx_sample_rate,
+			aux_pcm_tx_sample_rate_get,
+			aux_pcm_tx_sample_rate_put),
+	SOC_ENUM_EXT("QUIN_AUX_PCM_TX SampleRate", quin_aux_pcm_tx_sample_rate,
+			aux_pcm_tx_sample_rate_get,
+			aux_pcm_tx_sample_rate_put),
+	SOC_ENUM_EXT("SEN_AUX_PCM_TX SampleRate", sen_aux_pcm_tx_sample_rate,
+			aux_pcm_tx_sample_rate_get,
+			aux_pcm_tx_sample_rate_put),
+	SOC_ENUM_EXT("PRIM_AUX_PCM_RX Format", aux_pcm_rx_format,
+			msm_aux_pcm_rx_format_get, msm_aux_pcm_rx_format_put),
+	SOC_ENUM_EXT("SEC_AUX_PCM_RX Format", aux_pcm_rx_format,
+			msm_aux_pcm_rx_format_get, msm_aux_pcm_rx_format_put),
+	SOC_ENUM_EXT("TERT_AUX_PCM_RX Format", aux_pcm_rx_format,
+			msm_aux_pcm_rx_format_get, msm_aux_pcm_rx_format_put),
+	SOC_ENUM_EXT("QUAT_AUX_PCM_RX Format", aux_pcm_rx_format,
+			msm_aux_pcm_rx_format_get, msm_aux_pcm_rx_format_put),
+	SOC_ENUM_EXT("QUIN_AUX_PCM_RX Format", aux_pcm_rx_format,
+			msm_aux_pcm_rx_format_get, msm_aux_pcm_rx_format_put),
+	SOC_ENUM_EXT("SEN_AUX_PCM_RX Format", aux_pcm_rx_format,
+			msm_aux_pcm_rx_format_get, msm_aux_pcm_rx_format_put),
+	SOC_ENUM_EXT("PRIM_AUX_PCM_TX Format", aux_pcm_tx_format,
+			msm_aux_pcm_tx_format_get, msm_aux_pcm_tx_format_put),
+	SOC_ENUM_EXT("SEC_AUX_PCM_TX Format", aux_pcm_tx_format,
+			msm_aux_pcm_tx_format_get, msm_aux_pcm_tx_format_put),
+	SOC_ENUM_EXT("TERT_AUX_PCM_TX Format", aux_pcm_tx_format,
+			msm_aux_pcm_tx_format_get, msm_aux_pcm_tx_format_put),
+	SOC_ENUM_EXT("QUAT_AUX_PCM_TX Format", aux_pcm_tx_format,
+			msm_aux_pcm_tx_format_get, msm_aux_pcm_tx_format_put),
+	SOC_ENUM_EXT("QUIN_AUX_PCM_TX Format", aux_pcm_tx_format,
+			msm_aux_pcm_tx_format_get, msm_aux_pcm_tx_format_put),
+	SOC_ENUM_EXT("SEN_AUX_PCM_TX Format", aux_pcm_tx_format,
+			msm_aux_pcm_tx_format_get, msm_aux_pcm_tx_format_put),
+};
+
+static const struct snd_kcontrol_new msm_mi2s_snd_controls[] = {
+	SOC_ENUM_EXT("PRIM_MI2S_RX SampleRate", prim_mi2s_rx_sample_rate,
+			mi2s_rx_sample_rate_get,
+			mi2s_rx_sample_rate_put),
+	SOC_ENUM_EXT("SEC_MI2S_RX SampleRate", sec_mi2s_rx_sample_rate,
+			mi2s_rx_sample_rate_get,
+			mi2s_rx_sample_rate_put),
+	SOC_ENUM_EXT("TERT_MI2S_RX SampleRate", tert_mi2s_rx_sample_rate,
+			mi2s_rx_sample_rate_get,
+			mi2s_rx_sample_rate_put),
+	SOC_ENUM_EXT("QUAT_MI2S_RX SampleRate", quat_mi2s_rx_sample_rate,
+			mi2s_rx_sample_rate_get,
+			mi2s_rx_sample_rate_put),
+	SOC_ENUM_EXT("QUIN_MI2S_RX SampleRate", quin_mi2s_rx_sample_rate,
+			mi2s_rx_sample_rate_get,
+			mi2s_rx_sample_rate_put),
+	SOC_ENUM_EXT("SEN_MI2S_RX SampleRate", sen_mi2s_rx_sample_rate,
+			mi2s_rx_sample_rate_get,
+			mi2s_rx_sample_rate_put),
+	SOC_ENUM_EXT("PRIM_MI2S_TX SampleRate", prim_mi2s_tx_sample_rate,
+			mi2s_tx_sample_rate_get,
+			mi2s_tx_sample_rate_put),
+	SOC_ENUM_EXT("SEC_MI2S_TX SampleRate", sec_mi2s_tx_sample_rate,
+			mi2s_tx_sample_rate_get,
+			mi2s_tx_sample_rate_put),
+	SOC_ENUM_EXT("TERT_MI2S_TX SampleRate", tert_mi2s_tx_sample_rate,
+			mi2s_tx_sample_rate_get,
+			mi2s_tx_sample_rate_put),
+	SOC_ENUM_EXT("QUAT_MI2S_TX SampleRate", quat_mi2s_tx_sample_rate,
+			mi2s_tx_sample_rate_get,
+			mi2s_tx_sample_rate_put),
+	SOC_ENUM_EXT("QUIN_MI2S_TX SampleRate", quin_mi2s_tx_sample_rate,
+			mi2s_tx_sample_rate_get,
+			mi2s_tx_sample_rate_put),
+	SOC_ENUM_EXT("SEN_MI2S_TX SampleRate", sen_mi2s_tx_sample_rate,
+			mi2s_tx_sample_rate_get,
+			mi2s_tx_sample_rate_put),
+	SOC_ENUM_EXT("PRIM_MI2S_RX Format", mi2s_rx_format,
+			msm_mi2s_rx_format_get, msm_mi2s_rx_format_put),
+	SOC_ENUM_EXT("SEC_MI2S_RX Format", mi2s_rx_format,
+			msm_mi2s_rx_format_get, msm_mi2s_rx_format_put),
+	SOC_ENUM_EXT("TERT_MI2S_RX Format", mi2s_rx_format,
+			msm_mi2s_rx_format_get, msm_mi2s_rx_format_put),
+	SOC_ENUM_EXT("QUAT_MI2S_RX Format", mi2s_rx_format,
+			msm_mi2s_rx_format_get, msm_mi2s_rx_format_put),
+	SOC_ENUM_EXT("QUIN_MI2S_RX Format", mi2s_rx_format,
+			msm_mi2s_rx_format_get, msm_mi2s_rx_format_put),
+	SOC_ENUM_EXT("SEN_MI2S_RX Format", mi2s_rx_format,
+			msm_mi2s_rx_format_get, msm_mi2s_rx_format_put),
+	SOC_ENUM_EXT("PRIM_MI2S_TX Format", mi2s_tx_format,
+			msm_mi2s_tx_format_get, msm_mi2s_tx_format_put),
+	SOC_ENUM_EXT("SEC_MI2S_TX Format", mi2s_tx_format,
+			msm_mi2s_tx_format_get, msm_mi2s_tx_format_put),
+	SOC_ENUM_EXT("TERT_MI2S_TX Format", mi2s_tx_format,
+			msm_mi2s_tx_format_get, msm_mi2s_tx_format_put),
+	SOC_ENUM_EXT("QUAT_MI2S_TX Format", mi2s_tx_format,
+			msm_mi2s_tx_format_get, msm_mi2s_tx_format_put),
+	SOC_ENUM_EXT("QUIN_MI2S_TX Format", mi2s_tx_format,
+			msm_mi2s_tx_format_get, msm_mi2s_tx_format_put),
+	SOC_ENUM_EXT("SEN_MI2S_TX Format", mi2s_tx_format,
+			msm_mi2s_tx_format_get, msm_mi2s_tx_format_put),
+	SOC_ENUM_EXT("PRIM_MI2S_RX Channels", prim_mi2s_rx_chs,
+			msm_mi2s_rx_ch_get, msm_mi2s_rx_ch_put),
+	SOC_ENUM_EXT("SEC_MI2S_RX Channels", sec_mi2s_rx_chs,
+			msm_mi2s_rx_ch_get, msm_mi2s_rx_ch_put),
+	SOC_ENUM_EXT("TERT_MI2S_RX Channels", tert_mi2s_rx_chs,
+			msm_mi2s_rx_ch_get, msm_mi2s_rx_ch_put),
+	SOC_ENUM_EXT("QUAT_MI2S_RX Channels", quat_mi2s_rx_chs,
+			msm_mi2s_rx_ch_get, msm_mi2s_rx_ch_put),
+	SOC_ENUM_EXT("QUIN_MI2S_RX Channels", quin_mi2s_rx_chs,
+			msm_mi2s_rx_ch_get, msm_mi2s_rx_ch_put),
+	SOC_ENUM_EXT("SEN_MI2S_RX Channels", sen_mi2s_rx_chs,
+			msm_mi2s_rx_ch_get, msm_mi2s_rx_ch_put),
+	SOC_ENUM_EXT("PRIM_MI2S_TX Channels", prim_mi2s_tx_chs,
+			msm_mi2s_tx_ch_get, msm_mi2s_tx_ch_put),
+	SOC_ENUM_EXT("SEC_MI2S_TX Channels", sec_mi2s_tx_chs,
+			msm_mi2s_tx_ch_get, msm_mi2s_tx_ch_put),
+	SOC_ENUM_EXT("TERT_MI2S_TX Channels", tert_mi2s_tx_chs,
+			msm_mi2s_tx_ch_get, msm_mi2s_tx_ch_put),
+	SOC_ENUM_EXT("QUAT_MI2S_TX Channels", quat_mi2s_tx_chs,
+			msm_mi2s_tx_ch_get, msm_mi2s_tx_ch_put),
+	SOC_ENUM_EXT("QUIN_MI2S_TX Channels", quin_mi2s_tx_chs,
+			msm_mi2s_tx_ch_get, msm_mi2s_tx_ch_put),
+	SOC_ENUM_EXT("SEN_MI2S_TX Channels", sen_mi2s_tx_chs,
+			msm_mi2s_tx_ch_get, msm_mi2s_tx_ch_put),
+};
+#endif /* OPLUS_BUG_STABILITY */
 
 static const struct snd_kcontrol_new msm_snd_controls[] = {
 	SOC_ENUM_EXT("PRIM_AUX_PCM_RX Format", aux_pcm_rx_format,
@@ -5540,7 +5992,11 @@ static bool msm_usbc_swap_gnd_mic(struct snd_soc_component *component, bool acti
 	if (!pdata->fsa_handle)
 		return false;
 
+	#ifndef OPLUS_ARCH_EXTENDS
 	return fsa4480_switch_event(pdata->fsa_handle, FSA_MIC_GND_SWAP);
+	#else
+	return (0 == fsa4480_switch_event(pdata->fsa_handle, FSA_MIC_GND_SWAP));
+	#endif /* OPLUS_ARCH_EXTENDS */
 }
 
 static bool msm_swap_gnd_mic(struct snd_soc_component *component, bool active)
@@ -6620,6 +7076,47 @@ static struct snd_info_entry *msm_snd_info_create_subdir(struct module *mod,
 	return entry;
 }
 
+#ifdef OPLUS_BUG_STABILITY
+#ifndef CONFIG_TDM_DISABLE
+static void msm_add_tdm_snd_controls(struct snd_soc_component *component)
+{
+	snd_soc_add_component_controls(component, msm_tdm_snd_controls,
+				ARRAY_SIZE(msm_tdm_snd_controls));
+}
+#else
+static void msm_add_tdm_snd_controls(struct snd_soc_component *component)
+{
+	return;
+}
+#endif
+
+#ifndef CONFIG_MI2S_DISABLE
+static void msm_add_mi2s_snd_controls(struct snd_soc_component *component)
+{
+	snd_soc_add_component_controls(component, msm_mi2s_snd_controls,
+				ARRAY_SIZE(msm_mi2s_snd_controls));
+}
+#else
+static void msm_add_mi2s_snd_controls(struct snd_soc_component *component)
+{
+	return;
+}
+#endif
+
+#ifndef CONFIG_AUXPCM_DISABLE
+static void msm_add_auxpcm_snd_controls(struct snd_soc_component *component)
+{
+	snd_soc_add_component_controls(component, msm_auxpcm_snd_controls,
+				ARRAY_SIZE(msm_auxpcm_snd_controls));
+}
+#else
+static void msm_add_auxpcm_snd_controls(struct snd_soc_component *component)
+{
+	return;
+}
+#endif
+#endif /* OPLUS_BUG_STABILITY */
+
 static void *def_wcd_mbhc_cal(void)
 {
 	void *wcd_mbhc_cal;
@@ -6637,6 +7134,7 @@ static void *def_wcd_mbhc_cal(void)
 	btn_high = ((void *)&btn_cfg->_v_btn_low) +
 		(sizeof(btn_cfg->_v_btn_low[0]) * btn_cfg->num_btn);
 
+	#ifndef OPLUS_ARCH_EXTENDS
 	btn_high[0] = 75;
 	btn_high[1] = 150;
 	btn_high[2] = 237;
@@ -6645,6 +7143,16 @@ static void *def_wcd_mbhc_cal(void)
 	btn_high[5] = 500;
 	btn_high[6] = 500;
 	btn_high[7] = 500;
+	#else /* OPLUS_ARCH_EXTENDS */
+	btn_high[0] = 130;		/* Hook ,0 ~ 160 Ohm*/
+	btn_high[1] = 131;
+	btn_high[2] = 253;		/* Volume + ,160 ~ 360 Ohm*/
+	btn_high[3] = 425;		/* Volume - ,360 ~ 680 Ohm*/
+	btn_high[4] = 426;
+	btn_high[5] = 426;
+	btn_high[6] = 426;
+	btn_high[7] = 426;
+	#endif /* OPLUS_ARCH_EXTENDS */
 
 	return wcd_mbhc_cal;
 }
@@ -7072,6 +7580,9 @@ static struct snd_soc_dai_link msm_common_dai_links[] = {
 		.name = "TX3_CDC_DMA Hostless",
 		.stream_name = "TX3_CDC_DMA Hostless",
 		.dynamic = 1,
+		#ifdef OPLUS_FEATURE_AUDIO_FTM
+		.dpcm_playback = 1,
+		#endif /* OPLUS_FEATURE_AUDIO_FTM */
 		.dpcm_capture = 1,
 		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
 			    SND_SOC_DPCM_TRIGGER_POST},
@@ -7272,6 +7783,24 @@ static struct snd_soc_dai_link msm_common_misc_fe_dai_links[] = {
 		.ignore_pmdown_time = 1,
 		SND_SOC_DAILINK_REG(display_port_hostless),
 	},
+	#ifdef OPLUS_FEATURE_AUDIO_FTM
+	TX_CDC_DMA_HOSTLESS_DAILINK("TX4_CDC_DMA Hostless", "TX4_CDC_DMA Hostless", tx4_cdcdma_hostless),
+	#endif /* OPLUS_FEATURE_AUDIO_FTM */
+
+	#ifdef OPLUS_ARCH_EXTENDS
+	{/* hw:x,47 */
+		.name = "Quinary MI2S TX_Hostless",
+		.stream_name = "Quinary MI2S_TX Hostless Capture",
+		.dynamic = 1,
+		.dpcm_capture = 1,
+		.trigger = {SND_SOC_DPCM_TRIGGER_POST,
+				SND_SOC_DPCM_TRIGGER_POST},
+		.no_host_mode = SND_SOC_DAI_LINK_NO_HOST,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(quin_mi2s_tx_hostless),
+	},
+	#endif /* OPLUS_ARCH_EXTENDS */
 };
 
 static struct snd_soc_dai_link msm_common_be_dai_links[] = {
@@ -8134,6 +8663,224 @@ static struct snd_soc_dai_link msm_afe_rxtx_lb_be_dai_link[] = {
 	},
 };
 
+#ifdef OPLUS_ARCH_EXTENDS
+SND_SOC_DAILINK_DEFS(tfa98xx_tert_mi2s_rx,
+	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.4")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("tfa98xx.4-0035", "tfa98xx-aif-4-35"),
+			COMP_CODEC("tfa98xx.4-0034", "tfa98xx-aif-4-34"),),
+	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
+
+SND_SOC_DAILINK_DEFS(tfa98xx_quin_mi2s_rx,
+	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.8")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("tfa98xx.0-0034", "tfa98xx-aif-0-34"),),
+	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
+
+SND_SOC_DAILINK_DEFS(tfa98xx_stereo_quin_mi2s_rx,
+	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.8")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("tfa98xx.0-0034", "tfa98xx-aif-0-34"),
+			COMP_CODEC("tfa98xx.0-0035", "tfa98xx-aif-0-35"),),
+	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
+
+#ifdef CONFIG_SND_SOC_AW882XX
+extern void afe_set_spk_type(int enable);
+SND_SOC_DAILINK_DEFS(aw882xx_quin_mi2s_rx,
+	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.8")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("aw882xx_smartpa.0-0034", "aw882xx-aif-0-34"),),
+	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
+SND_SOC_DAILINK_DEFS(aw882xx_quin_mi2s_tx,
+	DAILINK_COMP_ARRAY(COMP_CPU("msm-dai-q6-mi2s.9")),
+	DAILINK_COMP_ARRAY(COMP_CODEC("aw882xx_smartpa.0-0034", "aw882xx-aif-0-34"),),
+	DAILINK_COMP_ARRAY(COMP_PLATFORM("msm-pcm-routing")));
+#endif
+
+static struct snd_soc_dai_link tfa98xx_mi2s_be_dai_links[] = {
+	{
+		.name = LPASS_BE_PRI_MI2S_RX,
+		.stream_name = "Primary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_PRI_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(pri_mi2s_rx),
+	},
+	{
+		.name = LPASS_BE_SEC_MI2S_RX,
+		.stream_name = "Secondary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_SECONDARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(sec_mi2s_rx),
+	},
+	{
+		.name = LPASS_BE_TERT_MI2S_RX,
+		.stream_name = "Tertiary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(tfa98xx_tert_mi2s_rx),
+		.num_codecs = ARRAY_SIZE(tfa98xx_tert_mi2s_rx_codecs),
+	},
+	{
+		.name = LPASS_BE_QUAT_MI2S_RX,
+		.stream_name = "Quaternary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(quat_mi2s_rx),
+	},
+	{
+		.name = LPASS_BE_QUIN_MI2S_RX,
+		.stream_name = "Quinary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_QUINARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(tfa98xx_quin_mi2s_rx),
+	},
+	{
+		.name = LPASS_BE_SENARY_MI2S_RX,
+		.stream_name = "Senary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_SENARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(sen_mi2s_rx),
+	},
+};
+
+static struct snd_soc_dai_link tfa98xx_stereo_mi2s_be_dai_links[] = {
+	{
+		.name = LPASS_BE_QUIN_MI2S_RX,
+		.stream_name = "Quinary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_QUINARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(tfa98xx_stereo_quin_mi2s_rx),
+	},
+};
+
+#ifdef CONFIG_SND_SOC_AW882XX
+static struct snd_soc_dai_link aw882xx_mono_mi2s_be_dai_links[] = {
+	{
+		.name = LPASS_BE_QUIN_MI2S_RX,
+		.stream_name = "Quinary MI2S Playback",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_QUINARY_MI2S_RX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(aw882xx_quin_mi2s_rx),
+	},
+	{
+		.name = LPASS_BE_QUIN_MI2S_TX,
+		.stream_name = "Quinary MI2S Capture",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.id = MSM_BACKEND_DAI_QUINARY_MI2S_TX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ops = &msm_mi2s_be_ops,
+		.ignore_suspend = 1,
+		.ignore_pmdown_time = 1,
+		SND_SOC_DAILINK_REG(aw882xx_quin_mi2s_tx),
+	},
+};
+#endif
+
+void exchange_mi2s_dai_config(const char *product_name, int mi2s_id)
+{
+	int i = 0;
+	struct snd_soc_dai_link *temp_link;
+	int target_mi2s_id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX;
+
+	switch (mi2s_id) {
+		case 0:
+			target_mi2s_id = MSM_BACKEND_DAI_PRI_MI2S_RX;
+			break;
+
+		case 1:
+			target_mi2s_id = MSM_BACKEND_DAI_SECONDARY_MI2S_RX;
+			break;
+
+		case 2:
+			target_mi2s_id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX;
+			break;
+
+		case 3:
+			target_mi2s_id = MSM_BACKEND_DAI_QUATERNARY_MI2S_RX;
+			break;
+
+		case 4:
+			target_mi2s_id = MSM_BACKEND_DAI_QUINARY_MI2S_RX;
+			break;
+
+		case 5:
+			target_mi2s_id = MSM_BACKEND_DAI_SENARY_MI2S_RX;
+			break;
+
+		default:
+			target_mi2s_id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(msm_mi2s_be_dai_links); i++) {
+		temp_link = &msm_mi2s_be_dai_links[i];
+		if (temp_link->id == target_mi2s_id) {
+			#ifdef CONFIG_SND_SOC_TFA98XX
+			if (!strcmp(product_name, "nxp")) {
+				pr_info("%s: use nxp stereo dailink replace\n", __func__);
+				memcpy(temp_link, &tfa98xx_mi2s_be_dai_links[mi2s_id],
+						sizeof(tfa98xx_mi2s_be_dai_links[mi2s_id]));
+			}
+			if (!strcmp(product_name, "nxp_stereo")) {
+				pr_info("%s: use nxp_stereo dailink replace\n", __func__);
+				memcpy(temp_link, &tfa98xx_stereo_mi2s_be_dai_links[0],
+						sizeof(tfa98xx_stereo_mi2s_be_dai_links[0]));
+			}
+			#endif
+			#ifdef CONFIG_SND_SOC_AW882XX
+			if (!strcmp(product_name, "aw882xx_mono")) {
+				pr_info("%s: use aw882xx mono dailink replace\n", __func__);
+				memcpy(temp_link, &aw882xx_mono_mi2s_be_dai_links[0],
+						sizeof(aw882xx_mono_mi2s_be_dai_links[0]));
+				afe_set_spk_type(true);
+			} else {
+				afe_set_spk_type(false);
+			}
+			#endif
+		}
+	}
+
+	return;
+}
+
+#endif /* OPLUS_ARCH_EXTENDS */
+
 static struct snd_soc_dai_link msm_lahaina_dai_links[
 			ARRAY_SIZE(msm_common_dai_links) +
 			ARRAY_SIZE(msm_bolero_fe_dai_links) +
@@ -8152,7 +8899,12 @@ static struct snd_soc_dai_link msm_lahaina_dai_links[
 #endif
 			ARRAY_SIZE(msm_wcn_be_dai_links) +
 			ARRAY_SIZE(msm_afe_rxtx_lb_be_dai_link) +
+#ifndef OPLUS_BUG_STABILITY
 			ARRAY_SIZE(msm_wcn_btfm_be_dai_links)];
+#else /* OPLUS_BUG_STABILITY */
+			ARRAY_SIZE(msm_wcn_btfm_be_dai_links) +
+			ARRAY_SIZE(msm_tdm_be_dai_links)];
+#endif /* OPLUS_BUG_STABILITY */
 
 static int msm_populate_dai_link_component_of_node(
 					struct snd_soc_card *card)
@@ -8256,9 +9008,15 @@ static int msm_populate_dai_link_component_of_node(
 
 				np = dai_link[i].codecs[j].of_node;
                                 if (!of_device_is_available(np)) {
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
+					dev_err_not_fb(cdev, "%s: codec is disabled: %s\n",
+						__func__,
+						np->full_name);
+#else
                                         dev_dbg(cdev, "%s: codec is disabled: %s\n",
 						__func__,
 						np->full_name);
+#endif /* CONFIG_OPLUS_FEATURE_MM_FEEDBACK */
 					dai_link[i].codecs[j].of_node = NULL;
 					continue;
                                 }
@@ -8462,6 +9220,12 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 	u32 val = 0;
 	u32 wcn_btfm_intf = 0;
 	const struct of_device_id *match;
+#ifdef OPLUS_ARCH_EXTENDS
+	const char *product_name = NULL;
+	const char *oplus_speaker_type = "oplus,speaker-pa";
+	u32 extend_mi2s_id = 0;
+	const char *oplus_mi2s_id = "oplus,mi2s-id";
+#endif /* OPLUS_ARCH_EXTENDS */
 	u32 wsa_max_devs = 0;
 
 	match = of_match_node(lahaina_asoc_machine_of_match, dev->of_node);
@@ -8541,6 +9305,20 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 				__func__);
 		} else {
 			if (mi2s_audio_intf) {
+#ifdef OPLUS_ARCH_EXTENDS
+				if (!of_property_read_string(dev->of_node, oplus_speaker_type,
+						&product_name)) {
+					pr_err("%s: custom speaker product %s\n", __func__, product_name);
+					if (!of_property_read_u32(dev->of_node, oplus_mi2s_id,
+						&extend_mi2s_id)) {
+						pr_info("%s: custom extend mi2s id %d\n", __func__, extend_mi2s_id);
+					} else {
+						pr_info("%s: No DT match extend mi2s id, use default tert mi2s\n", __func__);
+						extend_mi2s_id = 2;
+					}
+					exchange_mi2s_dai_config(product_name, extend_mi2s_id);
+				}
+#endif /* OPLUS_ARCH_EXTENDS */
 				memcpy(msm_lahaina_dai_links + total_links,
 					msm_mi2s_be_dai_links,
 					sizeof(msm_mi2s_be_dai_links));
@@ -8598,6 +9376,18 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 			total_links +=
 				ARRAY_SIZE(msm_afe_rxtx_lb_be_dai_link);
 		}
+
+		#ifdef OPLUS_BUG_STABILITY
+		rc = of_property_read_u32(dev->of_node, "qcom,tdm-audio-intf",
+				&val);
+		if (!rc && val) {
+			memcpy(msm_lahaina_dai_links + total_links,
+				msm_tdm_be_dai_links,
+				sizeof(msm_tdm_be_dai_links));
+			total_links +=
+				ARRAY_SIZE(msm_tdm_be_dai_links);
+		}
+		#endif /* OPLUS_BUG_STABILITY */
 
 		rc = of_property_read_u32(dev->of_node, "qcom,wcn-btfm",
 					  &wcn_btfm_intf);
@@ -8736,6 +9526,22 @@ static int msm_rx_tx_codec_init(struct snd_soc_pcm_runtime *rtd)
 			__func__, ret);
 		return ret;
 	}
+
+#ifdef OPLUS_FEATURE_EAR_PROTECTION
+	ret = snd_soc_add_component_controls(component, ear_protection_controls,
+									ARRAY_SIZE(ear_protection_controls));
+	if (ret < 0) {
+		pr_err("%s: add ear_protection_controls failed: %d\n", __func__, ret);
+		return ret;
+	}
+#endif /* OPLUS_FEATURE_EAR_PROTECTION */
+
+
+	#ifdef OPLUS_BUG_STABILITY
+	msm_add_tdm_snd_controls(component);
+	msm_add_mi2s_snd_controls(component);
+	msm_add_auxpcm_snd_controls(component);
+	#endif /* OPLUS_BUG_STABILITY */
 
 	snd_soc_dapm_new_controls(dapm, msm_int_dapm_widgets,
 				ARRAY_SIZE(msm_int_dapm_widgets));
@@ -9505,6 +10311,10 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	int ret = 0;
 	uint index = 0;
 	struct clk *lpass_audio_hw_vote = NULL;
+	#ifdef OPLUS_ARCH_EXTENDS
+	const char *pa_name = NULL;
+	const char *oplus_speaker_type = "oplus,speaker-pa";
+	#endif /* OPLUS_ARCH_EXTENDS */
 
 	if (!pdev->dev.of_node) {
 		dev_err(&pdev->dev, "%s: No platform supplied from device tree\n", __func__);
@@ -9564,6 +10374,20 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 			 __func__, pdev->dev.of_node->full_name, ret);
 		pdata->wsa_max_devs = 0;
 	}
+
+	#ifdef OPLUS_ARCH_EXTENDS
+	ret = of_property_read_string(pdev->dev.of_node, oplus_speaker_type,
+									&pa_name);
+	if (!ret && !strcmp(pa_name, "sia81xx")) {
+		ret = soc_aux_init_only_sia81xx(pdev, card);
+		if (ret) {
+			pr_err("%s soc_aux_init_only_sia81xx return error.\n", __func__);
+			goto err;
+		}
+	} else {
+		pr_err("%s not use aux sia81xx smartPA.\n", __func__);
+	}
+	#endif /* OPLUS_ARCH_EXTENDS */
 
 	ret = devm_snd_soc_register_card(&pdev->dev, card);
 	if (ret == -EPROBE_DEFER) {
@@ -9723,6 +10547,10 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 
 	/* Add QoS request for audio tasks */
 	msm_audio_add_qos_request();
+
+	#ifdef OPLUS_BUG_DEBUG
+	pr_warning("%s, %d, Successfully!\n", __func__, __LINE__);
+	#endif /* OPLUS_BUG_DEBUG */
 
 	return 0;
 err:

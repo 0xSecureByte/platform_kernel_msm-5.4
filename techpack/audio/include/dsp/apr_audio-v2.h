@@ -964,6 +964,31 @@ struct audproc_volume_ctrl_master_gain {
 	uint16_t                  reserved;
 } __packed;
 
+#ifdef OPLUS_FEATURE_KTV
+struct audproc_revert_param {
+	int32_t mode;
+	int32_t volume;
+	int32_t peg;
+	int32_t pitchange;
+	int32_t reverbparam;
+	int32_t enabled;
+	int32_t reverved0;
+	int32_t reverved1;
+	int32_t reverved2;
+	int32_t reverved3;
+	int32_t reverved4;
+	int32_t reverved5;
+	int32_t reverved6;
+	int32_t reverved7;
+	int32_t reverved8;
+	int32_t reverved9;
+	int32_t reverved10;
+	int32_t reverved11;
+	int32_t reverved12;
+	int32_t reverved13;
+} __packed;
+#endif /* OPLUS_FEATURE_KTV */
+
 struct audproc_soft_step_volume_params {
 /*
  * Period in milliseconds.
@@ -11457,6 +11482,14 @@ struct afe_spkr_prot_calib_get_resp {
 	struct asm_calib_res_cfg res_cfg;
 } __packed;
 
+#ifdef OPLUS_FEATURE_EAR_PROTECTION
+#define TOPOLOGY_ID_EAR_PROTECTION                              0x10012D20
+#define MODULE_ID_EAR_PROTECTION                                0x10012D21
+
+#define AFE_PARAM_ID_EAR_PROTECTION_ENABLE                      0x10012D23
+#define AFE_PARAM_ID_EAR_PROTECTION_GET_PARAM               0x10012D25
+#define AFE_PARAM_ID_EAR_PROTECTION_SET_PARAM               0x10012D27
+#endif /* OPLUS_FEATURE_EAR_PROTECTION */
 
 #define AFE_MODULE_SPEAKER_PROTECTION_V4_RX       0x000102C7
 #define AFE_PARAM_ID_SP_V4_OP_MODE                0x000102C9

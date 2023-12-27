@@ -21,6 +21,9 @@
 #include <dsp/msm-audio-event-notify.h>
 #include "swrm_registers.h"
 #include "swr-wcd-ctrl.h"
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
+#include "feedback/oplus_audio_kernel_fb.h"
+#endif
 
 #define SWR_BROADCAST_CMD_ID            0x0F
 #define SWR_AUTO_SUSPEND_DELAY          3 /* delay in sec */
@@ -492,6 +495,10 @@ static int swrm_cmd_fifo_rd_cmd(struct swr_mstr_ctrl *swrm, int *cmd_data,
 	if (ret < 0) {
 		dev_err(swrm->dev, "%s: reg 0x%x write failed, err:%d\n",
 			__func__, val, ret);
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
+		ratelimited_fb("payload@@%s %s:read cmd failed,reg=0x%x,cmd_id=0x%x,rcmd_id=0x%x,dev_id=0x%x",
+			dev_driver_string(swrm->dev), dev_name(swrm->dev), reg_addr, cmd_id, swrm->rcmd_id, dev_addr);
+#endif
 		goto err;
 	}
 	*cmd_data = swrm->read(swrm->handle, SWRM_CMD_FIFO_RD_FIFO_ADDR);
@@ -522,6 +529,10 @@ static int swrm_cmd_fifo_wr_cmd(struct swr_mstr_ctrl *swrm, u8 cmd_data,
 	if (ret < 0) {
 		dev_err(swrm->dev, "%s: reg 0x%x write failed, err:%d\n",
 			__func__, val, ret);
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
+		ratelimited_fb("payload@@%s %s:write cmd failed,reg=0x%x,cmd_id=0x%x,rcmd_id=0x%x,dev_id=0x%x,cmd_data=0x%x",
+			dev_driver_string(swrm->dev), dev_name(swrm->dev), reg_addr, cmd_id, swrm->wcmd_id, dev_addr, cmd_data);
+#endif
 		goto err;
 	}
 	if (cmd_id == 0xF) {
@@ -1223,6 +1234,10 @@ static irqreturn_t swr_mstr_interrupt(int irq, void *dev)
 			break;
 		case SWRM_INTERRUPT_STATUS_MASTER_CLASH_DET:
 			dev_err_ratelimited(swrm->dev, "SWR bus clash detected\n");
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
+			ratelimited_fb("payload@@%s %s:SWR bus clash detected",
+				dev_driver_string(swrm->dev), dev_name(swrm->dev));
+#endif
 			break;
 		case SWRM_INTERRUPT_STATUS_RD_FIFO_OVERFLOW:
 			dev_dbg(swrm->dev, "SWR read FIFO overflow\n");
@@ -1239,6 +1254,10 @@ static irqreturn_t swr_mstr_interrupt(int irq, void *dev)
 			"SWR CMD error, fifo status 0x%x, flushing fifo\n",
 					    value);
 			swrm->write(swrm->handle, SWRM_CMD_FIFO_CMD, 0x1);
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_MM_FEEDBACK)
+			ratelimited_fb("payload@@%s %s:SWR CMD error, fifo status 0x%x, flushing fifo",
+				dev_driver_string(swrm->dev), dev_name(swrm->dev), value);
+#endif
 			break;
 		case SWRM_INTERRUPT_STATUS_DOUT_PORT_COLLISION:
 			dev_dbg(swrm->dev, "SWR Port collision detected\n");
