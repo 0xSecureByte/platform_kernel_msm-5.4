@@ -243,7 +243,7 @@ static void oplus_voip_parse_fb_err(int port_type, char *presult)
 	}
 }
 
-static void oplus_voice_parse_fb_err()
+static void oplus_voice_parse_fb_err(void)
 {
 	char err_buf[MAX_PAYLOAD_DATASIZE] = {0};
 	char fb_buf[MAX_PAYLOAD_DATASIZE] = {0};
