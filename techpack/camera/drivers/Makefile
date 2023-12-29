@@ -172,6 +172,22 @@ camera-$(CONFIG_SPECTRA_SENSOR) += \
 	cam_sensor_module/cam_sensor_utils/cam_sensor_util.o \
 	cam_sensor_module/cam_res_mgr/cam_res_mgr.o
 
+camera-$(CONFIG_SPECTRA_OPLUS) += \
+	oplus/cam_sensor_module/cam_ois/onsemi_fw/fw_download_interface.o \
+	oplus/cam_sensor_module/cam_ois/onsemi_fw/LC898124/HighLevelCmd.o \
+	oplus/cam_sensor_module/cam_ois/onsemi_fw/LC898124/DownloadCmd.o \
+	oplus/cam_sensor_module/cam_ois/onsemi_fw/LC898124/E2PromCmd.o \
+	oplus/cam_sensor_module/cam_ois/onsemi_fw/LC898128/PhoneUpdate.o  \
+	oplus/cam_sensor_module/cam_tof8801/tof8801_pdrv.o \
+	oplus/cam_sensor_module/cam_tof8801/tof8801_driver.o \
+	oplus/cam_sensor_module/cam_tof8801/tof8801_bootloader.o \
+	oplus/cam_sensor_module/cam_tof8801/tof_hex_interpreter.o \
+	oplus/cam_sensor_module/cam_tof8801/tof8801_app0.o \
+	oplus/cam_sensor_module/cam_actuator/oplus_cam_actuator_core.o \
+	oplus/cam_sensor_module/cam_eeprom/oplus_cam_eeprom_core.o\
+	oplus/cam_sensor_module/cam_sensor/oplus_cam_sensor_core.o\
+	oplus/cam_sensor_module/cam_flash/oplus_cam_flash_dev.o
+
 camera-$(CONFIG_LEDS_QPNP_FLASH_V2) += \
 	cam_sensor_module/cam_flash/cam_flash_dev.o \
 	cam_sensor_module/cam_flash/cam_flash_core.o \

@@ -44,6 +44,10 @@
 #define CAM_IO_ACCESS  (1 << 29)
 #define CAM_SFE        (1 << 30)
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#define CAM_TOF        (1 << 31)
+#endif
+
 /* Log level types */
 #define CAM_TYPE_TRACE      (1 << 0)
 #define CAM_TYPE_ERR        (1 << 1)

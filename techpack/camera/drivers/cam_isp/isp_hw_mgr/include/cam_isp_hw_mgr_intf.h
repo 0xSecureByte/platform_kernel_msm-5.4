@@ -20,6 +20,11 @@
 #define CAM_TFE_HW_NUM_MAX   3
 #define CAM_TFE_RDI_NUM_MAX  3
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+//lanhe add
+#define CAM_IFE_CTX_RDI_SOF_EN BIT(31)
+#endif
+
 /* maximum context numbers for TFE */
 #define CAM_TFE_CTX_MAX      4
 
@@ -161,6 +166,9 @@ struct cam_isp_prepare_hw_update_data {
  *
  */
 struct cam_isp_hw_sof_event_data {
+#ifdef OPLUS_FEATURE_CAMERA_COMMON//lanhe todo
+	uint32_t       res_id;
+#endif
 	uint64_t       timestamp;
 	uint64_t       boot_time;
 };

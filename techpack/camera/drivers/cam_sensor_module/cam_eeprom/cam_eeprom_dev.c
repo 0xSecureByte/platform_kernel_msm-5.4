@@ -41,6 +41,10 @@ static int cam_eeprom_subdev_close(struct v4l2_subdev *sd,
 	return cam_eeprom_subdev_close_internal(sd, fh);
 }
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+extern bool chip_version_old;
+#endif
+
 static long cam_eeprom_subdev_ioctl(struct v4l2_subdev *sd,
 	unsigned int cmd, void *arg)
 {
@@ -87,6 +91,14 @@ int32_t cam_eeprom_update_i2c_info(struct cam_eeprom_ctrl_t *e_ctrl,
 		cci_client->retries = 3;
 		cci_client->id_map = 0;
 		cci_client->i2c_freq_mode = i2c_info->i2c_freq_mode;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+        if(e_ctrl->change_cci && (chip_version_old == FALSE)) {
+                e_ctrl->io_master_info_ois.cci_client->sid = (i2c_info->slave_addr) >> 1;
+                e_ctrl->io_master_info_ois.cci_client->retries = 3;
+                e_ctrl->io_master_info_ois.cci_client->id_map = 0;
+                e_ctrl->io_master_info_ois.cci_client->i2c_freq_mode = i2c_info->i2c_freq_mode;
+        }
+#endif
 	} else if (e_ctrl->io_master_info.master_type == I2C_MASTER) {
 		e_ctrl->io_master_info.client->addr = i2c_info->slave_addr;
 		CAM_DBG(CAM_EEPROM, "Slave addr: 0x%x", i2c_info->slave_addr);
@@ -462,7 +474,15 @@ static int cam_eeprom_component_bind(struct device *dev,
 		rc = -ENOMEM;
 		goto free_e_ctrl;
 	}
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	e_ctrl->io_master_info_ois.master_type = CCI_MASTER;
+	e_ctrl->io_master_info_ois.cci_client = kzalloc(
+		sizeof(struct cam_sensor_cci_client), GFP_KERNEL);
+	if (!e_ctrl->io_master_info_ois.cci_client) {
+		rc = -ENOMEM;
+		goto free_e_ctrl;
+	}
+#endif
 	soc_private = kzalloc(sizeof(struct cam_eeprom_soc_private),
 		GFP_KERNEL);
 	if (!soc_private) {
@@ -503,6 +523,9 @@ free_soc:
 	kfree(soc_private);
 free_cci_client:
 	kfree(e_ctrl->io_master_info.cci_client);
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+        kfree(e_ctrl->io_master_info_ois.cci_client);
+#endif
 free_e_ctrl:
 	kfree(e_ctrl);
 
@@ -536,6 +559,9 @@ static void cam_eeprom_component_unbind(struct device *dev,
 	cam_unregister_subdev(&(e_ctrl->v4l2_dev_str));
 	kfree(soc_info->soc_private);
 	kfree(e_ctrl->io_master_info.cci_client);
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+        kfree(e_ctrl->io_master_info_ois.cci_client);
+#endif
 	platform_set_drvdata(pdev, NULL);
 	v4l2_set_subdevdata(&e_ctrl->v4l2_dev_str.sd, NULL);
 	kfree(e_ctrl);

@@ -11,7 +11,9 @@
 #include <cam_req_mgr_util.h>
 #include "cam_sensor_soc.h"
 #include "cam_soc_util.h"
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#include "oplus_cam_sensor_core.h"
+#endif
 int32_t cam_sensor_get_sub_module_index(struct device_node *of_node,
 	struct cam_sensor_board_info *s_info)
 {
@@ -202,7 +204,9 @@ static int32_t cam_sensor_driver_get_dt_data(struct cam_sensor_ctrl_t *s_ctrl)
 		CAM_DBG(CAM_SENSOR, "Invalid sensor position");
 		sensordata->pos_yaw = 360;
 	}
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+        cam_sensor_get_dt_data(s_ctrl);
+#endif
 	return rc;
 
 FREE_SENSOR_DATA:
@@ -268,10 +272,23 @@ int32_t cam_sensor_parse_dt(struct cam_sensor_ctrl_t *s_ctrl)
 			return rc;
 		}
 	}
-
-	rc = cam_sensor_util_regulator_powerup(soc_info);
-	if (rc < 0)
-		return rc;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_SENSOR, "calling devm reg=%d", soc_info->num_rgltr);
+	/* Initialize regulators to default parameters */
+	for (i = 0; i < soc_info->num_rgltr; i++) {
+		soc_info->rgltr[i] = devm_regulator_get(soc_info->dev,
+					soc_info->rgltr_name[i]);
+		if (IS_ERR_OR_NULL(soc_info->rgltr[i])) {
+			rc = PTR_ERR(soc_info->rgltr[i]);
+			rc = rc ? rc : -EINVAL;
+			CAM_ERR(CAM_SENSOR, "get failed for regulator %s",
+				 soc_info->rgltr_name[i]);
+			return rc;
+		}
+		CAM_INFO(CAM_SENSOR, "get for regulator %s",
+			soc_info->rgltr_name[i]);
+	}
+#endif
 
 	rc = msm_sensor_init_default_params(s_ctrl);
 	if (rc < 0) {

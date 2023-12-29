@@ -8,3 +8,6 @@
 #define CONFIG_SPECTRA_OPE         1
 #define CONFIG_SPECTRA_TFE         1
 #define CONFIG_SPECTRA_SENSOR      1
+#define CONFIG_SPECTRA_OPLUS       1
+#define OPLUS_FEATURE_CAMERA_COMMON 1
+

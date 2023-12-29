@@ -9,6 +9,9 @@
 #include "cam_flash_core.h"
 #include "cam_common_util.h"
 #include "camera_main.h"
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#include "oplus_cam_flash_dev.h"
+#endif
 
 static int32_t cam_flash_driver_cmd(struct cam_flash_ctrl *fctrl,
 		void *arg, struct cam_flash_private_soc *soc_private)
@@ -538,6 +541,9 @@ static int cam_flash_component_bind(struct device *dev,
 	mutex_init(&(fctrl->flash_mutex));
 
 	fctrl->flash_state = CAM_FLASH_STATE_INIT;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+       oplus_cam_flash_proc_init(fctrl, pdev);
+#endif
 	CAM_DBG(CAM_FLASH, "Component bound successfully");
 	return rc;
 

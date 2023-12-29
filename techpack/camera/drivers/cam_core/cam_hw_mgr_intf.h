@@ -134,6 +134,9 @@ struct cam_hw_acquire_args {
 	bool                         custom_enabled;
 	bool                         use_frame_header_ts;
 	bool                         support_consumed_addr;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON//lanhe todo
+	bool                         use_rdi_sof;
+#endif
 
 	uint32_t    acquired_hw_id[CAM_MAX_ACQ_RES];
 	uint32_t    acquired_hw_path[CAM_MAX_ACQ_RES][CAM_MAX_HW_SPLIT];

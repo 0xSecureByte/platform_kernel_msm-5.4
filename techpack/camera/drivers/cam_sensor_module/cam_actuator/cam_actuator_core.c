@@ -12,6 +12,10 @@
 #include "cam_common_util.h"
 #include "cam_packet_util.h"
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#include "oplus_cam_actuator_core.h"
+#endif
+
 int32_t cam_actuator_construct_default_power_setting(
 	struct cam_sensor_power_ctrl_t *power_info)
 {
@@ -67,7 +71,14 @@ static int32_t cam_actuator_power_up(struct cam_actuator_ctrl_t *a_ctrl)
 		(power_info->power_down_setting == NULL)) {
 		CAM_INFO(CAM_ACTUATOR,
 			"Using default power settings");
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+		if (a_ctrl->io_master_info.cci_client->sid == (0x18 >> 1))
+			rc = oplus_cam_actuator_construct_default_power_setting(power_info);
+		else
+			rc = cam_actuator_construct_default_power_setting(power_info);
+#else
 		rc = cam_actuator_construct_default_power_setting(power_info);
+#endif
 		if (rc < 0) {
 			CAM_ERR(CAM_ACTUATOR,
 				"Construct default actuator power setting failed.");
@@ -112,6 +123,12 @@ static int32_t cam_actuator_power_up(struct cam_actuator_ctrl_t *a_ctrl)
 		goto cci_failure;
 	}
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_ACTUATOR,
+		"cam_actuator_power_up %x", a_ctrl->bridge_intf.device_hdl);
+	rc = oplus_cam_actuator_power_up(a_ctrl);
+#endif
+
 	return rc;
 cci_failure:
 	if (cam_sensor_util_power_down(power_info, soc_info))
@@ -148,7 +165,10 @@ static int32_t cam_actuator_power_down(struct cam_actuator_ctrl_t *a_ctrl)
 	}
 
 	camera_io_release(&a_ctrl->io_master_info);
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_ACTUATOR,
+	    "cam_actuator_power_down %x", a_ctrl->bridge_intf.device_hdl);
+#endif
 	return rc;
 }
 
@@ -158,7 +178,9 @@ static int32_t cam_actuator_i2c_modes_util(
 {
 	int32_t rc = 0;
 	uint32_t i, size;
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	cam_actuator_i2c_modes_util_oem(io_master_info,i2c_list);
+#endif
 	if (i2c_list->op_code == CAM_SENSOR_I2C_WRITE_RANDOM) {
 		rc = camera_io_dev_write(io_master_info,
 			&(i2c_list->i2c_settings));
@@ -275,6 +297,9 @@ int32_t cam_actuator_apply_settings(struct cam_actuator_ctrl_t *a_ctrl,
 				"Success:request ID: %d",
 				i2c_set->request_id);
 		}
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+                a_ctrl->is_actuator_ready = FALSE;
+#endif
 	}
 
 	return rc;
@@ -594,6 +619,9 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 		}
 
 		if (a_ctrl->cam_act_state == CAM_ACTUATOR_ACQUIRE) {
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+                        cam_actuator_poll_setting_update(a_ctrl);
+#endif
 			rc = cam_actuator_power_up(a_ctrl);
 			if (rc < 0) {
 				CAM_ERR(CAM_ACTUATOR,
@@ -602,7 +630,9 @@ int32_t cam_actuator_i2c_pkt_parse(struct cam_actuator_ctrl_t *a_ctrl,
 			}
 			a_ctrl->cam_act_state = CAM_ACTUATOR_CONFIG;
 		}
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+                cam_actuator_poll_setting_apply(a_ctrl);
+#endif
 		rc = cam_actuator_apply_settings(a_ctrl,
 			&a_ctrl->i2c_data.init_settings);
 		if (rc < 0) {
@@ -880,8 +910,13 @@ int32_t cam_actuator_driver_cmd(struct cam_actuator_ctrl_t *a_ctrl,
 		a_ctrl->bridge_intf.session_hdl =
 			actuator_acq_dev.session_handle;
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+		CAM_INFO(CAM_ACTUATOR, "CAM_ACQUIRE_DEV Device Handle: %d",
+ 			actuator_acq_dev.device_handle);
+#else
 		CAM_DBG(CAM_ACTUATOR, "Device Handle: %d",
 			actuator_acq_dev.device_handle);
+#endif
 		if (copy_to_user(u64_to_user_ptr(cmd->handle),
 			&actuator_acq_dev,
 			sizeof(struct cam_sensor_acquire_dev))) {
@@ -926,7 +961,10 @@ int32_t cam_actuator_driver_cmd(struct cam_actuator_ctrl_t *a_ctrl,
 			rc = -EAGAIN;
 			goto release_mutex;
 		}
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+		CAM_INFO(CAM_ACTUATOR, "CAM_RELEASE_DEV Device Handle: %d",
+			a_ctrl->bridge_intf.device_hdl);
+#endif
 		rc = cam_destroy_device_hdl(a_ctrl->bridge_intf.device_hdl);
 		if (rc < 0)
 			CAM_ERR(CAM_ACTUATOR, "destroying the device hdl");
@@ -964,6 +1002,10 @@ int32_t cam_actuator_driver_cmd(struct cam_actuator_ctrl_t *a_ctrl,
 			a_ctrl->cam_act_state);
 			goto release_mutex;
 		}
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+		CAM_INFO(CAM_ACTUATOR, "CAM_START_DEV Device Handle: %d",
+			a_ctrl->bridge_intf.device_hdl);
+#endif
 		a_ctrl->cam_act_state = CAM_ACTUATOR_START;
 		a_ctrl->last_flush_req = 0;
 	}
@@ -991,6 +1033,10 @@ int32_t cam_actuator_driver_cmd(struct cam_actuator_ctrl_t *a_ctrl,
 						i2c_set->request_id, rc);
 			}
 		}
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+		CAM_INFO(CAM_STOP_DEV, "CAM_START_DEV Device Handle: %d",
+			a_ctrl->bridge_intf.device_hdl);
+#endif
 		a_ctrl->last_flush_req = 0;
 		a_ctrl->cam_act_state = CAM_ACTUATOR_CONFIG;
 	}

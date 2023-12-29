@@ -212,6 +212,11 @@ const char *cam_get_module_name(unsigned int module_id)
 	case CAM_RES:
 		name = "CAM-RES";
 		break;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	case CAM_TOF:
+		name = "CAM-TOF";
+		break;
+#endif
 	case CAM_IO_ACCESS:
 		name = "CAM-IO-ACCESS";
 		break;

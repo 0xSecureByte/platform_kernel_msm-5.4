@@ -194,7 +194,9 @@ int cam_cci_init(struct v4l2_subdev *sd,
 	}
 
 	cci_dev->cci_state = CCI_STATE_ENABLED;
-
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_CCI, "cam_cci_init %x", cci_dev->cpas_handle);
+#endif
 	return 0;
 
 reset_complete_failed:
@@ -441,5 +443,8 @@ int cam_cci_soc_release(struct cci_device *cci_dev,
 
 	cam_cpas_stop(cci_dev->cpas_handle);
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_CCI, "cam_cci_soc_release %x", cci_dev->cpas_handle);
+#endif
 	return rc;
 }

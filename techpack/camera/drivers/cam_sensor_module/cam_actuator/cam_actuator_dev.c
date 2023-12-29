@@ -203,6 +203,9 @@ static int32_t cam_actuator_driver_i2c_probe(struct i2c_client *client,
 	soc_info->dev_name = client->name;
 	a_ctrl->io_master_info.master_type = I2C_MASTER;
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_ACTUATOR, "calling parsedt ac");
+#endif
 	rc = cam_actuator_parse_dt(a_ctrl, &client->dev);
 	if (rc < 0) {
 		CAM_ERR(CAM_ACTUATOR, "failed: cam_sensor_parse_dt rc %d", rc);
@@ -274,6 +277,9 @@ static int cam_actuator_component_bind(struct device *dev,
 	a_ctrl->soc_info.dev_name = pdev->name;
 	a_ctrl->io_master_info.master_type = CCI_MASTER;
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_ACTUATOR, "enter");
+#endif
 	a_ctrl->io_master_info.cci_client = kzalloc(sizeof(
 		struct cam_sensor_cci_client), GFP_KERNEL);
 	if (!(a_ctrl->io_master_info.cci_client)) {
@@ -302,6 +308,9 @@ static int cam_actuator_component_bind(struct device *dev,
 
 	for (i = 0; i < MAX_PER_FRAME_ARRAY; i++)
 		INIT_LIST_HEAD(&(a_ctrl->i2c_data.per_frame[i].list_head));
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_ACTUATOR, "calling parse actuator dt");
+#endif
 
 	rc = cam_actuator_parse_dt(a_ctrl, &(pdev->dev));
 	if (rc < 0) {

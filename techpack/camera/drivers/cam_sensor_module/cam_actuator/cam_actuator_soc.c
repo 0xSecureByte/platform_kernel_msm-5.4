@@ -57,9 +57,34 @@ int32_t cam_actuator_parse_dt(struct cam_actuator_ctrl_t *a_ctrl,
 		CAM_DBG(CAM_ACTUATOR, "cci-device %d", a_ctrl->cci_num);
 	}
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	CAM_INFO(CAM_ACTUATOR, "calling devm reg=%d", soc_info->num_rgltr);
+	/* Initialize regulators to default parameters */
+	for (i = 0; i < soc_info->num_rgltr; i++) {
+		soc_info->rgltr[i] = devm_regulator_get(soc_info->dev,
+					soc_info->rgltr_name[i]);
+		if (IS_ERR_OR_NULL(soc_info->rgltr[i])) {
+			rc = PTR_ERR(soc_info->rgltr[i]);
+			rc = rc ? rc : -EINVAL;
+			CAM_ERR(CAM_ACTUATOR, "get failed for regulator %s %d",
+				 soc_info->rgltr_name[i], rc);
+			return rc;
+		}
+		CAM_INFO(CAM_ACTUATOR, "get for regulator %s",
+			soc_info->rgltr_name[i]);
+	}
+
+	if (!of_property_read_bool(of_node, "need-check-pid")) {
+		a_ctrl->need_check_pid = false;
+	} else {
+		CAM_ERR(CAM_ACTUATOR, "need-check-pid defined for ultra wide camera");
+		a_ctrl->need_check_pid = true;
+	}
+#else
 	rc = cam_sensor_util_regulator_powerup(soc_info);
 	if (rc < 0)
 		return rc;
+#endif
 
 	if (!soc_info->gpio_data) {
 		CAM_DBG(CAM_ACTUATOR, "No GPIO found");

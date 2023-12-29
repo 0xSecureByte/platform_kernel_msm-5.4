@@ -321,7 +321,6 @@ static int32_t cam_sensor_get_io_buffer(
 			io_cfg->direction);
 		rc = -EINVAL;
 	}
-	cam_mem_put_cpu_buf(io_cfg->mem_handle[0]);
 	return rc;
 }
 
@@ -832,12 +831,9 @@ int cam_sensor_i2c_command_parser(
 			}
 		}
 		i2c_reg_settings->is_settings_valid = 1;
-		cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 	}
-	return rc;
 
 end:
-	cam_mem_put_cpu_buf(cmd_desc[i].mem_handle);
 	return rc;
 }
 
@@ -2017,6 +2013,12 @@ static int cam_config_mclk_reg(struct cam_sensor_power_ctrl_t *ctrl,
 
 				ps->data[0] =
 					soc_info->rgltr[j];
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+				regulator_put(
+					soc_info->rgltr[j]);
+				soc_info->rgltr[j] = NULL;
+#endif
+
 			}
 		}
 	}
@@ -2096,6 +2098,12 @@ int cam_sensor_core_power_up(struct cam_sensor_power_ctrl_t *ctrl,
 					CAM_DBG(CAM_SENSOR,
 						"Enable cam_clk: %d", j);
 
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+					soc_info->rgltr[j] =
+					regulator_get(
+						soc_info->dev,
+						soc_info->rgltr_name[j]);
+#endif
 					if (IS_ERR_OR_NULL(
 						soc_info->rgltr[j])) {
 						rc = PTR_ERR(
@@ -2189,6 +2197,12 @@ int cam_sensor_core_power_up(struct cam_sensor_power_ctrl_t *ctrl,
 			if (power_setting->seq_val < num_vreg) {
 				CAM_DBG(CAM_SENSOR, "Enable Regulator");
 				vreg_idx = power_setting->seq_val;
+
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+				soc_info->rgltr[vreg_idx] =
+					regulator_get(soc_info->dev,
+						soc_info->rgltr_name[vreg_idx]);
+#endif
 
 				if (IS_ERR_OR_NULL(
 					soc_info->rgltr[vreg_idx])) {
@@ -2312,6 +2326,10 @@ power_up_failed:
 				power_setting->data[0] =
 						soc_info->rgltr[vreg_idx];
 
+#ifndef OPLUS_FEATURE_CAMERA_COMMON
+				regulator_put(soc_info->rgltr[vreg_idx]);
+				soc_info->rgltr[vreg_idx] = NULL;
+#endif
 			} else {
 				CAM_ERR(CAM_SENSOR, "seq_val:%d > num_vreg: %d",
 					power_setting->seq_val, num_vreg);

@@ -115,6 +115,13 @@ struct cam_actuator_ctrl_t {
 	struct cam_actuator_query_cap act_info;
 	struct actuator_intf_params bridge_intf;
 	uint32_t last_flush_req;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	bool is_actuator_ready;
+	struct cam_sensor_i2c_reg_array poll_register;
+	enum camera_sensor_i2c_type addr_type;
+	enum camera_sensor_i2c_type data_type;
+	bool need_check_pid;
+#endif
 };
 
 /**

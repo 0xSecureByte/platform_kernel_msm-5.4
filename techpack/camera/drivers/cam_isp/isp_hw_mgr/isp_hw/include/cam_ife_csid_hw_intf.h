@@ -152,6 +152,10 @@ struct cam_csid_hw_reserve_resource_args {
 	cam_hw_mgr_event_cb_func                  event_cb;
 	uint32_t                                  phy_sel;
 	bool                                      can_use_lite;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	//lanhe add
+	bool                                      use_rdi_sof;
+#endif
 };
 
 /**

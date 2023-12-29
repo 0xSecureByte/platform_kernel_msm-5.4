@@ -308,6 +308,19 @@ int cam_flash_get_dt_data(struct cam_flash_ctrl *fctrl,
 		goto free_soc_private;
 	}
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	rc = of_property_read_string(of_node, "qcom,flash-name",
+		&fctrl->flash_name);
+	if (rc < 0) {
+		pr_err("get flash_name failed rc %d\n", rc);
+	}
+	fctrl->flash_current = 0;
+	rc = of_property_read_u32(of_node, "qcom,flash-current",
+		&fctrl->flash_current);
+	if (rc < 0) {
+		pr_err("get flash_current failed rc %d\n", rc);
+	}
+#endif
 	rc = cam_get_source_node_info(of_node, fctrl, soc_info->soc_private);
 	if (rc) {
 		CAM_ERR(CAM_FLASH,
