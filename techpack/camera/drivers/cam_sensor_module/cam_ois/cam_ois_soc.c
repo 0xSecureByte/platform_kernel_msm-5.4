@@ -35,15 +35,30 @@ static int cam_ois_get_dt_data(struct cam_ois_ctrl_t *o_ctrl)
 		return -EINVAL;
 	}
 	rc = cam_soc_util_get_dt_properties(soc_info);
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	/* Initialize regulators to default parameters */
+	CAM_INFO(CAM_OIS, "calling devm reg=%d", soc_info->num_rgltr);
+	for (i = 0; i < soc_info->num_rgltr; i++) {
+		soc_info->rgltr[i] = devm_regulator_get(soc_info->dev,
+					soc_info->rgltr_name[i]);
+		if (IS_ERR_OR_NULL(soc_info->rgltr[i])) {
+			rc = PTR_ERR(soc_info->rgltr[i]);
+			rc = rc ? rc : -EINVAL;
+			CAM_ERR(CAM_OIS, "get failed for regulator %s",
+				soc_info->rgltr_name[i]);
+			return rc;
+		}
+		CAM_INFO(CAM_OIS, "get for regulator %s",
+			soc_info->rgltr_name[i]);
+	}
+#endif
+
+
 	if (rc < 0) {
 		CAM_ERR(CAM_OIS, "cam_soc_util_get_dt_properties rc %d",
 			rc);
 		return rc;
 	}
-
-	rc = cam_sensor_util_regulator_powerup(soc_info);
-	if (rc < 0)
-		return rc;
 
 	if (!soc_info->gpio_data) {
 		CAM_INFO(CAM_OIS, "No GPIO found");
@@ -84,9 +99,12 @@ static int cam_ois_get_dt_data(struct cam_ois_ctrl_t *o_ctrl)
 int cam_ois_driver_soc_init(struct cam_ois_ctrl_t *o_ctrl)
 {
 	int                             rc = 0;
+	const char                     *p = NULL;
 	struct cam_hw_soc_info         *soc_info = &o_ctrl->soc_info;
 	struct device_node             *of_node = NULL;
 	struct device_node             *of_parent = NULL;
+	int                             ret = 0;
+	int                             id;
 
 	if (!soc_info->dev) {
 		CAM_ERR(CAM_OIS, "soc_info is not initialized");
@@ -121,6 +139,98 @@ int cam_ois_driver_soc_init(struct cam_ois_ctrl_t *o_ctrl)
 	rc = cam_ois_get_dt_data(o_ctrl);
 	if (rc < 0)
 		CAM_DBG(CAM_OIS, "failed: ois get dt data rc %d", rc);
+
+	ret = of_property_read_u32(of_node, "ois_gyro,position", &id);
+	if (ret) {
+	    o_ctrl->ois_gyro_position = 1;
+		CAM_ERR(CAM_OIS, "get ois_gyro,position failed rc:%d, set default value to %d", ret, o_ctrl->ois_gyro_position);
+	} else {
+	    o_ctrl->ois_gyro_position = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read ois_gyro,position success, value:%d", o_ctrl->ois_gyro_position);
+	}
+
+	ret = of_property_read_u32(of_node, "ois,type", &id);
+	if (ret) {
+	    o_ctrl->ois_type = CAM_OIS_MASTER;
+		CAM_ERR(CAM_OIS, "get ois,type failed rc:%d, default %d", ret, o_ctrl->ois_type);
+	} else {
+	    o_ctrl->ois_type = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read ois,type success, value:%d", o_ctrl->ois_type);
+	}
+
+	ret = of_property_read_u32(of_node, "ois_gyro,type", &id);
+	if (ret) {
+	    o_ctrl->ois_gyro_vendor = 0x02;
+		CAM_ERR(CAM_OIS, "get ois_gyro,type failed rc:%d, default %d", ret, o_ctrl->ois_gyro_vendor);
+	} else {
+	    o_ctrl->ois_gyro_vendor = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read ois_gyro,type success, value:%d", o_ctrl->ois_gyro_vendor);
+	}
+
+	ret = of_property_read_string_index(of_node, "ois,name", 0, (const char **)&p);
+	if (ret) {
+		CAM_ERR(CAM_OIS, "get ois,name failed rc:%d, set default value to %s", ret, o_ctrl->ois_name);
+	} else {
+	    memcpy(o_ctrl->ois_name, p, sizeof(o_ctrl->ois_name));
+		CAM_INFO(CAM_OIS, "read ois,name success, value:%s", o_ctrl->ois_name);
+	}
+
+	ret = of_property_read_u32(of_node, "ois_module,vendor", &id);
+	if (ret) {
+	    o_ctrl->ois_module_vendor = 0x01;
+		CAM_ERR(CAM_OIS, "get ois_module,vendor failed rc:%d, default %d", ret, o_ctrl->ois_module_vendor);
+	} else {
+	    o_ctrl->ois_module_vendor = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read ois_module,vendor success, value:%d", o_ctrl->ois_module_vendor);
+	}
+
+	ret = of_property_read_u32(of_node, "ois_actuator,vednor", &id);
+	if (ret) {
+	    o_ctrl->ois_actuator_vendor = 0x01;
+		CAM_ERR(CAM_OIS, "get ois_actuator,vednor failed rc:%d, default %d", ret, o_ctrl->ois_actuator_vendor);
+	} else {
+	    o_ctrl->ois_actuator_vendor = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read ois_actuator,vednor success, value:%d", o_ctrl->ois_actuator_vendor);
+	}
+
+	ret = of_property_read_u32(of_node, "ois,fw", &id);
+	if (ret) {
+	    o_ctrl->ois_fw_flag = 0x01;
+		CAM_ERR(CAM_OIS, "get ois,fw failed rc:%d, default %d", ret, o_ctrl->ois_fw_flag);
+	} else {
+	    o_ctrl->ois_fw_flag = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read ois,fw success, value:%d", o_ctrl->ois_fw_flag);
+	}
+
+	ret = of_property_read_u32(of_node, "change_cci", &id);
+	if (ret) {
+	    o_ctrl->ois_change_cci = 0x00;
+		CAM_ERR(CAM_OIS, "get change_cci failed rc:%d, default %d", ret, o_ctrl->ois_change_cci);
+	} else {
+	    o_ctrl->ois_change_cci = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read change_cci success, value:%d", o_ctrl->ois_change_cci);
+	}
+
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	ret = of_property_read_u32(of_node, "ois_eis_function", &id);
+	if (ret) {
+	    o_ctrl->ois_eis_function = 0x00;
+		CAM_ERR(CAM_OIS, "get ois_eis_function failed rc:%d, default %d", ret, o_ctrl->ois_eis_function);
+	} else {
+	    o_ctrl->ois_eis_function = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read ois_eis_function success, value:%d", o_ctrl->ois_eis_function);
+	}
+
+	ret = of_property_read_u32(of_node, "download,fw", &id);
+	if (ret) {
+	    o_ctrl->cam_ois_download_fw_in_advance = 0;
+		CAM_ERR(CAM_OIS, "get download,fw failed rc:%d, default %d", ret, o_ctrl->cam_ois_download_fw_in_advance);
+	} else {
+	    o_ctrl->cam_ois_download_fw_in_advance = (uint8_t)id;
+		CAM_INFO(CAM_OIS, "read download,fw success, value:%d", o_ctrl->cam_ois_download_fw_in_advance);
+	}
+
+#endif
 
 	return rc;
 }

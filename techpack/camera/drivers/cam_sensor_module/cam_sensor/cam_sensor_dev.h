@@ -45,6 +45,18 @@ enum cam_sensor_state_t {
 	CAM_SENSOR_START,
 };
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+enum cam_sensor_power_state {
+        CAM_SENSOR_POWER_OFF,
+        CAM_SENSOR_POWER_ON,
+};
+
+enum cam_sensor_setting_state {
+        CAM_SENSOR_SETTING_WRITE_INVALID,
+        CAM_SENSOR_SETTING_WRITE_SUCCESS,
+};
+#endif
+
 /**
  * struct sensor_intf_params
  * @device_hdl: Device Handle
@@ -111,6 +123,19 @@ struct cam_sensor_ctrl_t {
 	bool bob_pwm_switch;
 	uint32_t last_flush_req;
 	uint16_t pipeline_delay;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	uint32_t adv_powerup_vendor;
+	int is_support_laser;
+        int is_read_eeprom;
+        int reg_setting_ver;
+        struct mutex sensor_power_state_mutex;
+        struct mutex sensor_initsetting_mutex;
+        enum cam_sensor_power_state sensor_power_state;
+        enum cam_sensor_setting_state sensor_initsetting_state;
+        struct task_struct *sensor_open_thread;
+	int is_diff_af_support;
+	bool use_rdi_sof_apply;  //lanhe add for explorer latency mipi tx.
+#endif
 };
 
 /**

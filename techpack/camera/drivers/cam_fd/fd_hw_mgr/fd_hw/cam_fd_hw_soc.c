@@ -130,7 +130,7 @@ int cam_fd_soc_enable_resources(struct cam_hw_soc_info *soc_info)
 		return -EFAULT;
 	}
 
-	rc = cam_soc_util_enable_platform_resource(soc_info, true, CAM_SVS_VOTE,
+	rc = cam_soc_util_enable_platform_resource(soc_info, true, CAM_TURBO_VOTE,
 		true);
 	if (rc) {
 		CAM_ERR(CAM_FD, "Error enable platform failed, rc=%d", rc);

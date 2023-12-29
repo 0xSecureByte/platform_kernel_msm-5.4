@@ -8,6 +8,10 @@
 #include "cam_cci_dev.h"
 #include "cam_req_mgr_workq.h"
 #include "cam_common_util.h"
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+//#define DUMP_CCI_REGISTERS 1
+#include "cam_cci_ctrl_interface.h"
+#endif
 
 static int32_t cam_cci_convert_type_to_num_bytes(
 	enum camera_sensor_i2c_type type)
@@ -213,6 +217,9 @@ void cam_cci_dump_registers(struct cci_device *cci_dev,
 	void __iomem *base = cci_dev->soc_info.reg_map[0].mem_base;
 
 	dump_en = cci_dev->dump_en;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	dump_en = 3;
+#endif
 	if (!(dump_en & CAM_CCI_NACK_DUMP_EN) &&
 		!(dump_en & CAM_CCI_TIMEOUT_DUMP_EN)) {
 		CAM_DBG(CAM_CCI,
@@ -1916,3 +1923,153 @@ int32_t cam_cci_core_cfg(struct v4l2_subdev *sd,
 
 	return rc;
 }
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#define MAX_WRITE_ARRAY_SIZE   300
+static struct cam_cci_ctrl cci_ctrl_interface;
+static struct cam_sensor_cci_client cci_ctrl_interface_info;
+static struct cam_sensor_i2c_reg_array write_regarray[MAX_WRITE_ARRAY_SIZE];
+extern bool dump_tof_registers;
+
+int32_t cam_cci_read_packet(struct cam_cci_ctrl *cci_ctrl,
+	uint32_t addr, uint8_t *data,uint32_t count)
+{
+	int32_t rc = -EINVAL;
+
+	cci_ctrl->cmd = MSM_CCI_I2C_READ;
+	cci_ctrl->cfg.cci_i2c_read_cfg.addr = addr;
+	cci_ctrl->cfg.cci_i2c_read_cfg.addr_type = CAMERA_SENSOR_I2C_TYPE_BYTE;
+	cci_ctrl->cfg.cci_i2c_read_cfg.data_type = CAMERA_SENSOR_I2C_TYPE_BYTE;
+	cci_ctrl->cfg.cci_i2c_read_cfg.data = data;
+	cci_ctrl->cfg.cci_i2c_read_cfg.num_byte = count;
+
+	rc = cci_ctrl->status;
+	return rc;
+}
+
+static int32_t cam_cci_write_packet(
+	struct cam_cci_ctrl *cci_ctrl,
+	int addr,
+	uint8_t *data,
+	uint16_t count)
+{
+	int32_t rc = 0;
+	int i;
+	memset(write_regarray,0,sizeof(write_regarray));
+	if (!cci_ctrl || !data)
+		return rc;
+	if(count > MAX_WRITE_ARRAY_SIZE){
+		CAM_ERR(CAM_SENSOR, "fatal error!!count exceeds 300,count=%d",
+			count);
+		count = MAX_WRITE_ARRAY_SIZE;
+	}
+	for(i=0; i<count; i++){
+		write_regarray[i].reg_addr = addr+i;
+		write_regarray[i].reg_data = data[i];
+	}
+	cci_ctrl->cfg.cci_i2c_write_cfg.reg_setting =
+		write_regarray;
+	cci_ctrl->cfg.cci_i2c_write_cfg.data_type = CAMERA_SENSOR_I2C_TYPE_BYTE;
+	cci_ctrl->cfg.cci_i2c_write_cfg.addr_type = CAMERA_SENSOR_I2C_TYPE_BYTE;
+	cci_ctrl->cfg.cci_i2c_write_cfg.size = count;
+
+	if (rc < 0) {
+		CAM_ERR(CAM_SENSOR, "Failed rc = %d", rc);
+		return rc;
+	}
+	rc = cci_ctrl->status;
+	//if (write_setting->delay > 20)
+	//	  msleep(write_setting->delay);
+	//else if (write_setting->delay)
+	//	  usleep_range(write_setting->delay * 1000, (write_setting->delay
+	//		  * 1000) + 1000);
+
+	return rc;
+}
+
+int32_t cam_cci_control_interface(void* control)
+{
+
+	int32_t rc = 0,exp_byte;
+	struct v4l2_subdev *sd = cam_cci_get_subdev(CCI_DEVICE_1);
+	struct cci_device *cci_dev = v4l2_get_subdevdata(sd);
+	struct camera_cci_transfer* pControl = (struct camera_cci_transfer*)control;
+        int i=0;
+
+	switch (pControl->cmd) {
+	case CAMERA_CCI_INIT:
+		memset(&cci_ctrl_interface,0,sizeof(cci_ctrl_interface));
+		memset(&cci_ctrl_interface_info,0,sizeof(cci_ctrl_interface_info));
+		cci_ctrl_interface.cci_info = &cci_ctrl_interface_info;
+		cci_ctrl_interface.cci_info->cci_i2c_master = MASTER_1;
+		cci_ctrl_interface.cci_info->i2c_freq_mode = I2C_FAST_PLUS_MODE;
+		cci_ctrl_interface.cci_info->sid = (0x82 >> 1);
+		cci_ctrl_interface.cci_info->retries = 3;
+                cci_ctrl_interface.cci_info->cci_device = CCI_DEVICE_1;
+		mutex_lock(&cci_dev->init_mutex);
+		rc = cam_cci_init(sd, &cci_ctrl_interface);
+		mutex_unlock(&cci_dev->init_mutex);
+		CAM_INFO(CAM_CCI, "cci init cmd,rc=%d",rc);
+		break;
+	case CAMERA_CCI_RELEASE:
+		mutex_lock(&cci_dev->init_mutex);
+		rc = cam_cci_release(sd, cci_ctrl_interface.cci_info->cci_i2c_master);
+		mutex_unlock(&cci_dev->init_mutex);
+		CAM_INFO(CAM_CCI, "cci release cmd,rc=%d",rc);
+		break;
+	case CAMERA_CCI_READ:
+		cci_ctrl_interface.cmd = MSM_CCI_I2C_READ;
+		//pack read data
+		cam_cci_read_packet(&cci_ctrl_interface,
+							pControl->addr,
+							pControl->data,
+							pControl->count);
+		mutex_lock(&cci_dev->init_mutex);
+                cci_ctrl_interface.cci_info->cci_device=CCI_DEVICE_1;
+		rc = cam_cci_read_bytes(sd, &cci_ctrl_interface);
+		mutex_unlock(&cci_dev->init_mutex);
+                if(dump_tof_registers){
+		        CAM_ERR(CAM_CCI, "tof_registers %d,rc=%d", pControl->cmd,rc);
+		        exp_byte = cci_ctrl_interface.cfg.cci_i2c_read_cfg.num_byte;//((cci_ctrl_interface.cfg.cci_i2c_read_cfg.num_byte / 2) + 1);
+		        CAM_ERR(CAM_CCI, "tof_registers read exp byte=%d", exp_byte);
+		        for(i=0; i<exp_byte; i++){
+			        CAM_ERR(CAM_CCI, "tof_registers read addr =0x%x byte=0x%x,index=%d",
+				        cci_ctrl_interface.cfg.cci_i2c_read_cfg.addr,cci_ctrl_interface.cfg.cci_i2c_read_cfg.data[i],i);
+		        }
+                }
+		break;
+	case CAMERA_CCI_WRITE:
+		//if(pControl->count>1)
+		//	  cci_ctrl_interface.cmd = MSM_CCI_I2C_WRITE_SEQ;
+		//else
+		//	  cci_ctrl_interface.cmd = MSM_CCI_I2C_WRITE_SYNC_BLOCK;
+		cci_ctrl_interface.cmd = MSM_CCI_I2C_WRITE;
+		//pack write data
+		cam_cci_write_packet(&cci_ctrl_interface,
+							pControl->addr,
+							pControl->data,
+							pControl->count);
+		mutex_lock(&cci_dev->init_mutex);
+		rc = cam_cci_write(sd, &cci_ctrl_interface);
+		mutex_unlock(&cci_dev->init_mutex);
+                if(dump_tof_registers){
+		        exp_byte = cci_ctrl_interface.cfg.cci_i2c_write_cfg.size;
+		        CAM_ERR(CAM_CCI, "tof_registers write exp byte=%d", exp_byte);
+		        for(i=0; i<exp_byte; i++){
+			        CAM_ERR(CAM_CCI, "tof_registers write i=%d,addr=0x%x data=0x%x",i,
+				        cci_ctrl_interface.cfg.cci_i2c_write_cfg.reg_setting[i].reg_addr,
+				        cci_ctrl_interface.cfg.cci_i2c_write_cfg.reg_setting[i].reg_data);
+		        }
+                }
+		if(rc < 0){
+			CAM_ERR(CAM_CCI, "cmd %d,rc=%d",pControl->cmd,rc);
+		}
+		break;
+	default:
+		rc = -ENOIOCTLCMD;
+	}
+
+	cci_ctrl_interface.status = rc;
+	return rc;
+}
+#endif
+

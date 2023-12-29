@@ -215,6 +215,9 @@ struct cam_isp_context_state_monitor {
 
 struct cam_isp_context_req_id_info {
 	int64_t                          last_bufdone_req_id;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON //lanhe todo:
+	uint64_t                         last_rdi_req_id;
+#endif
 };
 
 /**
@@ -277,12 +280,16 @@ struct cam_isp_context_event_record {
  *                             decide whether to apply request in offline ctx
  * @workq:                     Worker thread for offline ife
  * @trigger_id:                ID provided by CRM for each ctx on the link
- * @last_bufdone_err_apply_req_id:  last bufdone error apply request id
+ * @last_bufdone_error_apply_req_id:  last bufdone error apply request id
+ * @apply_fail_cnt_on_bubble:  Count of apply fails after bubble
  *
  */
 struct cam_isp_context {
 	struct cam_context              *base;
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON //lanhe todo:
+	uint64_t                         rdi_frame_id;
+#endif
 	int64_t                          frame_id;
 	uint32_t                         frame_id_meta;
 	uint32_t                         substate_activated;

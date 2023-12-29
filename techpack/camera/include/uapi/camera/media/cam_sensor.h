@@ -8,7 +8,11 @@
 
 #include <linux/types.h>
 #include <linux/ioctl.h>
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#include <media/cam_defs.h>
+#else
 #include <camera/media/cam_defs.h>
+#endif
 
 #define CAM_SENSOR_PROBE_CMD   (CAM_COMMON_OPCODE_MAX + 1)
 #define CAM_FLASH_MAX_LED_TRIGGERS 2
@@ -487,4 +491,7 @@ struct cam_flash_query_cap_info {
 	__u32    flash_type;
 } __attribute__ ((packed));
 
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	#include "oplus/media/oplus_cam_sensor.h"
+#endif
 #endif

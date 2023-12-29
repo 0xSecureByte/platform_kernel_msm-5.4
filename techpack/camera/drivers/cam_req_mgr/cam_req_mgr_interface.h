@@ -122,6 +122,10 @@ enum cam_pipeline_delay {
 #define CAM_TRIGGER_POINT_SOF     (1 << 0)
 #define CAM_TRIGGER_POINT_EOF     (1 << 1)
 #define CAM_TRIGGER_MAX_POINTS    2
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+//lanhe add
+#define CAM_TRIGGER_POINT_RDI_SOF     (1 << 3)
+#endif
 
 /**
  * enum cam_req_status
@@ -280,6 +284,10 @@ struct cam_req_mgr_add_request {
 	uint32_t skip_at_sof;
 	uint32_t skip_at_eof;
 	bool     trigger_eof;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	//lanhe add for use RDI for sensor apply
+	bool     use_rdi_sof_apply;
+#endif
 };
 
 
