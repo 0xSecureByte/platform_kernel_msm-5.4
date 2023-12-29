@@ -886,7 +886,7 @@ static int __attribute__((__unused__)) init_ddr_vendor_size(struct device_info *
 			i++;
 		}
 #else
-	tmp_manufacture = strstr(boot_command_line, "device_info.ddr_info=");
+	tmp_manufacture = strstr(saved_command_line, "device_info.ddr_info=");
 	if (tmp_manufacture) {
 		tmp_manufacture += strlen("device_info.ddr_info=");
 
