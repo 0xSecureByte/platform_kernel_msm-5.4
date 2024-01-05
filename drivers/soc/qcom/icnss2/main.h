@@ -478,6 +478,11 @@ struct icnss_priv {
 	u32 hw_trc_override;
 	struct icnss_dms_data dms;
 	u8 use_nv_mac;
+#ifdef OPLUS_FEATURE_WIFI_DCS_SWITCH
+//Add for: check fw status for switch issue
+	unsigned long loadBdfState;
+	unsigned long loadRegdbState;
+#endif /* OPLUS_FEATURE_WIFI_DCS_SWITCH */
 	u8 is_slate_rfa;
 	struct completion slate_boot_complete;
 	u8 low_power_support;
@@ -492,6 +497,17 @@ struct icnss_priv {
 	u32 rf_subtype;
 	struct timer_list recovery_timer;
 };
+#ifdef OPLUS_FEATURE_WIFI_DCS_SWITCH
+//Add for: check fw status for switch issue
+enum cnss_load_state {
+	CNSS_LOAD_BDF_FAIL = 1,
+	CNSS_LOAD_BDF_SUCCESS,
+	CNSS_LOAD_REGDB_FAIL,
+	CNSS_LOAD_REGDB_SUCCESS,
+	CNSS_PROBE_FAIL,
+	CNSS_PROBE_SUCCESS,
+};
+#endif /* OPLUS_FEATURE_WIFI_DCS_SWITCH */
 
 struct icnss_reg_info {
 	uint32_t mem_type;
@@ -520,4 +536,3 @@ void icnss_add_fw_prefix_name(struct icnss_priv *priv, char *prefix_name,
 			      char *name);
 void icnss_recovery_timeout_hdlr(struct timer_list *t);
 #endif
-

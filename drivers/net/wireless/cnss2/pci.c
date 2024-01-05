@@ -1097,7 +1097,9 @@ static int cnss_set_pci_link(struct cnss_pci_data *pci_priv, bool link_up)
 {
 	int ret = 0, retry = 0;
 
+	#ifndef CONFIG_OPLUS_FEATURE_WIFI_BDF
 	cnss_pr_vdbg("%s PCI link\n", link_up ? "Resuming" : "Suspending");
+	#endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF */
 
 	if (link_up) {
 retry:
@@ -1744,8 +1746,10 @@ static int cnss_pci_set_mhi_state(struct cnss_pci_data *pci_priv,
 	if (ret)
 		goto out;
 
+	#ifndef CONFIG_OPLUS_FEATURE_WIFI_BDF
 	cnss_pr_vdbg("Setting MHI state: %s(%d)\n",
 		     cnss_mhi_state_to_str(mhi_state), mhi_state);
+	#endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF */
 
 	switch (mhi_state) {
 	case CNSS_MHI_INIT:

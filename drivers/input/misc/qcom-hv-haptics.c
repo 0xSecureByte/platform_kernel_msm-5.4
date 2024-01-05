@@ -640,6 +640,20 @@ static bool is_haptics_external_powered(struct haptics_chip *chip)
 	return false;
 }
 
+static RAW_NOTIFIER_HEAD(hbst_off_notifier);
+
+int register_hbst_off_notifier(struct notifier_block *nb)
+{
+	return raw_notifier_chain_register(&hbst_off_notifier, nb);
+}
+EXPORT_SYMBOL(register_hbst_off_notifier);
+
+int unregister_hbst_off_notifier(struct notifier_block *nb)
+{
+	return raw_notifier_chain_unregister(&hbst_off_notifier, nb);
+}
+EXPORT_SYMBOL(unregister_hbst_off_notifier);
+
 static int haptics_read(struct haptics_chip *chip,
 		u16 base, u8 offset, u8 *val, u32 length)
 {
