@@ -22,7 +22,11 @@
 #include <asm/unaligned.h>
 
 #include "u_os_desc.h"
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+static bool enable_l1_for_hs;
+module_param(enable_l1_for_hs, bool, S_IRUGO | S_IWUSR);
+MODULE_PARM_DESC(enable_l1_for_hs, "Enable support for L1 LPM for HS devices");
+#endif
 /**
  * struct usb_os_string - represents OS String to be reported by a gadget
  * @bLength: total length of the entire descritor, always 0x12
@@ -170,7 +174,7 @@ int config_ep_by_speed_and_alt(struct usb_gadget *g,
 	/* select desired speed */
 	switch (g->speed) {
 	case USB_SPEED_SUPER_PLUS:
-		if (gadget_is_superspeed_plus(g)) {
+		if (gadget_is_superspeed_plus(g) && f->ssp_descriptors != NULL) {
 			if (f->ssp_descriptors) {
 				speed_desc = f->ssp_descriptors;
 				want_comp_desc = 1;
@@ -180,7 +184,7 @@ int config_ep_by_speed_and_alt(struct usb_gadget *g,
 		}
 		/* fall through */
 	case USB_SPEED_SUPER:
-		if (gadget_is_superspeed(g)) {
+		if (gadget_is_superspeed(g) && f->ss_descriptors != NULL) {
 			if (f->ss_descriptors) {
 				speed_desc = f->ss_descriptors;
 				want_comp_desc = 1;
@@ -190,7 +194,7 @@ int config_ep_by_speed_and_alt(struct usb_gadget *g,
 		}
 		/* fall through */
 	case USB_SPEED_HIGH:
-		if (gadget_is_dualspeed(g)) {
+		if (gadget_is_dualspeed(g) && f->hs_descriptors != NULL) {
 			if (f->hs_descriptors) {
 				speed_desc = f->hs_descriptors;
 				break;
@@ -906,7 +910,7 @@ static int set_config(struct usb_composite_dev *cdev,
 		goto done;
 
 #ifdef CONFIG_QGKI_MSM_BOOT_TIME_MARKER
-	update_marker("M - USB device is enumerated");
+	place_marker("M - USB device is enumerated");
 #endif
 	usb_gadget_set_state(gadget, USB_STATE_CONFIGURED);
 	cdev->config = c;
@@ -1752,15 +1756,30 @@ composite_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 			cdev->desc.bMaxPacketSize0 =
 				cdev->gadget->ep0->maxpacket;
 			if (gadget_is_superspeed(gadget)) {
+#ifdef OPLUS_FEATURE_CHG_BASIC
+				if (gadget->speed >= USB_SPEED_SUPER) {
+					cdev->desc.bcdUSB = cpu_to_le16(0x0200);
+					cdev->desc.bMaxPacketSize0 = 9;
+				} else if (gadget->lpm_capable || enable_l1_for_hs)  {
+					cdev->desc.bcdUSB = cpu_to_le16(0x0200);
+				} else {
+					cdev->desc.bcdUSB = cpu_to_le16(0x0200);
+				}
+#else
 				if (gadget->speed >= USB_SPEED_SUPER) {
 					cdev->desc.bcdUSB = cpu_to_le16(0x0320);
 					cdev->desc.bMaxPacketSize0 = 9;
 				} else {
 					cdev->desc.bcdUSB = cpu_to_le16(0x0210);
 				}
+#endif
 			} else {
 				if (gadget->lpm_capable)
+#ifdef OPLUS_FEATURE_CHG_BASIC
+					cdev->desc.bcdUSB = cpu_to_le16(0x0200);
+#else
 					cdev->desc.bcdUSB = cpu_to_le16(0x0201);
+#endif
 				else
 					cdev->desc.bcdUSB = cpu_to_le16(0x0200);
 			}
@@ -1795,7 +1814,11 @@ composite_setup(struct usb_gadget *gadget, const struct usb_ctrlrequest *ctrl)
 				value = min(w_length, (u16) value);
 			break;
 		case USB_DT_BOS:
+#ifdef OPLUS_FEATURE_CHG_BASIC
+			if ((gadget_is_superspeed(gadget) && (gadget->speed >= USB_SPEED_SUPER)) ||
+#else
 			if (gadget_is_superspeed(gadget) ||
+#endif
 			    gadget->lpm_capable) {
 				value = bos_desc(cdev);
 				value = min(w_length, (u16) value);
@@ -2454,7 +2477,7 @@ void composite_resume(struct usb_gadget *gadget)
 	 */
 	INFO(cdev, "USB Resume end\n");
 #ifdef CONFIG_QGKI_MSM_BOOT_TIME_MARKER
-	update_marker("M - USB device is resumed");
+	place_marker("M - USB device is resumed");
 #endif
 	if (cdev->driver->resume)
 		cdev->driver->resume(cdev);

@@ -92,6 +92,11 @@ static int PWR_EVNT_IRQ_STAT_REG[] = {
 #define PWR_EVNT_LPM_OUT_RX_ELECIDLE_IRQ_MASK	BIT(12)
 #define PWR_EVNT_LPM_OUT_L1_MASK		BIT(13)
 
+#ifdef OPLUS_FEATURE_CHG_BASIC
+#define USB3_PRI_LINK_REGS_LLUCTL(n)	(0xd024 + ((n) * 0x80))
+#define FORCE_GEN1_MASK			BIT(10)
+#endif
+
 /* QSCRATCH_GENERAL_CFG register bit offset */
 #define PIPE_UTMI_CLK_SEL	BIT(0)
 #define PIPE3_PHYSTATUS_SW	BIT(3)
@@ -595,7 +600,9 @@ struct dwc3_msm {
 #define USB_SSPHY_1P8_VOL_MIN		1800000 /* uV */
 #define USB_SSPHY_1P8_VOL_MAX		1800000 /* uV */
 #define USB_SSPHY_1P8_HPM_LOAD		23000	/* uA */
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+struct device	*oplus_dev = NULL;
+#endif
 static void dwc3_pwr_event_handler(struct dwc3_msm *mdwc);
 static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned int mA);
 static void dwc3_msm_notify_event(struct dwc3 *dwc,
@@ -4219,7 +4226,7 @@ static irqreturn_t msm_dwc3_pwr_irq(int irq, void *data)
 	if (mdwc->drd_state == DRD_STATE_PERIPHERAL_SUSPEND) {
 		dev_info(mdwc->dev, "USB Resume start\n");
 #ifdef CONFIG_QGKI_MSM_BOOT_TIME_MARKER
-		update_marker("M - USB device resume started");
+		place_marker("M - USB device resume started");
 #endif
 	}
 
@@ -4592,6 +4599,12 @@ static enum usb_role dwc3_msm_usb_get_role(struct device *dev)
 	dbg_log_string("get_role:%s\n", usb_role_string(role));
 	return role;
 }
+#ifdef OPLUS_FEATURE_CHG_BASIC
+bool __attribute__((weak)) oplus_is_pd_svooc(void)
+{
+	return false;
+}
+#endif
 
 static int dwc3_msm_usb_set_role(struct device *dev, enum usb_role role)
 {
@@ -4600,7 +4613,12 @@ static int dwc3_msm_usb_set_role(struct device *dev, enum usb_role role)
 	enum usb_role cur_role = USB_ROLE_NONE;
 
 	cur_role = dwc3_msm_usb_get_role(dev);
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+	if (oplus_is_pd_svooc() == true) {
+		pr_err("!!!ignore the notify to start USB device mode");
+		return 0;
+	}
+#endif
 	switch (role) {
 	case USB_ROLE_HOST:
 		mdwc->vbus_active = false;
@@ -4653,6 +4671,14 @@ static struct usb_role_switch_desc role_desc = {
 	.get = dwc3_msm_usb_get_role,
 	.allow_userspace_control = true,
 };
+#ifdef OPLUS_FEATURE_CHG_BASIC
+void oplus_usb_set_none_role(void)
+{
+	if (oplus_dev)
+		dwc3_msm_usb_set_role(oplus_dev, USB_ROLE_NONE);
+}
+EXPORT_SYMBOL(oplus_usb_set_none_role);
+#endif
 
 static void typec_orientation_set(struct dwc3_msm *mdwc)
 {
@@ -5733,7 +5759,10 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	dpdm_init(mdwc);
 
 	dwc3_msm_default_peripheral(pdev);
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+	oplus_dev = mdwc->dev;
+	printk(KERN_ERR "%s, init oplus_dev\n", __func__);
+#endif
 	device_create_file(&pdev->dev, &dev_attr_orientation);
 	device_create_file(&pdev->dev, &dev_attr_mode);
 	device_create_file(&pdev->dev, &dev_attr_speed);
@@ -6212,6 +6241,14 @@ static int dwc3_otg_start_peripheral(struct dwc3_msm *mdwc, int on)
 		dwc3_dis_sleep_mode(mdwc);
 		mdwc->in_device_mode = true;
 
+#ifdef OPLUS_FEATURE_CHG_BASIC
+		/* disable host gen2 */
+		if (mdwc->ss_phy->flags & PHY_HOST_MODE){
+			dwc3_msm_write_reg_field(mdwc->base, USB3_PRI_LINK_REGS_LLUCTL(0), FORCE_GEN1_MASK, 1);
+			val = dwc3_msm_read_reg_field(mdwc->base, USB3_PRI_LINK_REGS_LLUCTL(0), FORCE_GEN1_MASK);
+			dev_info(mdwc->dev, "Turn on host: FORCE_GEN1_MASK = %d", val);
+		}
+#endif
 		/* Reduce the U3 exit handshake timer from 8us to approximately
 		 * 300ns to avoid lfps handshake interoperability issues
 		 */

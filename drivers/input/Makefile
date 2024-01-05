@@ -31,3 +31,15 @@ obj-$(CONFIG_INPUT_APMPOWER)	+= apm-power.o
 obj-$(CONFIG_RMI4_CORE)		+= rmi4/
 obj-$(CONFIG_SMI130)		+= sensors/smi130/
 obj-$(CONFIG_INPUT_SMI230)	+= sensors/smi230/
+
+#ifdef OPLUS_FEATURE_FINGERPRINT
+obj-$(CONFIG_OPLUS_SECURE)  += oplus_secure_drivers/
+#endif /* OPLUS_FEATURE_FINGERPRINT */
+
+#ifdef OPLUS_FEATURE_FINGERPRINT
+obj-$(CONFIG_OPLUS_FINGERPRINT)  += oplus_fp_drivers/
+#endif /* OPLUS_FEATURE_FINGERPRINT */
+
+#ifdef OPLUS_FEATURE_UFF_FINGERPRINT
+obj-$(CONFIG_UFF_FINGERPRINT)  += uff_fp_drivers/
+#endif /*OPLUS_FEATURE_UFF_FINGERPRINT*/
