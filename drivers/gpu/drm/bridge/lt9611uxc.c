@@ -1300,8 +1300,6 @@ static void lt9611_reset(struct lt9611 *pdata, bool on_off)
 	} else {
 		gpio_set_value(pdata->reset_gpio, 0);
 	}
-	/* Need longer time to wait LT9611UXC reset finished. */
-	msleep(300);
 }
 
 static void lt9611_assert_5v(struct lt9611 *pdata)
