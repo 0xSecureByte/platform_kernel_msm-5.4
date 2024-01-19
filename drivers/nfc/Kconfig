@@ -63,8 +63,6 @@ source "drivers/nfc/st21nfc-i2c/Kconfig"
 source "drivers/nfc/st54-spi/Kconfig"
 endmenu
 
-source "drivers/nfc/oplus_nfc/Kconfig"
-
 config NFC_QTI_I2C
 	tristate "QTI NCI based NFC I2C Slave Driver for SNxxx"
 	depends on I2C

@@ -20,4 +20,3 @@ obj-$(CONFIG_NFC_ST95HF)	+= st95hf/
 obj-y				+= qti/
 obj-$(CONFIG_NFC_ST21_I2C)  += st21nfc-i2c/
 obj-$(CONFIG_NFC_ST54_SPI)      += st54-spi/
-obj-$(CONFIG_OPLUS_NFC)      += oplus_nfc/

@@ -37,7 +37,6 @@
  */
 
 #include "nfc_common.h"
-#include "../oplus_nfc/oplus_nfc.h"
 
 #ifdef OPLUS_BUG_STABILITY
 #define NCI_GET_FW_CMD_LEN       8
@@ -337,10 +336,6 @@ int nfc_i2c_dev_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	struct platform_gpio *nfc_gpio = &nfc_configs.gpio;
 
 	pr_debug("%s: enter\n", __func__);
-        //#ifdef OPLUS_FEATURE_CONNFCSOFT
-        //CHECK_NFC_CHIP(SN100T);
-        //#endif /* OPLUS_FEATURE_CONNFCSOFT */
-        //retrieve details of gpios from dt
 
 	ret = nfc_parse_dt(&client->dev, &nfc_configs, PLATFORM_IF_I2C);
 	if (ret) {
