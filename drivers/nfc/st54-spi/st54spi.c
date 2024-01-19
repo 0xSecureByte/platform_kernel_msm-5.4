@@ -35,8 +35,6 @@
 
 #include "../st21nfc-i2c/st21nfc.h"
 
-#include "../oplus_nfc/oplus_nfc.h"
-
 /*
  * This supports access to SPI devices using normal userspace I/O calls.
  * Note that while traditional UNIX/POSIX I/O semantics are half duplex,
@@ -1032,10 +1030,6 @@ static int st54spi_probe(struct spi_device *spi)
     struct st54spi_data *st54spi;
     int status, ret;
     unsigned long minor;
-
-    //#ifdef OPLUS_FEATURE_CONNFCSOFT
-    CHECK_NFC_CHIP(ST54H);
-    //#endif /* OPLUS_FEATURE_CONNFCSOFT */
 
     /*
      * st54spi should never be referenced in DT without a specific
