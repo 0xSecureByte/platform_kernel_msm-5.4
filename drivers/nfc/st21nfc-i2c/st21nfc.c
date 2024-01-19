@@ -41,8 +41,6 @@
 #include <linux/of_irq.h>
 #include "st21nfc.h"
 
-#include "../oplus_nfc/oplus_nfc.h"
-
 #define MAX_BUFFER_SIZE 260
 #define HEADER_LENGTH 3
 #define IDLE_CHARACTER 0x7e
@@ -965,10 +963,6 @@ static int st21nfc_probe(struct i2c_client *client,
 	int ret;
 	struct st21nfc_device *st21nfc_dev;
 	struct device *dev = &client->dev;
-
-        //#ifdef OPLUS_FEATURE_CONNFCSOFT
-        CHECK_NFC_CHIP(ST21H);
-        //#endif /* OPLUS_FEATURE_CONNFCSOFT */
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
 		pr_err("%s : need I2C_FUNC_I2C\n", __func__);
