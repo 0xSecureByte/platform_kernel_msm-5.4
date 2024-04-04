@@ -3142,6 +3142,8 @@ static int battery_psy_get_prop(struct power_supply *psy,
 		pval->intval = chip->charger_cycle;
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
+		pval->intval = chip->batt_capacity_mah * 1000;
+		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
 		pval->intval = chip->batt_fcc * 1000;
 		break;
