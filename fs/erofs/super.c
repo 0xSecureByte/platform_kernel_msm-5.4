@@ -218,19 +218,24 @@ enum {
 	Opt_err
 };
 
-static const struct constant_table erofs_param_cache_strategy[] = {
-	{"disabled",	EROFS_ZIP_CACHE_DISABLED},
-	{"readahead",	EROFS_ZIP_CACHE_READAHEAD},
-	{"readaround",	EROFS_ZIP_CACHE_READAROUND},
+static const struct fs_parameter_spec erofs_fs_param_specs[] = {
+	fsparam_flag_no("user_xattr",	Opt_user_xattr),
+	fsparam_flag_no("acl",		Opt_acl),
+	fsparam_enum("cache_strategy",	Opt_cache_strategy),
 	{}
 };
 
-static const struct fs_parameter_spec erofs_fs_parameters[] = {
-	fsparam_flag_no("user_xattr",	Opt_user_xattr),
-	fsparam_flag_no("acl",		Opt_acl),
-	fsparam_enum("cache_strategy",	Opt_cache_strategy,
-		     erofs_param_cache_strategy),
+static const struct fs_parameter_enum erofs_fs_param_enums[] = {
+	{Opt_cache_strategy, "disabled",	EROFS_ZIP_CACHE_DISABLED},
+	{Opt_cache_strategy, "readahead",	EROFS_ZIP_CACHE_READAHEAD},
+	{Opt_cache_strategy, "readaround",	EROFS_ZIP_CACHE_READAROUND},
 	{}
+};
+
+const struct fs_parameter_description erofs_fs_parameters = {
+	.name		= "erofs",
+	.specs		= erofs_fs_param_specs,
+	.enums		= erofs_fs_param_enums,
 };
 
 static int erofs_fc_parse_param(struct fs_context *fc,
@@ -240,7 +245,7 @@ static int erofs_fc_parse_param(struct fs_context *fc,
 	struct fs_parse_result result;
 	int opt;
 
-	opt = fs_parse(fc, erofs_fs_parameters, param, &result);
+	opt = fs_parse(fc, &erofs_fs_parameters, param, &result);
 	if (opt < 0)
 		return opt;
 
