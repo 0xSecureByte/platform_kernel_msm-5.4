@@ -496,8 +496,8 @@ struct dwc3_msm {
 	struct reset_control	*core_reset;
 	struct regulator	*dwc3_gdsc;
 
-	struct usb_phy		**hs_phy;
-	struct usb_phy		**ss_phy;
+	struct usb_phy		**hs_phy, **ss_phy;
+	struct usb_phy		*hs_phy1, *ss_phy1;
 	u32			num_hsphy;
 	u32			num_ssphy;
 	struct usb_redriver	*redriver;
@@ -6063,7 +6063,9 @@ static int dwc3_otg_start_host(struct dwc3_msm *mdwc, int on)
 {
 	struct dwc3 *dwc = platform_get_drvdata(mdwc->dwc3);
 	int ret = 0;
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+	u32 val;
+#endif
 	if (vbus_regulator_get(mdwc))
 		return -EPROBE_DEFER;
 
@@ -6122,7 +6124,14 @@ static int dwc3_otg_start_host(struct dwc3_msm *mdwc, int on)
 			pipectl_ss_phys_quirk(mdwc, 1);
 			u3_ctrl_ss_phys_quirk(mdwc);
 		}
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+                /* disable host gen2 */
+				if (mdwc->ss_phy && mdwc->ss_phy[0] && (mdwc->ss_phy[0]->flags & PHY_HOST_MODE)) {
+                        dwc3_msm_write_reg_field(mdwc->base, USB3_PRI_LINK_REGS_LLUCTL(0), FORCE_GEN1_MASK, 1);
+                        val = dwc3_msm_read_reg_field(mdwc->base, USB3_PRI_LINK_REGS_LLUCTL(0), FORCE_GEN1_MASK);
+                        dev_info(mdwc->dev, "Turn on host: FORCE_GEN1_MASK = %d", val);
+                }
+#endif
 		/* xHCI should have incremented child count as necessary */
 		dbg_event(0xFF, "StrtHost psync",
 			atomic_read(&mdwc->dev->power.usage_count));
@@ -6241,14 +6250,6 @@ static int dwc3_otg_start_peripheral(struct dwc3_msm *mdwc, int on)
 		dwc3_dis_sleep_mode(mdwc);
 		mdwc->in_device_mode = true;
 
-#ifdef OPLUS_FEATURE_CHG_BASIC
-		/* disable host gen2 */
-		if (mdwc->ss_phy->flags & PHY_HOST_MODE){
-			dwc3_msm_write_reg_field(mdwc->base, USB3_PRI_LINK_REGS_LLUCTL(0), FORCE_GEN1_MASK, 1);
-			val = dwc3_msm_read_reg_field(mdwc->base, USB3_PRI_LINK_REGS_LLUCTL(0), FORCE_GEN1_MASK);
-			dev_info(mdwc->dev, "Turn on host: FORCE_GEN1_MASK = %d", val);
-		}
-#endif
 		/* Reduce the U3 exit handshake timer from 8us to approximately
 		 * 300ns to avoid lfps handshake interoperability issues
 		 */

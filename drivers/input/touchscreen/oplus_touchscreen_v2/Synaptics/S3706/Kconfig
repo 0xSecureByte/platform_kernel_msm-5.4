@@ -1,0 +1,12 @@
+
+#ifdef OPLUS_FEATURE_TP_BASIC
+
+config TOUCHPANEL_SYNAPTICS_S3706
+#    default y
+    tristate "TP Synaptics_S3508 IC enable or not for OPLUS"
+    help
+    Say Y to enable driver for Touchpanel useing synaptics s3706
+    Say M to enable driver for Touchpanel useing synaptics s3706
+
+#endif
+

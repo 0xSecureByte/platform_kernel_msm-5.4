@@ -34,9 +34,10 @@ int nfc_parse_dt(struct device *dev, struct platform_configs *nfc_configs,
 	struct platform_ldo *ldo = &nfc_configs->ldo;
 
 	if (!np) {
-		pr_err("nfc of_node NULL\n");
-		return -EINVAL;
+			pr_err("nfc of_node NULL\n");
+			return -EINVAL;
 	}
+
 	nfc_gpio->irq = -EINVAL;
 	nfc_gpio->dwl_req = -EINVAL;
 	nfc_gpio->ven = -EINVAL;
@@ -44,51 +45,51 @@ int nfc_parse_dt(struct device *dev, struct platform_configs *nfc_configs,
 
 	/* required for i2c based chips only */
 	if (interface == PLATFORM_IF_I2C) {
-		nfc_gpio->irq = of_get_named_gpio(np, DTS_IRQ_GPIO_STR, 0);
-		if ((!gpio_is_valid(nfc_gpio->irq))) {
-			pr_err("nfc irq gpio invalid %d\n", nfc_gpio->irq);
-			return -EINVAL;
-		}
-		pr_info("%s: irq %d\n", __func__, nfc_gpio->irq);
+			nfc_gpio->irq = of_get_named_gpio(np, DTS_IRQ_GPIO_STR, 0);
+			if ((!gpio_is_valid(nfc_gpio->irq))) {
+					pr_err("nfc irq gpio invalid %d\n", nfc_gpio->irq);
+					return -EINVAL;
+			}
+			pr_info("%s: irq %d\n", __func__, nfc_gpio->irq);
 	}
-
 	nfc_gpio->ven = of_get_named_gpio(np, DTS_VEN_GPIO_STR, 0);
 	if ((!gpio_is_valid(nfc_gpio->ven))) {
-		pr_err("nfc ven gpio invalid %d\n", nfc_gpio->ven);
-		return -EINVAL;
+			pr_err("nfc ven gpio invalid %d\n", nfc_gpio->ven);
+			return -EINVAL;
 	}
 
 	nfc_gpio->dwl_req = of_get_named_gpio(np, DTS_FWDN_GPIO_STR, 0);
+
 	/* not returning failure for dwl gpio as it is optional for sn220/pn560 */
 	if ((!gpio_is_valid(nfc_gpio->dwl_req)))
-		pr_warn("nfc dwl_req gpio invalid %d\n", nfc_gpio->dwl_req);
+			pr_warn("nfc dwl_req gpio invalid %d\n", nfc_gpio->dwl_req);
 
 	nfc_gpio->clkreq = of_get_named_gpio(np, DTS_CLKREQ_GPIO_STR, 0);
 	if (!gpio_is_valid(nfc_gpio->clkreq)) {
-		dev_err(dev, "clkreq gpio invalid %d\n", nfc_gpio->dwl_req);
-		return -EINVAL;
+			dev_err(dev, "clkreq gpio invalid %d\n", nfc_gpio->dwl_req);
+			return -EINVAL;
 	}
 
 	pr_info("%s: ven %d, dwl req %d, clkreq %d\n", __func__,
-		nfc_gpio->ven, nfc_gpio->dwl_req, nfc_gpio->clkreq);
+			nfc_gpio->ven, nfc_gpio->dwl_req, nfc_gpio->clkreq);
 
 	// optional property
 	ret = of_property_read_u32_array(np, NFC_LDO_VOL_DT_NAME,
-			(u32 *) ldo->vdd_levels,
-			ARRAY_SIZE(ldo->vdd_levels));
+					(u32 *) ldo->vdd_levels,
+					ARRAY_SIZE(ldo->vdd_levels));
 	if (ret) {
-		dev_err(dev, "error reading NFC VDDIO min and max value\n");
-		// set default as per datasheet
-		ldo->vdd_levels[0] = NFC_VDDIO_MIN;
-		ldo->vdd_levels[1] = NFC_VDDIO_MAX;
+			dev_err(dev, "error reading NFC VDDIO min and max value\n");
+			// set default as per datasheet
+			ldo->vdd_levels[0] = NFC_VDDIO_MIN;
+			ldo->vdd_levels[1] = NFC_VDDIO_MAX;
 	}
 
 	// optional property
 	ret = of_property_read_u32(np, NFC_LDO_CUR_DT_NAME, &ldo->max_current);
 	if (ret) {
-		dev_err(dev, "error reading NFC current value\n");
-		// set default as per datasheet
-		ldo->max_current = NFC_CURRENT_MAX;
+			dev_err(dev, "error reading NFC current value\n");
+			// set default as per datasheet
+			ldo->max_current = NFC_CURRENT_MAX;
 	}
 
 	return 0;
@@ -204,27 +205,6 @@ int nfc_ldo_unvote(struct nfc_dev *nfc_dev)
 	if (ret < 0)
 		pr_err("%s: set load failed\n", __func__);
 	return ret;
-}
-void set_valid_gpio(int gpio, int value)
-{
-	if (gpio_is_valid(gpio)) {
-		pr_debug("%s gpio %d value %d\n", __func__, gpio, value);
-		gpio_set_value(gpio, value);
-		/* hardware dependent delay */
-		usleep_range(NFC_GPIO_SET_WAIT_TIME_USEC,
-			     NFC_GPIO_SET_WAIT_TIME_USEC + 100);
-	}
-}
-
-int get_valid_gpio(int gpio)
-{
-	int value = -EINVAL;
-
-	if (gpio_is_valid(gpio)) {
-		value = gpio_get_value(gpio);
-		pr_debug("%s gpio %d value %d\n", __func__, gpio, value);
-	}
-	return value;
 }
 void set_valid_gpio(int gpio, int value)
 {
@@ -953,10 +933,6 @@ int nfcc_hw_check(struct nfc_dev *nfc_dev)
 	case NFC_STATE_FW_DWL:
 	case NFC_STATE_NCI:
 		break;
-	case NFCC_SN220:
-		/* SN220 is not supported yet */
-		pr_debug("%s: ## NFCC == SN220x ## Not Supported\n", __func__);
-		goto err_nfcc_hw_check;
 	case NFC_STATE_UNKNOWN:
 	default:
 		ret = -ENXIO;

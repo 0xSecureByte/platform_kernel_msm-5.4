@@ -1,0 +1,13 @@
+
+#ifdef OPLUS_FEATURE_TP_BASIC
+
+
+config TOUCHPANEL_SAMSUNG_S6SY791
+#   default y
+    tristate "TP Samsung s6sy791 IC enable or not for OPLUS"
+    help
+    Say Y to enable driver for Touchpanel using Samsung s6sy791
+    Say M to enable driver for Touchpanel using Samsung s6sy791 as module
+
+#endif
+
