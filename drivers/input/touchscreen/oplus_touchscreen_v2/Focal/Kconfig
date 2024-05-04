@@ -1,0 +1,3 @@
+source "drivers/input/touchscreen/oplus_touchscreen_v2/Focal/ft3518/Kconfig"
+source "drivers/input/touchscreen/oplus_touchscreen_v2/Focal/ft3658u/Kconfig"
+

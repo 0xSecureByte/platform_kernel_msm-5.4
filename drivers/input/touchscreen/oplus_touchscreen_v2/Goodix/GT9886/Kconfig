@@ -1,0 +1,8 @@
+config TOUCHPANEL_GOODIX_GT9886
+#   default y
+    tristate "TP goodix gt9886 IC enable or not for OPLUS"
+    help
+    Say Y to enable driver for Touchpanel useing goodix gt9886
+    Say M to enable driver for Touchpanel useing goodix gt9886 as module
+
+#endif

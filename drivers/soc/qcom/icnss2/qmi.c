@@ -1089,6 +1089,118 @@ out:
 	return ret;
 }
 #endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF2 */
+int icnss_wlfw_qdss_dnld_send_sync(struct icnss_priv *priv)
+{
+        struct wlfw_qdss_trace_config_download_req_msg_v01 *req;
+        struct wlfw_qdss_trace_config_download_resp_msg_v01 *resp;
+        struct qmi_txn txn;
+        char filename[ICNSS_MAX_FILE_NAME];
+        const struct firmware *fw_entry = NULL;
+        const u8 *temp;
+        unsigned int remaining;
+        int ret = 0;
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_WIFI_BDF2)
+//Modify for: multi projects using different bdf
+	int loading_bdf_retry_cnt = 5;
+#endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF2 */
+        icnss_pr_dbg("Sending QDSS config download message, state: 0x%lx\n",
+                     priv->state);
+
+        req = kzalloc(sizeof(*req), GFP_KERNEL);
+        if (!req)
+                return -ENOMEM;
+
+        resp = kzalloc(sizeof(*resp), GFP_KERNEL);
+        if (!resp) {
+                kfree(req);
+                return -ENOMEM;
+        }
+
+        icnss_add_fw_prefix_name(priv, filename, QDSS_TRACE_CONFIG_FILE);
+        ret = request_firmware(&fw_entry, filename,
+                               &priv->pdev->dev);
+        if (ret) {
+                icnss_pr_err("Failed to load QDSS: %s ret:%d\n",
+                             filename, ret);
+                goto err_req_fw;
+        }
+
+        temp = fw_entry->data;
+        remaining = fw_entry->size;
+
+        icnss_pr_dbg("Downloading QDSS: %s, size: %u\n",
+                     filename, remaining);
+
+        while (remaining) {
+                req->total_size_valid = 1;
+                req->total_size = remaining;
+                req->seg_id_valid = 1;
+                req->data_valid = 1;
+                req->end_valid = 1;
+
+                if (remaining > QMI_WLFW_MAX_DATA_SIZE_V01) {
+                        req->data_len = QMI_WLFW_MAX_DATA_SIZE_V01;
+                } else {
+                        req->data_len = remaining;
+                        req->end = 1;
+                }
+
+                memcpy(req->data, temp, req->data_len);
+
+                ret = qmi_txn_init
+                        (&priv->qmi, &txn,
+                         wlfw_qdss_trace_config_download_resp_msg_v01_ei,
+                         resp);
+                if (ret < 0) {
+                        icnss_pr_err("Failed to initialize txn for QDSS download request, err: %d\n",
+                                     ret);
+                        goto err_send;
+                }
+
+                ret = qmi_send_request
+                      (&priv->qmi, NULL, &txn,
+                       QMI_WLFW_QDSS_TRACE_CONFIG_DOWNLOAD_REQ_V01,
+                       WLFW_QDSS_TRACE_CONFIG_DOWNLOAD_REQ_MSG_V01_MAX_MSG_LEN,
+                       wlfw_qdss_trace_config_download_req_msg_v01_ei, req);
+                if (ret < 0) {
+                        qmi_txn_cancel(&txn);
+                        icnss_pr_err("Failed to send respond QDSS download request, err: %d\n",
+                                     ret);
+                        goto err_send;
+                }
+
+                ret = qmi_txn_wait(&txn, priv->ctrl_params.qmi_timeout);
+                if (ret < 0) {
+                        icnss_pr_err("Failed to wait for response of QDSS download request, err: %d\n",
+                                     ret);
+                        goto err_send;
+                }
+
+                if (resp->resp.result != QMI_RESULT_SUCCESS_V01) {
+                        icnss_pr_err("QDSS download request failed, result: %d, err: %d\n",
+                                     resp->resp.result, resp->resp.error);
+                        ret = -resp->resp.result;
+                        goto err_send;
+                }
+
+                remaining -= req->data_len;
+                temp += req->data_len;
+                req->seg_id++;
+        }
+
+        release_firmware(fw_entry);
+        kfree(req);
+        kfree(resp);
+        return 0;
+
+err_send:
+        release_firmware(fw_entry);
+err_req_fw:
+
+        kfree(req);
+        kfree(resp);
+        return ret;
+}
 
 int icnss_wlfw_bdf_dnld_send_sync(struct icnss_priv *priv, u32 bdf_type)
 {
@@ -1357,119 +1469,6 @@ fail:
 	kfree(p_qdss_trace_data);
 
 end:
-	kfree(req);
-	kfree(resp);
-	return ret;
-}
-
-int icnss_wlfw_qdss_dnld_send_sync(struct icnss_priv *priv)
-{
-	struct wlfw_qdss_trace_config_download_req_msg_v01 *req;
-	struct wlfw_qdss_trace_config_download_resp_msg_v01 *resp;
-	struct qmi_txn txn;
-	char filename[ICNSS_MAX_FILE_NAME];
-	const struct firmware *fw_entry = NULL;
-	const u8 *temp;
-	unsigned int remaining;
-	int ret = 0;
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_WIFI_BDF2)
-//Modify for: multi projects using different bdf
-	int loading_bdf_retry_cnt = 5;
-#endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF2 */
-	icnss_pr_dbg("Sending QDSS config download message, state: 0x%lx\n",
-		     priv->state);
-
-	req = kzalloc(sizeof(*req), GFP_KERNEL);
-	if (!req)
-		return -ENOMEM;
-
-	resp = kzalloc(sizeof(*resp), GFP_KERNEL);
-	if (!resp) {
-		kfree(req);
-		return -ENOMEM;
-	}
-
-	icnss_add_fw_prefix_name(priv, filename, QDSS_TRACE_CONFIG_FILE);
-	ret = request_firmware(&fw_entry, filename,
-			       &priv->pdev->dev);
-	if (ret) {
-		icnss_pr_err("Failed to load QDSS: %s ret:%d\n",
-			     filename, ret);
-		goto err_req_fw;
-	}
-
-	temp = fw_entry->data;
-	remaining = fw_entry->size;
-
-	icnss_pr_dbg("Downloading QDSS: %s, size: %u\n",
-		     filename, remaining);
-
-	while (remaining) {
-		req->total_size_valid = 1;
-		req->total_size = remaining;
-		req->seg_id_valid = 1;
-		req->data_valid = 1;
-		req->end_valid = 1;
-
-		if (remaining > QMI_WLFW_MAX_DATA_SIZE_V01) {
-			req->data_len = QMI_WLFW_MAX_DATA_SIZE_V01;
-		} else {
-			req->data_len = remaining;
-			req->end = 1;
-		}
-
-		memcpy(req->data, temp, req->data_len);
-
-		ret = qmi_txn_init
-			(&priv->qmi, &txn,
-			 wlfw_qdss_trace_config_download_resp_msg_v01_ei,
-			 resp);
-		if (ret < 0) {
-			icnss_pr_err("Failed to initialize txn for QDSS download request, err: %d\n",
-				     ret);
-			goto err_send;
-		}
-
-		ret = qmi_send_request
-		      (&priv->qmi, NULL, &txn,
-		       QMI_WLFW_QDSS_TRACE_CONFIG_DOWNLOAD_REQ_V01,
-		       WLFW_QDSS_TRACE_CONFIG_DOWNLOAD_REQ_MSG_V01_MAX_MSG_LEN,
-		       wlfw_qdss_trace_config_download_req_msg_v01_ei, req);
-		if (ret < 0) {
-			qmi_txn_cancel(&txn);
-			icnss_pr_err("Failed to send respond QDSS download request, err: %d\n",
-				     ret);
-			goto err_send;
-		}
-
-		ret = qmi_txn_wait(&txn, priv->ctrl_params.qmi_timeout);
-		if (ret < 0) {
-			icnss_pr_err("Failed to wait for response of QDSS download request, err: %d\n",
-				     ret);
-			goto err_send;
-		}
-
-		if (resp->resp.result != QMI_RESULT_SUCCESS_V01) {
-			icnss_pr_err("QDSS download request failed, result: %d, err: %d\n",
-				     resp->resp.result, resp->resp.error);
-			ret = -resp->resp.result;
-			goto err_send;
-		}
-
-		remaining -= req->data_len;
-		temp += req->data_len;
-		req->seg_id++;
-	}
-
-	release_firmware(fw_entry);
-	kfree(req);
-	kfree(resp);
-	return 0;
-
-err_send:
-	release_firmware(fw_entry);
-err_req_fw:
-
 	kfree(req);
 	kfree(resp);
 	return ret;

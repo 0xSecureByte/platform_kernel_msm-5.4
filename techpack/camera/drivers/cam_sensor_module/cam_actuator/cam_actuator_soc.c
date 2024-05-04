@@ -16,6 +16,7 @@ int32_t cam_actuator_parse_dt(struct cam_actuator_ctrl_t *a_ctrl,
 	struct device *dev)
 {
 	int32_t                         rc = 0;
+	int 				i = 0;
 	struct cam_hw_soc_info          *soc_info = &a_ctrl->soc_info;
 	struct cam_actuator_soc_private *soc_private =
 		(struct cam_actuator_soc_private *)a_ctrl->soc_info.soc_private;

@@ -1,0 +1,10 @@
+source "drivers/input/touchscreen/oplus_touchscreen_v2/Synaptics/S3706/Kconfig"
+source "drivers/input/touchscreen/oplus_touchscreen_v2/Synaptics/Syna_tcm_oncell/Kconfig"
+
+config KUNIT_OPLUS_SYNAPTICS
+    tristate "TP Synaptics-test enable or not"
+    help
+      Say Y here if you have a Synaptics test
+      to your system.
+
+      If unsure, say N.
