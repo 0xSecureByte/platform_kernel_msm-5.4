@@ -5812,8 +5812,16 @@ static ssize_t proc_wireless_current_out_write(struct file *file, const char __u
 		return -ENODEV;
 	}
 
-	copy_from_user(cur_string, buf, len);
-	kstrtoint(cur_string, 0, &cur);
+	if (copy_from_user(cur_string, buf, len)) {
+		chg_err("copy from user error\n");
+		return -EFAULT;
+	}
+
+	if (kstrtoint(cur_string, 0, &cur) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("set current: cur_string = %s, cur = %d.", cur_string, cur);
 	p922x_chip->p922x_chg_status.iout_stated_current = cur;
 
@@ -5914,7 +5922,10 @@ static ssize_t proc_wireless_rx_voltage_read(struct file *file,
 	len = snprintf(vol_string, 8, "%d",
 		       p922x_chip->p922x_chg_status.charge_voltage);
 
-	copy_to_user(buf, vol_string, len);
+	if (copy_to_user(buf, vol_string, len)) {
+		chg_err("copy to user error\n");
+		return -EFAULT;
+	}
 
 	return 0;
 }
@@ -5931,8 +5942,16 @@ static ssize_t proc_wireless_rx_voltage_write(struct file *file,
 		return -ENODEV;
 	}
 
-	copy_from_user(vol_string, buf, len);
-	kstrtoint(vol_string, 0, &vol);
+	if (copy_from_user(vol_string, buf, len)) {
+		chg_err("copy from user error\n");
+		return -EFAULT;
+	}
+
+	if (kstrtoint(vol_string, 0, &vol) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("set voltage: vol_string = %s, vol = %d.", vol_string, vol);
 	p922x_set_rx_charge_voltage(p922x_chip, vol);
 
@@ -6011,7 +6030,12 @@ static ssize_t proc_wireless_tx_write(struct file *file, const char __user *buf,
 	}
 
 	chg_err("buffer=%s", buffer);
-	kstrtoint(buffer, 0, &val);
+
+	if (kstrtoint(buffer, 0, &val) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("val = %d", val);
 
 	if (val == 1) {
@@ -6098,7 +6122,12 @@ static ssize_t proc_wireless_epp_write(struct file *file,
 		return -EFAULT;
 	}
 	chg_err("buffer=%s", buffer);
-	kstrtoint(buffer, 0, &val);
+
+	if (kstrtoint(buffer, 0, &val) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("val=%d", val);
 	if (val == 1) {
 		force_bpp = true;
@@ -6272,7 +6301,12 @@ static ssize_t proc_wireless_bat_mult_write(struct file *file,
 		return -EFAULT;
 	}
 	chg_err("buffer=%s", buffer);
-	kstrtoint(buffer, 0, &val);
+
+	if (kstrtoint(buffer, 0, &val) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("val=%d", val);
 	test_bat_val = val;
 #endif
@@ -6375,7 +6409,12 @@ static ssize_t proc_wireless_rx_write(struct file *file, const char __user *buf,
 	}
 
 	chg_err("buffer=%s", buffer);
-	kstrtoint(buffer, 0, &val);
+
+	if (kstrtoint(buffer, 0, &val) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("val = %d", val);
 
 	if (val == 0) {
@@ -6441,7 +6480,10 @@ start:
 			return -EINVAL;
 		}
 		memset(temp_buf, 0, sizeof(struct idt_fw_head));
-		copy_from_user(temp_buf, buf, sizeof(struct idt_fw_head));
+		if (copy_from_user(temp_buf, buf, sizeof(struct idt_fw_head))) {
+			chg_err("copy from user error\n");
+			return -EFAULT;
+		}
 		fw_head = (struct idt_fw_head *)temp_buf;
 		if (fw_head->magic[0] == 0x02 && fw_head->magic[1] == 0x00 &&
 		    fw_head->magic[2] == 0x03 && fw_head->magic[3] == 0x00) {
@@ -6452,7 +6494,10 @@ start:
 				return -ENOMEM;
 			}
 			chg_err("<IDT UPDATE>image header verification succeeded, fw_size=%d\n", fw_size);
-			copy_from_user(fw_buf, buf + sizeof(struct idt_fw_head), count - sizeof(struct idt_fw_head));
+			if (copy_from_user(fw_buf, buf + sizeof(struct idt_fw_head), count - sizeof(struct idt_fw_head))) {
+				chg_err("copy from user error\n");
+				return -EFAULT;
+			}
 			fw_index = count - sizeof(struct idt_fw_head);
 			chg_info("<IDT UPDATE>Receiving image, fw_size=%d, fw_index=%d\n", fw_size, fw_index);
 			if (fw_index >= fw_size) {
@@ -6467,7 +6512,10 @@ start:
 		}
 		break;
 	case UPGRADE_FW:
-		copy_from_user(fw_buf + fw_index, buf, count);
+		if (copy_from_user(fw_buf + fw_index, buf, count)) {
+			chg_err("copy from user error\n");
+			return -EFAULT;
+		}
 		fw_index += count;
 		chg_info("<IDT UPDATE>Receiving image, fw_size=%d, fw_index=%d\n", fw_size, fw_index);
 		if (fw_index >= fw_size) {
@@ -6547,9 +6595,17 @@ static ssize_t proc_wireless_rx_freq_write(struct file *file,
 	}
 
 	memset(string, 0, 16);
-	copy_from_user(string, buf, count);
+	if (copy_from_user(string, buf, count)) {
+		chg_err("copy from user error\n");
+		return -EFAULT;
+	}
 	chg_err("buf = %s, len = %zu\n", string, count);
-	kstrtoint(string, 0, &freq);
+
+	if (kstrtoint(string, 0, &freq) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("set freq threshold to %d\n", freq);
 	chip->p922x_chg_status.freq_threshold = freq;
 
@@ -6616,7 +6672,12 @@ static ssize_t proc_wireless_w30w_time_write(struct file *file,
 		return -EFAULT;
 	}
 	chg_err("buffer=%s", buffer);
-	kstrtoint(buffer, 0, &timeminutes);
+
+	if (kstrtoint(buffer, 0, &timeminutes) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	chg_err("set w30w_time = %dm", timeminutes);
 	if (timeminutes >= 0 && timeminutes <= 60)
 		chip->w30w_time = timeminutes;
@@ -6692,7 +6753,12 @@ static ssize_t proc_wireless_user_sleep_mode_write(struct file *file, const char
 	}
 
 	chg_err("user mode: buffer=%s\n", buffer);
-	kstrtoint(buffer, 0, &pmw_pulse);
+
+	if (kstrtoint(buffer, 0, &pmw_pulse) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	if (chip->cep_timeout_ack == false)
 		return -EBUSY;
 	if (pmw_pulse == FASTCHG_MODE) {
@@ -6795,7 +6861,11 @@ static ssize_t proc_wireless_idt_adc_test_write(struct file *file, const char __
 		return -EFAULT;
 	}
 
-	kstrtoint(buffer, 0, &idt_adc_cmd);
+	if (kstrtoint(buffer, 0, &idt_adc_cmd) != 0) {
+		chg_err("kstrtoint error\n");
+		return -EINVAL;
+	}
+
 	if (idt_adc_cmd == 0) {
 		chg_err("<~WPC~> idt_adc_test: set 0.\n");
 		chip->p922x_chg_status.idt_adc_test_enable = false;
