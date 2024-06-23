@@ -4493,7 +4493,7 @@ static int _sde_kms_get_splash_data(struct sde_kms *sde_kms,
 				+ dp_display_get_num_of_boot_displays();
 	num_regions = of_property_count_u64_elems(node, "reg") / 2;
 
-	if (num_displays >= MAX_DSI_DISPLAYS) {
+	if (num_displays > MAX_DSI_DISPLAYS) {
 		SDE_ERROR("invalid number of built in displays %d\n",
 				num_displays);
 		return -EINVAL;
