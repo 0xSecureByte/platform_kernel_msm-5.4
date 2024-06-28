@@ -5993,6 +5993,7 @@ static int fastrpc_get_process_gids(struct gid_list *gidlist)
 	gidlist->gids = gids;
 	gidlist->gidcount = num_gids;
 bail:
+	put_group_info(group_info);
 	if (err)
 		kfree(gids);
 	return err;
