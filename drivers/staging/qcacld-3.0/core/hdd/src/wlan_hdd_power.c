@@ -2989,8 +2989,8 @@ static int __wlan_hdd_cfg80211_get_txpower(struct wiphy *wiphy,
 	HDD_IS_RATE_LIMIT_REQ(is_rate_limited,
 			      hdd_ctx->config->nb_commands_interval);
 	if (hdd_ctx->driver_status != DRIVER_MODULES_ENABLED ||
-	    is_rate_limited) {
-		hdd_debug("Modules not enabled/rate limited, use cached stats");
+	    is_rate_limited || hdd_is_roaming_in_progress(hdd_ctx)) {
+		hdd_debug("Modules not enabled/rate limited/roaming, use cached stats");
 		/* Send cached data to upperlayer*/
 		vdev = hdd_objmgr_get_vdev(adapter);
 		if (!vdev) {
