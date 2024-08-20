@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2018-2019, The Linux Foundation. All rights reserved.
  */
 
@@ -12,6 +13,7 @@
 #define DP_IRQ_HPD_INT_STATUS		BIT(1)
 #define DP_HPD_REPLUG_INT_STATUS	BIT(2)
 #define DP_HPD_UNPLUG_INT_STATUS	BIT(3)
+#define DP_HPD_STATE_STATUS_CONNECTED   BIT(30)
 
 /**
  * dp_lphw_hpd_get() - configure and get the DisplayPlot HPD module data

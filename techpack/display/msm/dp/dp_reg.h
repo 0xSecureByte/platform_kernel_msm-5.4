@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  */
 
@@ -388,6 +389,28 @@
 #define TXn_TX_POL_INV_V420			(0x005C)
 
 #define QSERDES_COM_BIAS_EN_CLKBUFLR_EN		(0x044)
+
+#define DP_PHY_PD_CTL_V500                      (0x0000001C)
+#define DP_PHY_MODE_V500                        (0x00000020)
+#define DP_PHY_AUX_CFG0_V500                    (0x00000024)
+#define DP_PHY_AUX_CFG1_V500                    (0x00000028)
+#define DP_PHY_AUX_CFG2_V500                    (0x0000002C)
+#define DP_PHY_AUX_CFG3_V500                    (0x00000030)
+#define DP_PHY_AUX_CFG4_V500                    (0x00000034)
+#define DP_PHY_AUX_CFG5_V500                    (0x00000038)
+#define DP_PHY_AUX_CFG6_V500                    (0x0000003C)
+#define DP_PHY_AUX_CFG7_V500                    (0x00000040)
+#define DP_PHY_AUX_CFG8_V500                    (0x00000044)
+#define DP_PHY_AUX_CFG9_V500                    (0x00000048)
+#define DP_PHY_AUX_INTERRUPT_MASK_V500          (0x00000058)
+#define DP_PHY_AUX_INTERRUPT_CLEAR_V500         (0x0000005C)
+#define DP_PHY_AUX_INTERRUPT_STATUS_V500        (0x000000DC)
+#define DP_PHY_SPARE0_V500                      (0x00CC)
+#define DP_PHY_VCO_DIV_V500                     (0x0074)
+#define TXn_TX_EMP_POST1_LVL_V500               (0x0004)
+#define TXn_TX_DRV_LVL_V500                     (0x0014)
+#define TXn_TX_POL_INV_V500                     (0x005C)
+#define TXn_LDO_CONFIG_V500                     (0x0084)
 
 /* DP MMSS_CC registers */
 #define MMSS_DP_PIXEL_M				(0x01B4)
