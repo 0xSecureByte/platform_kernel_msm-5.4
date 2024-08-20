@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
  */
 
@@ -17,6 +18,9 @@
 #define DP_RECEIVER_DSC_CAP_SIZE    15
 #define DP_RECEIVER_FEC_STATUS_SIZE 3
 #define DP_RECEIVER_EXT_CAP_SIZE 4
+#define MAX_BL_LEVEL 4096
+#define MAX_BL_SCALE_LEVEL 1024
+#define MAX_SV_BL_SCALE_LEVEL 65535
 /*
  * A source initiated power down flag is set
  * when the DP is powered off while physical
@@ -74,6 +78,8 @@ struct dp_panel_in {
 	struct drm_connector *connector;
 	struct dp_panel *base_panel;
 	struct dp_parser *parser;
+	bool is_edp;
+	bool panel_notifier_support;
 };
 
 struct dp_dsc_caps {
@@ -82,6 +88,22 @@ struct dp_dsc_caps {
 	bool block_pred_en;
 	u8 color_depth;
 };
+
+struct dp_backlight_config {
+	u32 bl_min_level;
+	u32 bl_max_level;
+	u32 brightness_max_level;
+	u32 bl_level;
+	u32 bl_scale;
+	u32 bl_scale_sv;
+
+	int en_gpio;
+	/* PWM params */
+	struct pwm_device *pwm_bl;
+	bool pwm_enabled;
+	u32 pwm_period_usecs;
+};
+
 
 struct dp_audio;
 
@@ -95,9 +117,11 @@ struct dp_panel {
 	u8 fec_dpcd;
 	u8 fec_sts_dpcd[DP_RECEIVER_FEC_STATUS_SIZE + 1];
 
+	struct drm_panel drm_panel;
 	struct drm_dp_link link_info;
 	struct sde_edid_ctrl *edid_ctrl;
 	struct dp_panel_info pinfo;
+	struct dp_backlight_config bl_config;
 	bool video_test;
 	bool spd_enabled;
 
@@ -155,6 +179,7 @@ struct dp_panel {
 			bool dhdr_update, u64 core_clk_rate, bool flush);
 	int (*set_colorspace)(struct dp_panel *dp_panel,
 		u32 colorspace);
+	int (*set_backlight)(struct dp_panel *dp_panel, u32 bl_lvl);
 	void (*tpg_config)(struct dp_panel *dp_panel, bool enable);
 	int (*spd_config)(struct dp_panel *dp_panel);
 	bool (*hdr_supported)(struct dp_panel *dp_panel);

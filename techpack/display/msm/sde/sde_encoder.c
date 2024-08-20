@@ -1687,17 +1687,6 @@ static void _sde_encoder_rc_cancel_delayed(struct sde_encoder_virt *sde_enc,
 				sw_event);
 }
 
-void sde_encoder_cancel_delayed_work(struct drm_encoder *encoder)
-{
-	struct sde_encoder_virt *sde_enc;
-
-	if (!encoder)
-		return;
-
-	sde_enc = to_sde_encoder_virt(encoder);
-	_sde_encoder_rc_cancel_delayed(sde_enc, 0);
-}
-
 static void _sde_encoder_rc_kickoff_delayed(struct sde_encoder_virt *sde_enc,
 	u32 sw_event)
 {
@@ -4869,6 +4858,9 @@ static int sde_encoder_setup_display(struct sde_encoder_virt *sde_enc,
 	if (disp_info->intf_type == DRM_MODE_CONNECTOR_DSI) {
 		*drm_enc_mode = DRM_MODE_ENCODER_DSI;
 		intf_type = INTF_DSI;
+	} else if (disp_info->intf_type == DRM_MODE_CONNECTOR_eDP) {
+		*drm_enc_mode = DRM_MODE_ENCODER_TMDS;
+		intf_type = INTF_DP;
 	} else if (disp_info->intf_type == DRM_MODE_CONNECTOR_HDMIA) {
 		*drm_enc_mode = DRM_MODE_ENCODER_TMDS;
 		intf_type = INTF_HDMI;

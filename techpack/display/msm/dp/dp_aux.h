@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
  */
 
@@ -47,7 +48,7 @@ struct dp_aux {
 	int (*drm_aux_register)(struct dp_aux *aux);
 	void (*drm_aux_deregister)(struct dp_aux *aux);
 	void (*isr)(struct dp_aux *aux);
-	void (*init)(struct dp_aux *aux, struct dp_aux_cfg *aux_cfg);
+	void (*init)(struct dp_aux *aux, struct dp_aux_cfg *aux_cfg, bool skip_op);
 	void (*deinit)(struct dp_aux *aux);
 	void (*reconfig)(struct dp_aux *aux);
 	void (*abort)(struct dp_aux *aux, bool abort);

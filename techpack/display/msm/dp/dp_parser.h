@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
+ * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
  */
 
@@ -23,6 +24,20 @@ enum dp_pm_type {
 	DP_LINK_PM,
 	DP_PLL_PM,
 	DP_MAX_PM
+};
+
+enum dp_pin_states {
+	DP_GPIO_AUX_ENABLE,
+	DP_GPIO_AUX_SEL,
+	DP_GPIO_USBPLUG_CC,
+	DP_GPIO_CMN_MAX = DP_GPIO_USBPLUG_CC,
+	DP_GPIO_EDP_VCC_EN,
+	DP_GPIO_EDP_MIN = DP_GPIO_EDP_VCC_EN,
+	DP_GPIO_EDP_BACKLIGHT_PWR,
+	DP_GPIO_EDP_PWM,
+	DP_GPIO_EDP_BACKLIGHT_EN,
+	DP_GPIO_EDP_MAX,
+	DP_GPIO_MAX = DP_GPIO_EDP_MAX,
 };
 
 static inline const char *dp_parser_pm_name(enum dp_pm_type module)
@@ -85,6 +100,7 @@ struct dp_io {
  * @state_active: active state pin control
  * @state_hpd_active: hpd active state pin control
  * @state_suspend: suspend state pin control
+ * @state_bl_pwm: backlight pwm pin control
  */
 struct dp_pinctrl {
 	struct pinctrl *pin;
@@ -93,6 +109,7 @@ struct dp_pinctrl {
 	struct pinctrl_state *state_hpd_tlmm;
 	struct pinctrl_state *state_hpd_ctrl;
 	struct pinctrl_state *state_suspend;
+	struct pinctrl_state *state_bl_pwm;
 };
 
 #define DP_ENUM_STR(x)	#x
@@ -131,13 +148,33 @@ enum dp_phy_aux_config_type {
  * enum dp_phy_version - version of the dp phy
  * @DP_PHY_VERSION_UNKNOWN: Unknown controller version
  * @DP_PHY_VERSION_4_2_0:   DP phy v4.2.0 controller
+ * @DP_PHY_VERSION_5_0_0:   DP phy v5.0.0 controller
  * @DP_PHY_VERSION_MAX:     max version
  */
 enum dp_phy_version {
 	DP_PHY_VERSION_UNKNOWN,
 	DP_PHY_VERSION_2_0_0 = 0x200,
 	DP_PHY_VERSION_4_2_0 = 0x420,
+	DP_PHY_VERSION_5_0_0 = 0x500,
 	DP_PHY_VERSION_MAX
+};
+
+/**
+ * enum dp_phy_mode - mode of the dp phy
+ * @DP_PHY_MODE_UNKNOWN: Unknown PHY mode
+ * @DP_PHY_MODE_DP:      DP PHY mode
+ * @DP_PHY_MODE_MINIDP:  MiniDP PHY mode
+ * @DP_PHY_MODE_EDP:     eDP PHY mode
+ * @DP_PHY_MODE_EDP_HIGH_SWING:   eDP PHY mode, high swing/pre-empahsis
+ * @DP_PHY_MODE_MAX:     max PHY mode
+ */
+enum dp_phy_mode {
+	DP_PHY_MODE_UNKNOWN = 0,
+	DP_PHY_MODE_DP,
+	DP_PHY_MODE_MINIDP,
+	DP_PHY_MODE_EDP,
+	DP_PHY_MODE_EDP_HIGH_SWING,
+	DP_PHY_MODE_MAX
 };
 
 /**
@@ -147,6 +184,7 @@ enum dp_phy_version {
  */
 struct dp_hw_cfg {
 	enum dp_phy_version phy_version;
+	enum dp_phy_mode phy_mode;
 };
 
 static inline char *dp_phy_aux_config_type_to_string(u32 cfg_type)
@@ -188,20 +226,30 @@ static inline char *dp_phy_aux_config_type_to_string(u32 cfg_type)
  * @l_pnswap: P/N swap status on each lane
  * @max_pclk_khz: maximum pixel clock supported for the platform
  * @max_lclk_khz: maximum link clock supported for the platform
+ * @max_hor_width: maximum horizontal width supported by the platform
  * @hw_cfg: DP HW specific settings
  * @has_mst: MST feature enable status
  * @has_mst_sideband: MST sideband feature enable status
  * @no_aux_switch: presence AUX switch status
  * @gpio_aux_switch: presence GPIO AUX switch status
+ * @no_backlight_support: For some display type that no support backlight
+ * @ext_hpd_en: A boolean value indicates an external dp can support hotplug
+ * @is_edp: A boolean value indicates an edp interface
  * @dsc_feature_enable: DSC feature enable status
  * @fec_feature_enable: FEC feature enable status
  * @dsc_continuous_pps: PPS sent every frame by HW
  * @has_widebus: widebus (2PPC) feature eanble status
-  *@mst_fixed_port: mst port_num reserved for fixed topology
+ * @bl_min_level: minimum brightness value for backlight
+ * @bl_max_level: maximum brightness value for backlight
+ * @brightness_max_level: maximum brightness level for backlight
+ * @pwm_period_usecs: pwm period in usecs for backlight pwm
+ * @mst_fixed_port: mst port_num reserved for fixed topology
  * @parse: function to be called by client to parse device tree.
  * @get_io: function to be called by client to get io data.
  * @get_io_buf: function to be called by client to get io buffers.
  * @clear_io_buf: function to be called by client to clear io buffers.
+ * @mst_fixed_display_type: mst display_type reserved for fixed topology
+ * @display_type: display type as defined in device tree.
  */
 struct dp_parser {
 	struct platform_device *pdev;
@@ -216,6 +264,7 @@ struct dp_parser {
 	struct dp_aux_cfg aux_cfg[AUX_CFG_LEN];
 	u32 max_pclk_khz;
 	u32 max_lclk_khz;
+	u32 max_hor_width;
 	struct dp_hw_cfg hw_cfg;
 	bool has_mst;
 	bool has_mst_sideband;
@@ -226,7 +275,18 @@ struct dp_parser {
 	bool has_widebus;
 	bool gpio_aux_switch;
 	bool lphw_hpd;
+	bool panel_notifier_support;
+	bool no_backlight_support;
+	bool ext_hpd_en;
+	bool is_edp;
+	u32 bl_min_level;
+	u32 bl_max_level;
+	u32 brightness_max_level;
+	u32 pwm_period_usecs;
 	u32 mst_fixed_port[MAX_DP_MST_STREAMS];
+	u32 pixel_base_off[MAX_DP_MST_STREAMS];
+	const char *mst_fixed_display_type[MAX_DP_MST_STREAMS];
+	const char *display_type;
 
 	int (*parse)(struct dp_parser *parser);
 	struct dp_io_data *(*get_io)(struct dp_parser *parser, char *name);

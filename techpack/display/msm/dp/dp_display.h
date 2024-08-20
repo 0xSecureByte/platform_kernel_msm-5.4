@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
+ * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  */
 
@@ -11,8 +12,13 @@
 #include <drm/sde_drm.h>
 
 #include "dp_panel.h"
+#include "dp_parser.h"
 
 #define DP_MST_SIM_MAX_PORTS	8
+#define MAX_DP_ACTIVE_DISPLAY	8
+#define MAX_DP_ACTIVE_BOOT_DISPLAY 1
+
+#define MAX_CMDLINE_PARAM_LEN 512
 
 enum dp_drv_state {
 	PM_DEFAULT,
@@ -27,6 +33,20 @@ struct dp_mst_hpd_info {
 	bool mst_sim_add_con;
 	bool mst_sim_remove_con;
 	int mst_sim_remove_con_id;
+};
+
+struct dp_display_info {
+	u32 cell_idx;
+	u32 intf_idx[DP_STREAM_MAX];
+	u32 phy_idx;
+	u32 stream_cnt;
+};
+
+struct dp_display_boot_param {
+	char name[MAX_CMDLINE_PARAM_LEN];
+	char *boot_param;
+	bool boot_disp_en;
+	void *disp;
 };
 
 struct dp_mst_drm_cbs {
@@ -70,11 +90,15 @@ struct dp_display {
 	void *base_dp_panel;
 	bool is_sst_connected;
 	bool is_mst_supported;
+	bool is_edp;
 	bool dsc_cont_pps;
 	u32 max_pclk_khz;
 	void *dp_mst_prv_info;
 	u32 max_mixer_count;
 	u32 max_dsc_count;
+	bool cont_splash_enabled;
+	bool no_backlight_support;
+	bool ext_hpd_en;
 
 	int (*enable)(struct dp_display *dp_display, void *panel);
 	int (*post_enable)(struct dp_display *dp_display, void *panel);
@@ -99,6 +123,8 @@ struct dp_display {
 				bool dhdr_update);
 	int (*set_colorspace)(struct dp_display *dp_display, void *panel,
 				u32 colorspace);
+	int (*set_backlight)(struct dp_display *dp_display, void *panel,
+				u32 bl_lvl);
 	int (*post_init)(struct dp_display *dp_display);
 	int (*mst_install)(struct dp_display *dp_display,
 			struct dp_mst_drm_install_info *mst_install_info);
@@ -132,14 +158,26 @@ struct dp_display {
 	int (*get_available_dp_resources)(struct dp_display *dp_display,
 			const struct msm_resource_caps_info *avail_res,
 			struct msm_resource_caps_info *max_dp_avail_res);
+	int (*get_display_type)(struct dp_display *dp_display,
+			const char **display_type);
+	int (*mst_get_fixed_topology_display_type)(struct dp_display *dp_display,
+			u32 strm_id, const char **display_type);
+	int (*edp_detect)(struct dp_display *dp_display);
 };
 
 #if IS_ENABLED(CONFIG_DRM_MSM_DP)
 int dp_display_get_num_of_displays(void);
+int dp_display_get_num_of_boot_displays(void);
 int dp_display_get_displays(void **displays, int count);
 int dp_display_get_num_of_streams(void);
+int dp_display_get_info(void *dp_display, struct dp_display_info *dp_info);
+int dp_display_cont_splash_config(void *display);
 #else
 static inline int dp_display_get_num_of_displays(void)
+{
+	return 0;
+}
+static inline int dp_display_get_num_of_boot_displays(void)
 {
 	return 0;
 }
@@ -151,8 +189,16 @@ static inline int dp_display_get_num_of_streams(void)
 {
 	return 0;
 }
+static inline int dp_display_get_info(void *dp_display, struct dp_display_info *dp_info)
+{
+	return 0;
+}
 static inline int dp_connector_update_pps(struct drm_connector *connector,
 		char *pps_cmd, void *display)
+{
+	return 0;
+}
+static inline int dp_display_cont_splash_config(void *display)
 {
 	return 0;
 }

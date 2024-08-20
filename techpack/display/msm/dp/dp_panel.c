@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
  */
 
 #include "dp_panel.h"
 #include <linux/unistd.h>
+#include <linux/pwm.h>
 #include <drm/drm_fixed.h>
 #include "dp_debug.h"
 #include <drm/drm_dsc.h>
@@ -2294,6 +2296,91 @@ static int dp_panel_set_stream_info(struct dp_panel *dp_panel,
 	return 0;
 }
 
+static int dp_panel_pwm_register(struct dp_panel *dp_panel)
+{
+	int rc = 0;
+	struct dp_backlight_config *bl = &dp_panel->bl_config;
+	struct platform_device *pdev;
+	struct device *dev;
+	struct dp_panel_private *panel;
+
+	panel = container_of(dp_panel, struct dp_panel_private, dp_panel);
+	pdev = panel->parser->pdev;
+	dev = &pdev->dev;
+
+	bl->pwm_bl = devm_of_pwm_get(dev, dev->of_node, NULL);
+	if (IS_ERR_OR_NULL(bl->pwm_bl)) {
+		rc = PTR_ERR(bl->pwm_bl);
+		DP_ERR("failed to request pwm, rc=%d\n", rc);
+		return rc;
+	}
+
+	return 0;
+}
+
+static void dp_panel_pwm_unregister(struct dp_panel *dp_panel)
+{
+	struct dp_backlight_config *bl = &dp_panel->bl_config;
+	struct platform_device *pdev;
+	struct dp_panel_private *panel;
+
+	panel = container_of(dp_panel, struct dp_panel_private, dp_panel);
+	pdev = panel->parser->pdev;
+
+	if (bl->pwm_bl)
+		devm_pwm_put(&pdev->dev, bl->pwm_bl);
+}
+
+static int dp_panel_set_backlight(struct dp_panel *panel, u32 bl_lvl)
+{
+	int rc = 0;
+	u32 duty = 0;
+	u32 period_ns = 0;
+	struct dp_backlight_config *bl;
+
+	if (!panel) {
+		DP_ERR("Invalid Params\n");
+		return -EINVAL;
+	}
+
+	bl = &panel->bl_config;
+	if (!bl->pwm_bl) {
+		DP_ERR("pwm device not found\n");
+		return -EINVAL;
+	}
+
+	DP_DEBUG("backlight lvl:%d\n", bl_lvl);
+
+	period_ns = bl->pwm_period_usecs * NSEC_PER_USEC;
+	duty = bl_lvl * period_ns;
+	duty /= bl->bl_max_level;
+
+	rc = pwm_config(bl->pwm_bl, duty, period_ns);
+	if (rc) {
+		DP_ERR("failed to change pwm config, rc=\n", rc);
+		goto error;
+	}
+
+	if (bl_lvl == 0 && bl->pwm_enabled) {
+		pwm_disable(bl->pwm_bl);
+		bl->pwm_enabled = false;
+		return 0;
+	}
+
+	if (bl_lvl != 0 && !bl->pwm_enabled) {
+		rc = pwm_enable(bl->pwm_bl);
+		if (rc) {
+			DP_ERR("failed to enable pwm, rc=\n", rc);
+			goto error;
+		}
+
+		bl->pwm_enabled = true;
+	}
+
+error:
+	return rc;
+}
+
 static int dp_panel_init_panel_info(struct dp_panel *dp_panel)
 {
 	int rc = 0;
@@ -3015,6 +3102,8 @@ struct dp_panel *dp_panel_get(struct dp_panel_in *in)
 	struct dp_panel_private *panel;
 	struct dp_panel *dp_panel;
 	struct sde_connector *sde_conn;
+	struct device *dev;
+	struct device_node *of_node = NULL;
 
 	if (!in->dev || !in->catalog || !in->aux ||
 			!in->link || !in->connector) {
@@ -3025,6 +3114,13 @@ struct dp_panel *dp_panel_get(struct dp_panel_in *in)
 
 	panel = devm_kzalloc(in->dev, sizeof(*panel), GFP_KERNEL);
 	if (!panel) {
+		rc = -ENOMEM;
+		goto error;
+	}
+
+	dev = devm_kzalloc(in->dev, sizeof(*dev), GFP_KERNEL);
+	if (!dev) {
+		DP_ERR("failed to allocate dev\n");
 		rc = -ENOMEM;
 		goto error;
 	}
@@ -3047,6 +3143,15 @@ struct dp_panel *dp_panel_get(struct dp_panel_in *in)
 	dp_panel->dsc_feature_enable = panel->parser->dsc_feature_enable;
 	dp_panel->fec_feature_enable = panel->parser->fec_feature_enable;
 	dp_panel->dsc_continuous_pps = panel->parser->dsc_continuous_pps;
+
+	/* backlight config for edp */
+	dp_panel->bl_config.bl_min_level = panel->parser->bl_min_level;
+	dp_panel->bl_config.bl_max_level = panel->parser->bl_max_level;
+	dp_panel->bl_config.brightness_max_level = panel->parser->brightness_max_level;
+	dp_panel->bl_config.pwm_period_usecs = panel->parser->pwm_period_usecs;
+	dp_panel->bl_config.bl_scale = MAX_BL_SCALE_LEVEL;
+	dp_panel->bl_config.bl_scale_sv = MAX_SV_BL_SCALE_LEVEL;
+
 
 	if (in->base_panel) {
 		memcpy(dp_panel->dpcd, in->base_panel->dpcd,
@@ -3075,6 +3180,7 @@ struct dp_panel *dp_panel_get(struct dp_panel_in *in)
 	dp_panel->spd_config = dp_panel_spd_config;
 	dp_panel->setup_hdr = dp_panel_setup_hdr;
 	dp_panel->set_colorspace = dp_panel_set_colorspace;
+	dp_panel->set_backlight  = dp_panel_set_backlight;
 	dp_panel->hdr_supported = dp_panel_hdr_supported;
 	dp_panel->set_stream_info = dp_panel_set_stream_info;
 	dp_panel->read_sink_status = dp_panel_read_sink_sts;
@@ -3087,6 +3193,29 @@ struct dp_panel *dp_panel_get(struct dp_panel_in *in)
 	sde_conn->drv_panel = dp_panel;
 
 	dp_panel_edid_register(panel);
+
+	if (in->is_edp && in->panel_notifier_support) {
+		of_node = of_parse_phandle(in->dev->of_node, "qcom,edp-default-panel", 0);
+		if (!of_node) {
+			DP_ERR("phandle for default panel not found\n");
+		} else {
+			drm_panel_init(&dp_panel->drm_panel);
+			dp_panel->drm_panel.dev = dev;
+			dev->of_node = of_node;
+
+			rc = drm_panel_add(&dp_panel->drm_panel);
+			if (rc)
+				DP_ERR("Failed to add drm_panel\n");
+
+			dp_panel->connector->panel = &dp_panel->drm_panel;
+		}
+	}
+
+	if (in->is_edp) {
+		rc = dp_panel_pwm_register(dp_panel);
+		if (rc)
+			DP_ERR("Failed to register pwm\n");
+	}
 
 	return dp_panel;
 error:
@@ -3105,6 +3234,9 @@ void dp_panel_put(struct dp_panel *dp_panel)
 
 	dp_panel_edid_deregister(panel);
 	sde_conn = to_sde_connector(dp_panel->connector);
+
+	dp_panel_pwm_unregister(dp_panel);
+
 	if (sde_conn)
 		sde_conn->drv_panel = NULL;
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
  */
 
@@ -20,6 +21,8 @@ struct dp_power_private {
 	struct clk *pixel_clk_rcg;
 	struct clk *pixel_parent;
 	struct clk *pixel1_clk_rcg;
+	struct clk *link_clk_rcg;
+	struct clk *link_parent;
 
 	struct dp_power dp_power;
 
@@ -229,6 +232,22 @@ static int dp_power_clk_init(struct dp_power_private *power, bool enable)
 				goto err_pixel1_clk_rcg;
 			}
 		}
+
+		power->link_clk_rcg = clk_get(dev, "link_clk_src");
+		if (IS_ERR(power->link_clk_rcg)) {
+			DP_ERR("Unable to get DP link clk RCG: %ld\n",
+					PTR_ERR(power->link_clk_rcg));
+			rc = 0;
+			power->link_clk_rcg = NULL;
+		}
+
+		power->link_parent = clk_get(dev, "link_parent");
+		if (IS_ERR(power->link_parent)) {
+			DP_ERR("Unable to get DP link parent: %ld\n",
+					PTR_ERR(power->link_parent));
+			rc = 0;
+			power->link_parent = NULL;
+		}
 	} else {
 		if (power->pixel1_clk_rcg)
 			clk_put(power->pixel1_clk_rcg);
@@ -238,6 +257,12 @@ static int dp_power_clk_init(struct dp_power_private *power, bool enable)
 
 		if (power->pixel_clk_rcg)
 			clk_put(power->pixel_clk_rcg);
+
+		if (power->link_parent)
+			clk_put(power->link_parent);
+
+		if (power->link_clk_rcg)
+			clk_put(power->link_clk_rcg);
 
 		dp_power_clk_put(power);
 	}
@@ -349,6 +374,14 @@ static int dp_power_clk_enable(struct dp_power *dp_power,
 		}
 	}
 
+	if (pm_type == DP_LINK_PM && enable && power->link_parent) {
+		rc = clk_set_parent(power->link_clk_rcg, power->link_parent);
+		if (rc) {
+			DP_ERR("failed to set link parent\n");
+			goto error;
+		}
+	}
+
 	rc = dp_power_clk_set_rate(power, pm_type, enable);
 	if (rc) {
 		DP_ERR("failed to '%s' clks for: %s. err=%d\n",
@@ -388,6 +421,7 @@ static int dp_power_request_gpios(struct dp_power_private *power)
 	struct dss_module_power *mp;
 	static const char * const gpio_names[] = {
 		"aux_enable", "aux_sel", "usbplug_cc",
+		"edp_vcc_enable", "edp_backlight_pwr", "edp_pwm_en", "edp_backlight_en",
 	};
 
 	if (!power) {
@@ -410,6 +444,7 @@ static int dp_power_request_gpios(struct dp_power_private *power)
 			}
 		}
 	}
+
 	return 0;
 error:
 	for (i = 0; i < ARRAY_SIZE(gpio_names); i++) {
@@ -432,7 +467,7 @@ static void dp_power_set_gpio(struct dp_power_private *power, bool flip)
 	struct dss_module_power *mp = &power->parser->mp[DP_CORE_PM];
 	struct dss_gpio *config = mp->gpio_config;
 
-	for (i = 0; i < mp->num_gpio; i++) {
+	for (i = 0; i <= DP_GPIO_CMN_MAX; i++) {
 		if (dp_power_find_gpio(config->gpio_name, "aux-sel"))
 			config->value = flip;
 
@@ -689,6 +724,43 @@ exit:
 	return rc;
 }
 
+static int dp_power_edp_panel_set_gpio(struct dp_power *dp_power,
+		enum dp_pin_states pin_state, bool enable)
+{
+	int rc = 0;
+	struct dp_power_private *power;
+	struct dss_module_power *mp;
+	struct dss_gpio *config;
+
+	if (!dp_power) {
+		DP_ERR("invalid power data\n");
+		return -EINVAL;
+	}
+
+	power = container_of(dp_power, struct dp_power_private, dp_power);
+
+	mp = &power->parser->mp[DP_CORE_PM];
+	config = mp->gpio_config;
+
+	if (config == NULL)
+		return -EINVAL;
+
+	if ((pin_state >= DP_GPIO_EDP_MIN) && (pin_state < DP_GPIO_EDP_MAX)) {
+		if (gpio_is_valid(config[pin_state].gpio)) {
+			rc = gpio_direction_output(config[pin_state].gpio, enable);
+			if (rc)
+				DP_ERR("unable to set gpio rc=%d\n", rc);
+		} else {
+			DP_ERR("gpio invalid for %d pin\n", pin_state);
+		}
+	} else {
+		pr_err(" Invalid GPIO call\n");
+		return -EINVAL;
+	}
+
+	return rc;
+}
+
 struct dp_power *dp_power_get(struct dp_parser *parser, struct dp_pll *pll)
 {
 	int rc = 0;
@@ -720,6 +792,7 @@ struct dp_power *dp_power_get(struct dp_parser *parser, struct dp_pll *pll)
 	dp_power->clk_get_rate = dp_power_clk_get_rate;
 	dp_power->power_client_init = dp_power_client_init;
 	dp_power->power_client_deinit = dp_power_client_deinit;
+	dp_power->edp_panel_set_gpio = dp_power_edp_panel_set_gpio;
 
 	return dp_power;
 error:

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
  * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
  */
 
@@ -16,6 +16,7 @@
 #include <linux/string.h>
 #include "dsi_drm.h"
 #include "dsi_display.h"
+#include "dp_panel.h"
 #include "sde_crtc.h"
 #include "sde_rm.h"
 #include "sde_vm.h"
@@ -23,6 +24,7 @@
 
 #define BL_NODE_NAME_SIZE 32
 #define HDR10_PLUS_VSIF_TYPE_CODE      0x81
+#define MAX_BRIGHTNESS_LEVEL 255
 
 /* Autorefresh will occur after FRAME_CNT frames. Large values are unlikely */
 #define AUTOREFRESH_MAX_FRAME_CNT 6
@@ -93,13 +95,16 @@ static inline struct sde_kms *_sde_connector_get_kms(struct drm_connector *conn)
 static int sde_backlight_device_update_status(struct backlight_device *bd)
 {
 	int brightness;
-	struct dsi_display *display;
+	struct dsi_display *dsi_display;
+	struct dp_panel *dp_panel;
 	struct sde_connector *c_conn = bl_get_data(bd);
 	int bl_lvl;
 	struct drm_event event;
 	int rc = 0;
 	struct sde_kms *sde_kms;
 	struct sde_vm_ops *vm_ops;
+	u32 bl_max_level = 0;
+	u32 brightness_max_level = 0;
 
 	sde_kms = _sde_connector_get_kms(&c_conn->base);
 	if (!sde_kms) {
@@ -114,15 +119,27 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
 			(bd->props.state & BL_CORE_SUSPENDED))
 		brightness = 0;
 
-	display = (struct dsi_display *) c_conn->display;
-	if (brightness > display->panel->bl_config.bl_max_level)
-		brightness = display->panel->bl_config.bl_max_level;
+	if (c_conn->connector_type == DRM_MODE_CONNECTOR_DSI) {
+		dsi_display = (struct dsi_display *) c_conn->display;
+		bl_max_level = dsi_display->panel->bl_config.bl_max_level;
+		brightness_max_level =
+			dsi_display->panel->bl_config.brightness_max_level;
+	} else if (c_conn->connector_type == DRM_MODE_CONNECTOR_eDP) {
+		dp_panel = (struct dp_panel *) c_conn->drv_panel;
+		if (dp_panel) {
+			bl_max_level = dp_panel->bl_config.bl_max_level;
+			brightness_max_level =
+				dp_panel->bl_config.brightness_max_level;
+		}
+	}
+
+	if (brightness > bl_max_level)
+		brightness = bl_max_level;
 	if (brightness > c_conn->thermal_max_brightness)
 		brightness = c_conn->thermal_max_brightness;
 
 	/* map UI brightness into driver backlight level with rounding */
-	bl_lvl = mult_frac(brightness, display->panel->bl_config.bl_max_level,
-			display->panel->bl_config.brightness_max_level);
+	bl_lvl = mult_frac(brightness, bl_max_level, brightness_max_level);
 
 	if (!bl_lvl && brightness)
 		bl_lvl = 1;
@@ -188,31 +205,46 @@ static int sde_backlight_setup(struct sde_connector *c_conn,
 {
 	struct backlight_properties props;
 	struct dsi_display *display;
-	struct dsi_backlight_config *bl_config;
+	struct dp_panel *dp_panel;
+	struct dsi_backlight_config *dsi_bl_config;
 	struct sde_kms *sde_kms;
 	static int display_count;
 	char bl_node_name[BL_NODE_NAME_SIZE];
+	u32 brightness_max_level = 0;
 
 	sde_kms = _sde_connector_get_kms(&c_conn->base);
 	if (!sde_kms) {
 		SDE_ERROR("invalid kms\n");
 		return -EINVAL;
-	} else if (c_conn->connector_type != DRM_MODE_CONNECTOR_DSI) {
+	}
+
+	if (c_conn->connector_type == DRM_MODE_CONNECTOR_DSI) {
+		display = (struct dsi_display *) c_conn->display;
+		dsi_bl_config = &display->panel->bl_config;
+		brightness_max_level = dsi_bl_config->brightness_max_level;
+		if (dsi_bl_config->type != DSI_BACKLIGHT_DCS &&
+			sde_in_trusted_vm(sde_kms))
+			return 0;
+	} else if (c_conn->connector_type == DRM_MODE_CONNECTOR_eDP) {
+		dp_panel = (struct dp_panel *) c_conn->drv_panel;
+		if (dp_panel)
+			brightness_max_level =
+				dp_panel->bl_config.brightness_max_level;
+		else {
+			brightness_max_level = MAX_BRIGHTNESS_LEVEL;
+		}
+	} else {
+		SDE_DEBUG("invalid connector type %d\n",
+				c_conn->connector_type);
 		return 0;
 	}
 
-	display = (struct dsi_display *) c_conn->display;
-	bl_config = &display->panel->bl_config;
-
-	if (bl_config->type != DSI_BACKLIGHT_DCS &&
-		sde_in_trusted_vm(sde_kms))
-		return 0;
 
 	memset(&props, 0, sizeof(props));
 	props.type = BACKLIGHT_RAW;
 	props.power = FB_BLANK_UNBLANK;
-	props.max_brightness = bl_config->brightness_max_level;
-	props.brightness = bl_config->brightness_max_level;
+	props.max_brightness = brightness_max_level;
+	props.brightness = brightness_max_level;
 	snprintf(bl_node_name, BL_NODE_NAME_SIZE, "panel%u-backlight",
 							display_count);
 	c_conn->bl_device = backlight_device_register(bl_node_name, dev->dev,
@@ -223,7 +255,7 @@ static int sde_backlight_setup(struct sde_connector *c_conn,
 		c_conn->bl_device = NULL;
 		return -ENODEV;
 	}
-	c_conn->thermal_max_brightness = bl_config->brightness_max_level;
+	c_conn->thermal_max_brightness = brightness_max_level;
 
 	/**
 	 * In TVM, thermal cooling device is not enabled. Registering with dummy
@@ -639,42 +671,62 @@ static int _sde_connector_update_power_locked(struct sde_connector *c_conn)
 static int _sde_connector_update_bl_scale(struct sde_connector *c_conn)
 {
 	struct dsi_display *dsi_display;
-	struct dsi_backlight_config *bl_config;
+	struct dp_display *dp_display;
+	struct dsi_backlight_config *dsi_bl_config;
+	struct dp_backlight_config *dp_bl_config;
+	struct dp_panel *dp_panel;
 	int rc = 0;
+	u32 bl_scale, bl_scale_sv;
 
 	if (!c_conn) {
 		SDE_ERROR("Invalid params sde_connector null\n");
 		return -EINVAL;
 	}
 
-	dsi_display = c_conn->display;
-	if (!dsi_display || !dsi_display->panel) {
-		SDE_ERROR("Invalid params(s) dsi_display %pK, panel %pK\n",
-			dsi_display,
-			((dsi_display) ? dsi_display->panel : NULL));
-		return -EINVAL;
-	}
-
-	bl_config = &dsi_display->panel->bl_config;
-
-	if (!c_conn->allow_bl_update) {
-		c_conn->unset_bl_level = bl_config->bl_level;
-		return 0;
-	}
-
-	if (c_conn->unset_bl_level)
-		bl_config->bl_level = c_conn->unset_bl_level;
-
-	bl_config->bl_scale = c_conn->bl_scale > MAX_BL_SCALE_LEVEL ?
+	bl_scale = c_conn->bl_scale > MAX_BL_SCALE_LEVEL ?
 			MAX_BL_SCALE_LEVEL : c_conn->bl_scale;
-	bl_config->bl_scale_sv = c_conn->bl_scale_sv > MAX_SV_BL_SCALE_LEVEL ?
+	bl_scale_sv = c_conn->bl_scale_sv > MAX_SV_BL_SCALE_LEVEL ?
 			MAX_SV_BL_SCALE_LEVEL : c_conn->bl_scale_sv;
 
-	SDE_DEBUG("bl_scale = %u, bl_scale_sv = %u, bl_level = %u\n",
-		bl_config->bl_scale, bl_config->bl_scale_sv,
-		bl_config->bl_level);
-	rc = c_conn->ops.set_backlight(&c_conn->base,
-			dsi_display, bl_config->bl_level);
+	if (c_conn->connector_type == DRM_MODE_CONNECTOR_DSI) {
+		dsi_display = c_conn->display;
+		if (!dsi_display || !dsi_display->panel) {
+			SDE_ERROR("Invalid params dsi_display %pK, panel %pK\n",
+				dsi_display,
+				((dsi_display) ? dsi_display->panel : NULL));
+			return -EINVAL;
+		}
+		dsi_bl_config = &dsi_display->panel->bl_config;
+		if (!c_conn->allow_bl_update) {
+			c_conn->unset_bl_level = dsi_bl_config->bl_level;
+			return 0;
+		}
+		dsi_bl_config->bl_scale = bl_scale;
+		dsi_bl_config->bl_scale_sv = bl_scale_sv;
+		if (c_conn->unset_bl_level)
+			dsi_bl_config->bl_level = c_conn->unset_bl_level;
+
+		rc = c_conn->ops.set_backlight(&c_conn->base,
+				dsi_display, dsi_bl_config->bl_level);
+	} else if (c_conn->connector_type == DRM_MODE_CONNECTOR_eDP) {
+		dp_display = c_conn->display;
+		dp_panel = (struct dp_panel *) c_conn->drv_panel;
+		if (dp_panel) {
+			dp_bl_config = &dp_panel->bl_config;
+			if (!c_conn->allow_bl_update) {
+				c_conn->unset_bl_level = dp_bl_config->bl_level;
+				return 0;
+			}
+			dp_bl_config->bl_scale = bl_scale;
+			dp_bl_config->bl_scale_sv = bl_scale_sv;
+			if (c_conn->unset_bl_level)
+				dp_bl_config->bl_level = c_conn->unset_bl_level;
+			rc = c_conn->ops.set_backlight(&c_conn->base,
+					dp_display, dp_bl_config->bl_level);
+		} else
+			SDE_ERROR("Invalid dp_panel null\n");
+	}
+
 	c_conn->unset_bl_level = 0;
 
 	return rc;
@@ -968,18 +1020,23 @@ void sde_connector_helper_bridge_enable(struct drm_connector *connector)
 	}
 
 	c_conn = to_sde_connector(connector);
-	display = (struct dsi_display *) c_conn->display;
 
-	/*
-	 * Special handling for some panels which need atleast
-	 * one frame to be transferred to GRAM before enabling backlight.
-	 * So delay backlight update to these panels until the
-	 * first frame commit is received from the HW.
-	 */
-	if (display->panel->bl_config.bl_update ==
-				BL_UPDATE_DELAY_UNTIL_FIRST_FRAME)
-		sde_encoder_wait_for_event(c_conn->encoder,
-				MSM_ENC_TX_COMPLETE);
+	if (c_conn->connector_type == DRM_MODE_CONNECTOR_DSI) {
+		display = (struct dsi_display *) c_conn->display;
+
+		/*
+		 * Special handling for some panels which need atleast
+		 * one frame to be transferred to GRAM before enabling
+		 * backlight.
+		 * So delay backlight update to these panels until the
+		 * first frame commit is received from the HW.
+		 */
+		if (display->panel->bl_config.bl_update ==
+					BL_UPDATE_DELAY_UNTIL_FIRST_FRAME)
+			sde_encoder_wait_for_event(c_conn->encoder,
+					MSM_ENC_TX_COMPLETE);
+	}
+
 	c_conn->allow_bl_update = true;
 
 	if (!sde_in_trusted_vm(sde_kms) && c_conn->bl_device) {
