@@ -1,0 +1,76 @@
+QTI Snapdragon Display Engine (SDE) configuration driver
+
+Required properties:
+- compatible:		"qcom,sde-cfg"
+
+Each child node represents a configuration, with properties:
+- reg: A u32 property defines the configuration id.
+- connectors: A phandle array property defines sub devices to be added.
+
+Each child node can have multiple sub-child nodes. Each sub-child node
+represents a device to be created for that configuration.
+
+Configuration N will be selected by boot paramerter msm_cfg.cfg_sel=<N>.
+Default configuration is child node with reg = <0>.
+
+Example:
+
+/ {
+	...
+
+	sde_cfg: qcom,sde-cfg {
+		compatible = "qcom,sde-cfg";
+
+		qcom,sde-sub-cfg@0 {
+			reg = <0>;
+			connectors = <&dsi_dp1>;
+
+			dsi_dp1: qcom,dsi-display@1 {
+				compatible = "qcom,dsi-display";
+				label = "primary";
+
+				qcom,dsi-ctrl = <&mdss_dsi0 &mdss_dsi1>;
+				qcom,dsi-phy = <&mdss_dsi_phy0 &mdss_dsi_phy1>;
+
+				clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
+					 <&mdss_dsi0_pll PCLK_MUX_0_CLK>,
+					 <&mdss_dsi1_pll BYTECLK_MUX_1_CLK>,
+					 <&mdss_dsi1_pll PCLK_MUX_1_CLK>,
+					 <&rpmhcc RPMH_CXO_CLK>;
+				clock-names = "mux_byte_clk0", "mux_pixel_clk0",
+					      "mux_byte_clk1", "mux_pixel_clk1", "xo_clk";
+
+				qcom,dsi-display-list =
+					<&dsi_anx_7625_1>;
+			};
+		};
+
+		qcom,sde-sub-cfg@1 {
+			reg = <1>;
+			connectors = <dsi_dp2>;
+
+			dsi_dp2: qcom,dsi-display@2 {
+				compatible = "qcom,dsi-display";
+				label = "secondary";
+
+				qcom,dsi-ctrl = <&mdss_dsi0 &mdss_dsi1>;
+				qcom,dsi-phy = <&mdss_dsi_phy0 &mdss_dsi_phy1>;
+
+				clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
+					 <&mdss_dsi0_pll PCLK_MUX_0_CLK>,
+					 <&mdss_dsi1_pll BYTECLK_MUX_1_CLK>,
+					 <&mdss_dsi1_pll PCLK_MUX_1_CLK>,
+					 <&rpmhcc RPMH_CXO_CLK>;
+				clock-names = "mux_byte_clk0", "mux_pixel_clk0",
+					      "mux_byte_clk1", "mux_pixel_clk1", "xo_clk";
+
+				qcom,dsi-display-list =
+					<&dsi_anx_7625_2>;
+			};
+		};
+	};
+};
+
+&mdss_mdp {
+	connectors = <&sde_cfg>;
+};

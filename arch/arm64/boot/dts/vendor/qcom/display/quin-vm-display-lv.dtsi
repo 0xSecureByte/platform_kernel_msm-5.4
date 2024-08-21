@@ -1,0 +1,11 @@
+&soc {
+	wfd_kms: qcom,wfd_kms@0 {
+		compatible = "qcom,wfd-kms";
+		qcom,client-id = "7816";
+	};
+
+	sde_kms_hyp: qcom,sde_kms_hyp@ae00000 {
+		compatible = "qcom,sde-kms-hyp";
+		qcom,kms = <&wfd_kms>;
+	};
+};

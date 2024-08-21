@@ -1,0 +1,20 @@
+/dts-v1/;
+
+#include "sdxlemur.dtsi"
+#include "sdxlemur-mtp-cpe.dtsi"
+#include "sdxlemur-mtp-cpe-pine2x.dtsi"
+#include "sdxlemur-1024mb.dtsi"
+#include "sdxlemur-bluetooth.dtsi"
+
+/ {
+	model = "Qualcomm Technologies, Inc. SDXLEMUR MTP CPE 2x Pine";
+	compatible = "qcom,sdxlemur-mtp",
+		"qcom,sdxlemur", "qcom,mtp";
+	qcom,board-id = <0xA010008 0x30A>;
+};
+
+&ipa_hw {
+	qcom,use-dual-pine-config;
+	qcom,scaling-exceptions = "wdi", "1400", "4800", "10000", "wdi1", "1400", "4800", "10000";
+};
+
