@@ -36,8 +36,8 @@ DLKM_DIR := $(TOP)/$(BOARD_COMMON_DIR)/dlkm
 
 KBUILD_OPTIONS := $(RMNET_BLD_DIR)
 
-$(warning $(DLKM_DIR))
-include $(DLKM_DIR)/AndroidKernelModule.mk
+#$(warning $(DLKM_DIR))
+#include $(DLKM_DIR)/AndroidKernelModule.mk
 
 ######## Create RMNET_CTL DLKM ########
 include $(CLEAR_VARS)
@@ -57,8 +57,8 @@ DLKM_DIR := $(TOP)/$(BOARD_COMMON_DIR)/dlkm
 
 KBUILD_OPTIONS := $(RMNET_BLD_DIR)
 
-$(warning $(DLKM_DIR))
-include $(DLKM_DIR)/AndroidKernelModule.mk
+#$(warning $(DLKM_DIR))
+#nclude $(DLKM_DIR)/AndroidKernelModule.mk
 
 endif #End of Check for target
 endif #End of Check for qssi target

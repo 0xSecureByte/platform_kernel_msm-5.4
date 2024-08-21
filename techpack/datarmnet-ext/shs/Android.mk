@@ -44,7 +44,7 @@ KBUILD_OPTIONS_GKI += RMNET_CORE_PATH=$(RMNET_CORE_PATH)/gki
 LOCAL_ADDITIONAL_DEPENDENCIES := $(TARGET_OUT_INTERMEDIATES)/$(RMNET_CORE_PATH)/rmnet_core.ko
 LOCAL_ADDITIONAL_DEPENDENCIES_GKI := $(TARGET_OUT_INTERMEDIATES)/$(RMNET_CORE_PATH)/gki/rmnet_core.ko
 
-include $(DLKM_DIR)/AndroidKernelModule.mk
+#include $(DLKM_DIR)/AndroidKernelModule.mk
 
 endif #End of Check for target
 endif #End of Check for qssi target
