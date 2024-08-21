@@ -1,0 +1,36 @@
+#include "yupik-sde-display.dtsi"
+
+&pm7250b_gpios {
+	disp_lcd_bias_en {
+		disp_lcd_bias_en_default: disp_lcd_bias_en_default {
+			pins = "gpio2";
+			function = "func1";
+			input-disable;
+			output-enable;
+			bias-disable;
+			power-source = <0>;
+			qcom,drive-strength = <2>;
+		};
+	};
+};
+
+&pm8350c_gpios {
+	lcd_backlight_ctrl {
+		lcd_backlight_ctrl_default: lcd_backlight_ctrl_default {
+			pins = "gpio8";
+			function = "func1";
+			input-disable;
+			output-low;
+			bias-disable;
+			power-source = <1>;
+			qcom,drive-strength = <3>;
+		};
+	};
+};
+
+&sde_dsi {
+	/delete-property/ lab-supply;
+	/delete-property/ ibb-supply;
+
+	qcom,dsi-default-panel = <&dsi_ext_bridge_1080p>;
+};

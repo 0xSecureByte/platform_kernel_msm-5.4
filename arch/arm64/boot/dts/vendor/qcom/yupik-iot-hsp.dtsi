@@ -1,0 +1,126 @@
+#include "yupik-iot-idp.dtsi"
+#include "qcx6490-cnss.dtsi"
+
+&soc {
+};
+
+&sde_edp {
+	status = "disabled";
+	pinctrl-names = "mdss_dp_hpd_active", "mdss_dp_hpd_tlmm", "mdss_dp_hpd_ctrl",
+			"mdss_dp_active", "mdss_dp_sleep", "mdss_edp_bl_pwm";
+	pinctrl-0 = <&edp_hpd_ctrl>;
+	pinctrl-1 = <&edp_hpd_ctrl>;
+	pinctrl-2 = <&edp_hpd_ctrl>;
+	pinctrl-3 = <&edp_hpd_ctrl>;
+	pinctrl-4 = <&edp_hpd_ctrl>;
+	pinctrl-5 = <&pmic_edp_bl_pwm>;
+	qcom,dp-hpd-gpio = <&tlmm 60 0>;
+	qcom,edp-vcc-en-gpio = <&tlmm 80 0>;
+	//qcom,edp-backlight-pwr-gpio = <&tlmm 102 0>;
+	qcom,edp-pwm-en-gpio = <&pm8350c_gpios 8 0>;
+	qcom,edp-backlight-en-gpio = <&pm8350c_gpios 7 0>;
+	qcom,edp-default-panel = <&edp_panel_1080p_video>;
+	qcom,panel-notifier-support;
+	qcom,edp-bl-min-level = <1>;
+	qcom,edp-bl-max-level = <4095>;
+	qcom,edp-brightness-max-level = <255>;
+	qcom,bl-pmic-pwm-period-usecs = <100>;
+	pwms = <&pm8350c_pwm_2 0 65535>;
+};
+
+&mdss_mdp {
+	edp_panel_1080p_video: qcom,mdss_edp_panel_1080p_video {
+		status = "ok";
+	};
+};
+
+&tlmm {
+	edp_hpd_ctrl: hpd_ctrl@60 {
+		mux {
+			pins = "gpio60";
+			function = "edp_hot";
+		};
+
+		config {
+			pins = "gpio60";
+			bias-disable;
+			input-enable;
+			drive-strength = <2>;
+		};
+	};
+};
+
+&pm8350c_gpios {
+	pmic_edp_bl_pwm: pmic-edp-bl-pwm-state {
+		pins = "gpio8";
+		function = "func1";
+		bias-disable;
+		qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;
+		/* Force backlight to be disabled to match state at boot. */
+		output-low;
+	};
+};
+
+&pm8350c_pwm_2 {
+	status = "ok";
+};
+
+&pcie0 {
+	status = "ok";
+};
+
+&pcie0_msi {
+	status = "ok";
+};
+
+&pcie1 {
+	status = "ok";
+	qcom,boot-option = <0x0>;
+	qcom,ep-gpio = <&tlmm 19 0>;
+	pinctrl-0 = <&pcie1_perst_default
+			&pcie1_clkreq_default
+			&pcie1_wake_default
+			&pcie1_ep_default>;
+	pinctrl-1 = <&pcie1_perst_default
+			&pcie1_clkreq_sleep
+			&pcie1_wake_default
+			&pcie1_ep_default>;
+};
+
+&pcie1_msi {
+	status = "ok";
+};
+
+&pm7325_gpios {
+	usb2_vbus_boost {
+		usb2_vbus_boost_default: usb2_vbus_boost_default {
+			pins = "gpio8";
+			function = "normal";
+			output-low;
+			power-source = <0>;	/* 1.8V input supply */
+		};
+	};
+};
+
+&soc {
+	usb2_vbus_boost_reg: usb2_vbus_boost_reg {
+		compatible = "regulator-fixed";
+		regulator-name = "usb2_vbus_boost_vreg";
+		startup-delay-us = <4000>;
+		enable-active-high;
+		gpios = <&pm7325_gpios 8 0>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&usb2_vbus_boost_default>;
+	};
+};
+
+&usb1 {
+	vbus_dwc3-supply = <&usb2_vbus_boost_reg>;
+	qcom,default-mode-none;
+	status = "ok";
+};
+
+&usb2_phy1 {
+	status = "ok";
+};

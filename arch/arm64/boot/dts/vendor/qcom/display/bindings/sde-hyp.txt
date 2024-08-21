@@ -1,0 +1,30 @@
+Qualcomm Technologies, Inc. SDE KMS HYP
+
+Snapdragon Display Engine HYP registers with the Linux DRM/KMS framework to
+facilitate DRM driver creation, publishing /dev/dri/card0, and sending
+VBlank and Page Flip events to User Space listeners.
+
+Required properties
+- compatible: Must be "qcom,sde-kms-hyp"
+- qcom,kms: Component phandle list
+
+Component phandle list must include one KMS backend. In the driver WFD KMS
+is provided as OpenWFD backend.
+
+Required properties for OpenWFD backend:
+- compatible: Must be "qcom,wfd-kms"
+- qcom,client-id:	A four character string that is converted to a u32. It's
+			understood as a hex value, if compatible (i.e. "7816").
+			Otherwise, it is treated as a FourCC sequence code
+			(i.e. "LV01").
+
+Example:
+	wfd_kms: qcom,wfd_kms@0 {
+		compatible = "qcom,wfd-kms";
+		qcom,client-id = "7816";
+	};
+
+	sde_kms_hyp: qcom,sde_kms_hyp@900000 {
+		compatible = "qcom,sde-kms-hyp";
+		qcom,kms = <&wfd_kms>;
+	};

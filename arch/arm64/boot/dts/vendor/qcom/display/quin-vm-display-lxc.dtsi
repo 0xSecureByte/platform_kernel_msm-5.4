@@ -1,0 +1,45 @@
+&soc {
+	wfd_kms: qcom,wfd_kms@0 {
+		compatible = "qcom,wfd-kms";
+		qcom,client-id = "7816";
+	};
+
+	sde_kms_hyp: qcom,sde_kms_hyp@ae00000 {
+		compatible = "qcom,sde-kms-hyp";
+		qcom,dev-name = "msm_drm";
+		qcom,kms = <&wfd_kms>;
+	};
+
+	wfd_kms1: qcom,wfd_kms@1 {
+		compatible = "qcom,wfd-kms";
+		qcom,client-id = "7818";
+	};
+
+	sde_kms_hyp1: qcom,sde_kms_hyp@ae10000 {
+		compatible = "qcom,sde-kms-hyp";
+		qcom,dev-name = "msm_drm1";
+		qcom,kms = <&wfd_kms1>;
+	};
+
+	wfd_kms2: qcom,wfd_kms@2 {
+		compatible = "qcom,wfd-kms";
+		qcom,client-id = "7819";
+	};
+
+	sde_kms_hyp2: qcom,sde_kms_hyp@ae20000 {
+		compatible = "qcom,sde-kms-hyp";
+		qcom,dev-name = "msm_drm2";
+		qcom,kms = <&wfd_kms2>;
+	};
+
+	wfd_kms3: qcom,wfd_kms@3 {
+		compatible = "qcom,wfd-kms";
+		qcom,client-id = "7815";
+	};
+
+	sde_kms_hyp3: qcom,sde_kms_hyp@ae30000 {
+		compatible = "qcom,sde-kms-hyp";
+		qcom,dev-name = "msm_drm3";
+		qcom,kms = <&wfd_kms3>;
+	};
+};

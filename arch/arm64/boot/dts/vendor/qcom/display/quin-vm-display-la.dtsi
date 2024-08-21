@@ -1,0 +1,18 @@
+&soc {
+	sde_cfg: qcom,sde-cfg {
+		compatible = "qcom,sde-cfg";
+
+		qcom,sde-sub-cfg@0 {
+			reg = <0>;
+			wfd_kms: qcom,wfd_kms@0 {
+				compatible = "qcom,wfd-kms";
+				qcom,client-id = "7815";
+			};
+
+			qcom,sde_kms_hyp@ae00000 {
+				compatible = "qcom,sde-kms-hyp";
+				qcom,kms = <&wfd_kms>;
+			};
+		};
+	};
+};
