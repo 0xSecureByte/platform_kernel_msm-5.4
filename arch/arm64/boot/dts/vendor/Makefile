@@ -5,7 +5,7 @@ ifeq ($(strip $(CONFIG_CHG_FOR_OP9_PRO)), y)
         subdir-y += oplus/lemonadev
 else ifeq ($(strip $(CONFIG_OPLUS_CHG_OP9RT_PMIC_VOOCPHY)), y)
         subdir-y += oplus/martini
-else ifeq ($(strip $(OPLUS_VND_BUILD_PLATFORM)), SM7325)
+else ifeq ($(strip $(OPLUS_VND_BUILD_PLATFORM)), y)
         subdir-y += oplus/walle
         subdir-y += oplus/libai
         subdir-y += oplus/lantian
