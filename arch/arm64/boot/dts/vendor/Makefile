@@ -8,11 +8,13 @@ else ifeq ($(strip $(CONFIG_ARCH_YUPIK)), y)
         subdir-y += oplus/libai
         subdir-y += oplus/lantian
         subdir-y += oplus/lunaa
+
         subdir-y += oplus/taylor
         subdir-y += oplus/garbo
         subdir-y += oplus/ziti
 else
 	subdir-y += oplus/cupid
+	subdir-y += oplus/porsche
 	subdir-y += oplus/peacock
 	subdir-y += oplus/fussi
 	subdir-y += oplus/luwu
