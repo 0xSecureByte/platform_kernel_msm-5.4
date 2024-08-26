@@ -34,7 +34,7 @@ ifeq ($(CONFIG_ARCH_SHIMA), y)
 include $(srctree)/techpack/camera/config/shimacamera.conf
 endif
 
-ifeq ($(OPLUS_VND_BUILD_PLATFORM), y)
+ifeq ($(CONFIG_ARCH_YUPIK), y)
 include $(srctree)/techpack/camera/config/yupikcamera.conf
 endif
 
@@ -82,7 +82,7 @@ LINUXINCLUDE    += \
 		-include $(srctree)/techpack/camera/config/shimacameraconf.h
 endif
 
-ifeq ($(OPLUS_VND_BUILD_PLATFORM), y)
+ifeq ($(CONFIG_ARCH_YUPIK), y)
 LINUXINCLUDE    += \
 		-include $(srctree)/techpack/camera/config/yupikcameraconf.h
 endif

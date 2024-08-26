@@ -180,7 +180,7 @@ dtb-$(CONFIG_ARCH_SHIMA) += shima-rumi.dtb  \
 endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
-dtbo-$(OPLUS_VND_BUILD_PLATFORM) +=    \
+dtbo-$(CONFIG_ARCH_YUPIK) +=    \
 	yupik-rumi-overlay.dtbo \
 	yupik-idp-overlay.dtbo \
 	yupik-atp-overlay.dtbo \
@@ -248,7 +248,7 @@ katmaip-fp2-hsp-overlay.dtbo-base := katmaip-fp2.dtb
 katmaip-fp2-hsp-pm7250b-overlay.dtbo-base := katmaip-fp2.dtb
 yupikp-iot-idps-amoled-overlay.dtbo-base := yupikp-iot.dtb katmaip.dtb katmaip-fp2.dtb
 else
-dtb-$(OPLUS_VND_BUILD_PLATFORM) += yupik-rumi.dtb \
+dtb-$(CONFIG_ARCH_YUPIK) += yupik-rumi.dtb \
 	yupik-idp.dtb \
 	yupik-atp.dtb \
 	yupik-qrd.dtb \
@@ -484,7 +484,7 @@ dtb-$(CONFIG_ARCH_SDXNIGHTJAR) += sdxnightjar-mtp.dtb \
 	sdxnightjar-512mb-mtp.dtb \
 	sdxnightjar-dualwifi-512mb-mtp.dtb
 
-ifeq ($(OPLUS_VND_BUILD_PLATFORM), y)
+ifeq ($(CONFIG_ARCH_YUPIK), y)
 ifeq ($(CONFIG_ARCH_QTI_VM), y)
 dtb-$(CONFIG_ARCH_QTI_VM) += yupik-vm-rumi.dtb \
 	yupik-vm-atp.dtb \
