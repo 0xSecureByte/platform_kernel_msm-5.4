@@ -1089,6 +1089,7 @@ out:
 	return ret;
 }
 #endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF2 */
+
 int icnss_wlfw_qdss_dnld_send_sync(struct icnss_priv *priv)
 {
         struct wlfw_qdss_trace_config_download_req_msg_v01 *req;
@@ -1099,10 +1100,7 @@ int icnss_wlfw_qdss_dnld_send_sync(struct icnss_priv *priv)
         const u8 *temp;
         unsigned int remaining;
         int ret = 0;
-#if IS_ENABLED(CONFIG_OPLUS_FEATURE_WIFI_BDF2)
-//Modify for: multi projects using different bdf
-	int loading_bdf_retry_cnt = 5;
-#endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF2 */
+
         icnss_pr_dbg("Sending QDSS config download message, state: 0x%lx\n",
                      priv->state);
 
@@ -1212,7 +1210,10 @@ int icnss_wlfw_bdf_dnld_send_sync(struct icnss_priv *priv, u32 bdf_type)
 	const u8 *temp;
 	unsigned int remaining;
 	int ret = 0;
-
+#if IS_ENABLED(CONFIG_OPLUS_FEATURE_WIFI_BDF2)
+//Modify for: multi projects using different bdf
+	int loading_bdf_retry_cnt = 5;
+#endif /* CONFIG_OPLUS_FEATURE_WIFI_BDF2 */
 	icnss_pr_dbg("Sending %s download message, state: 0x%lx, type: %d\n",
 		     icnss_bdf_type_to_str(bdf_type), priv->state, bdf_type);
 
