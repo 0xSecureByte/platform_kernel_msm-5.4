@@ -5917,6 +5917,10 @@ int dsi_panel_switch(struct dsi_panel *panel)
 	if (!strcmp(panel->name, "samsung ams662zs01 dvt dsc cmd mode panel")) {
 		dsi_panel_fps_change(panel);
 	}
+	if (panel->oplus_priv.is_90fps_switch) {
+		dsi_panel_fps_change(panel);
+		DSI_INFO("Panel FPS refreshed!");
+	}
 #endif /*OPLUS_BUG_STABILITY*/
 
 	mutex_unlock(&panel->panel_lock);
