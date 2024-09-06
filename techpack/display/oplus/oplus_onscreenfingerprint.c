@@ -487,6 +487,8 @@ int dsi_panel_parse_oplus_config(struct dsi_panel *panel)
 		/*Display.LCD.Params, 2022-10-18 add for luna-A(21603) panel osc config*/
 		if (!strcmp(panel->oplus_priv.vendor_name, "AMS643YE01"))
 			dynamic_osc_clock = panel->oplus_priv.osc_clk_mode1_rate;
+	panel->oplus_priv.is_90fps_switch = utils->read_bool(utils->data,  "oplus,90fps_switch");
+	DSI_INFO("oplus,is_90fps_switch: %s", panel->oplus_priv.is_90fps_switch ? "true" : "false");
 	}
 
 	/* Add for apollo */
