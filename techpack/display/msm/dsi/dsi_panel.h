@@ -240,6 +240,7 @@ struct dsi_panel_oplus_privite {
 	u32 dc_apollo_sync_brightness_level;
 	u32 dc_apollo_sync_brightness_level_pcc;
 	u32 dc_apollo_sync_brightness_level_pcc_min;
+	bool is_90fps_switch;
 /********************************************
 	fp_type usage:
 	bit(0):lcd capacitive fingerprint(aod/fod are not supported)
