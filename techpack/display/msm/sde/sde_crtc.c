@@ -2648,6 +2648,7 @@ void sde_crtc_complete_commit(struct drm_crtc *crtc,
 		return;
 
 	sde_core_perf_crtc_update(crtc, 0, false);
+        pr_err(">>>>>>> Reached sde_crtc_complete_commit <<<<<<<");
 #ifdef OPLUS_BUG_STABILITY
 	{
 		struct sde_crtc_state *old_cstate;
@@ -2667,8 +2668,9 @@ void sde_crtc_complete_commit(struct drm_crtc *crtc,
 		}
 		old_cstate = to_sde_crtc_state(old_state);
 		cstate = to_sde_crtc_state(crtc->state);
-
+                pr_err(">>>>>>> Reached sde_crtc_complete_commit_state <<<<<<<");
 		if (old_cstate->fingerprint_pressed != cstate->fingerprint_pressed) {
+                	pr_err(">>>>>>> Pressed FP sde_crtc_commit <<<<<<<");
 			blank = cstate->fingerprint_pressed;
 			notifier_data.data = &blank;
 
