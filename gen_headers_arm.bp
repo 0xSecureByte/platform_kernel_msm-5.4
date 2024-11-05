@@ -16,6 +16,14 @@ gen_headers_exclude_srcs_arm = [
 
 gen_headers_out_arm = [
 
+    "linux/netfilter_ipv4/ipt_NATTYPE.h",
+    "camera/oplus/media/oplus_cam_defs.h",
+    "scsi/ufs/ioctl.h",
+    "audio/linux/msm_audio_ar.h",
+    "linux/watch_queue.h",
+    "camera/oplus/media/oplus_cam_sensor.h",
+    "display/drm/msm_drm_iris.h",
+
     // Matching generated-y:
 
     "asm/unistd-common.h",

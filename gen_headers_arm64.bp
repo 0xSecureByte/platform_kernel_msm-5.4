@@ -15,7 +15,12 @@ gen_headers_exclude_srcs_arm64 = [
 ]
 
 gen_headers_out_arm64 = [
-
+    "audio/linux/msm_audio_ar.h",
+    "scsi/ufs/ioctl.h",
+    "camera/oplus/media/oplus_cam_sensor.h",
+    "display/drm/msm_drm_iris.h",
+    "camera/oplus/media/oplus_cam_defs.h",
+    "linux/watch_queue.h",
     // Matching generic-y:
 
     "asm/kvm_para.h",
