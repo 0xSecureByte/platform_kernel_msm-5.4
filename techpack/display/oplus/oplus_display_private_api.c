@@ -3125,6 +3125,10 @@ int dsi_display_oplus_set_power(struct drm_connector *connector,
 				}
 			}
 			#endif
+			/* Restore dimlayer_hbm BEFORE the HBM check so FP unlock from AOD is instant */
+			if (oplus_dimlayer_hbm != oplus_dimlayer_hbm_saved) {
+				oplus_dimlayer_hbm = oplus_dimlayer_hbm_saved;
+			}
 			if (sde_crtc_get_fingerprint_mode(connector->state->crtc->state) && oplus_dimlayer_hbm) {
 				mutex_lock(&display->panel->panel_lock);
 				dsi_display_clk_ctrl(display->dsi_clk_handle,
