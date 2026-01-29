@@ -257,12 +257,15 @@
                 qcom,mdss-dsi-seed-0-command = [
                     /* SEED CRC Setting */
                     39 01 00 00 00 00 03 F0 5A 5A
+                    39 01 00 00 00 00 04 72 2C 21 00
+                    39 01 00 00 00 00 02 F8 00
                     39 01 00 00 00 00 02 5D 86
                     /* SEED CRC ON */
                     39 01 00 00 00 00 02 62 00
                     /* SEED CRC DCI-P3 */
                     39 01 00 00 00 00 03 B0 2B 62
                     39 01 00 00 00 00 16 62 E0 00 06 13 D3 03 07 0B EE 16 FA E2 F7 00 E4 E9 E6 03 FF FF FF
+                    39 01 00 00 14 00 04 72 2C 01 00
                     39 01 00 00 00 00 03 F0 A5 A5
                 ];
                 qcom,mdss-dsi-seed-1-command = [
@@ -605,12 +608,15 @@
                 qcom,mdss-dsi-seed-0-command = [
                     /* SEED CRC Setting */
                     39 01 00 00 00 00 03 F0 5A 5A
+                    39 01 00 00 00 00 04 72 2C 21 00
+                    39 01 00 00 00 00 02 F8 00
                     39 01 00 00 00 00 02 5D 86
                     /* SEED CRC ON */
                     39 01 00 00 00 00 02 62 00
                     /* SEED CRC DCI-P3 */
                     39 01 00 00 00 00 03 B0 2B 62
                     39 01 00 00 00 00 16 62 E0 00 06 13 D3 03 07 0B EE 16 FA E2 F7 00 E4 E9 E6 03 FF FF FF
+                    39 01 00 00 14 00 04 72 2C 01 00
                     39 01 00 00 00 00 03 F0 A5 A5
                 ];
                 qcom,mdss-dsi-seed-1-command = [
